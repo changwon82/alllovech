@@ -33,7 +33,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansKR.variable} antialiased`}
       >
-        {children}
+        <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 sm:px-6 lg:px-8">
+          {children}
+        </div>
       </body>
     </html>
   );

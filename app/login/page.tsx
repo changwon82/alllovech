@@ -45,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6">
+    <div className="flex flex-1 flex-col items-center justify-center py-12">
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <Link
@@ -55,7 +55,7 @@ export default function LoginPage() {
           alllovech
         </Link>
 
-        <h1 className="mb-8 text-center text-2xl font-bold">
+        <h1 className="mb-6 text-center text-2xl font-bold sm:mb-8">
           {mode === "login" ? "로그인" : "회원가입"}
         </h1>
 
