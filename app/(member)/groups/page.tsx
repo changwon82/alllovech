@@ -3,7 +3,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import Container from "@/src/components/Container";
 import { getProfileName } from "@/src/lib/utils";
 
-export const metadata = { title: "소그룹 — alllovech" };
+export const metadata = { title: "소그룹 — All Love Church" };
 
 export default async function GroupsPage() {
   const supabase = await createClient();

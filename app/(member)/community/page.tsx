@@ -5,7 +5,7 @@ import { POST_CATEGORY_LABEL } from "@/src/types/database";
 import type { Post } from "@/src/types/database";
 import { getProfileName } from "@/src/lib/utils";
 
-export const metadata = { title: "커뮤니티 — alllovech" };
+export const metadata = { title: "커뮤니티 — All Love Church" };
 
 export default async function CommunityPage() {
   const supabase = await createClient();

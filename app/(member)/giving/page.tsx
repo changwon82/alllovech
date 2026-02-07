@@ -3,7 +3,7 @@ import Container from "@/src/components/Container";
 import { GIVING_CATEGORY_LABEL } from "@/src/types/database";
 import type { Giving } from "@/src/types/database";
 
-export const metadata = { title: "헌금 — alllovech" };
+export const metadata = { title: "헌금 — All Love Church" };
 
 export default async function GivingPage() {
   const supabase = await createClient();

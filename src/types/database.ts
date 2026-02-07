@@ -82,3 +82,89 @@ export const POST_CATEGORY_LABEL: Record<Post["category"], string> = {
   prayer: "기도제목",
   testimony: "간증",
 };
+
+// ── 출석체크 / 보고 시스템 ──
+
+/** organizations 테이블 */
+export interface Organization {
+  id: string;
+  name: string;
+  type: "small_group" | "department" | "worship";
+  parent_id: string | null;
+  description: string;
+  created_at: string;
+}
+
+/** org_leaders 테이블 */
+export interface OrgLeader {
+  organization_id: string;
+  user_id: string;
+  role: "pastor" | "leader";
+}
+
+/** roster_members 테이블 */
+export interface RosterMember {
+  id: string;
+  organization_id: string;
+  name: string;
+  phone: string | null;
+  status: "active" | "inactive" | "new";
+  memo: string | null;
+  created_at: string;
+}
+
+/** meetings 테이블 */
+export interface Meeting {
+  id: string;
+  organization_id: string;
+  meeting_date: string;
+  title: string;
+  created_by: string | null;
+  created_at: string;
+}
+
+/** attendance 테이블 */
+export interface Attendance {
+  meeting_id: string;
+  roster_member_id: string;
+  status: "present" | "absent" | "excused";
+  note: string | null;
+}
+
+/** meeting_reports 테이블 */
+export interface MeetingReport {
+  id: string;
+  meeting_id: string;
+  content: string;
+  new_visitors: number;
+  returning_count: number;
+  prayer_requests: string;
+  created_at: string;
+}
+
+/** 조직 타입 한국어 매핑 */
+export const ORG_TYPE_LABEL: Record<Organization["type"], string> = {
+  small_group: "소그룹",
+  department: "부서",
+  worship: "예배",
+};
+
+/** 리더 역할 한국어 매핑 */
+export const ORG_ROLE_LABEL: Record<OrgLeader["role"], string> = {
+  pastor: "교역자",
+  leader: "리더",
+};
+
+/** 명단 상태 한국어 매핑 */
+export const ROSTER_STATUS_LABEL: Record<RosterMember["status"], string> = {
+  active: "활성",
+  inactive: "비활성",
+  new: "신규",
+};
+
+/** 출석 상태 한국어 매핑 */
+export const ATTENDANCE_STATUS_LABEL: Record<Attendance["status"], string> = {
+  present: "출석",
+  absent: "결석",
+  excused: "사유",
+};

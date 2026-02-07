@@ -17,11 +17,13 @@ export default async function MemberLayout({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("name, role")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { count: leaderCount }] = await Promise.all([
+    supabase.from("profiles").select("name, role").eq("id", user.id).single(),
+    supabase
+      .from("org_leaders")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+  ]);
 
   return (
     <>
@@ -29,6 +31,7 @@ export default async function MemberLayout({
         email={user.email ?? ""}
         name={profile?.name}
         isAdmin={profile?.role === "admin"}
+        isLeader={(leaderCount ?? 0) > 0}
       />
       <div className="flex-1">{children}</div>
     </>

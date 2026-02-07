@@ -10,7 +10,7 @@ export default function PublicLayout({
       <nav className="sticky top-0 z-10 -mx-4 border-b border-neutral-200 bg-white/80 px-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 dark:border-neutral-800 dark:bg-neutral-950/80">
         <div className="flex items-center justify-between py-4">
           <Link href="/" className="text-lg font-bold tracking-tight">
-            alllovech
+            All Love Church
           </Link>
           <div className="flex items-center gap-4">
             <Link

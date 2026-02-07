@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/src/lib/supabase/server";
 import Container from "@/src/components/Container";
 
-export const metadata = { title: "대시보드 — alllovech" };
+export const metadata = { title: "대시보드 — All Love Church" };
 
 const quickLinks = [
   {
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
         안녕하세요{profile?.name ? `, ${profile.name}` : ""} 👋
       </h1>
       <p className="mt-1 text-neutral-500 dark:text-neutral-400">
-        alllovech 교인 페이지입니다.
+        All Love Church 교인 페이지입니다.
       </p>
 
       {/* 빠른 링크 */}

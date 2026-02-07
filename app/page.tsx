@@ -53,7 +53,7 @@ export default async function LandingPage() {
       <nav className="sticky top-0 z-10 -mx-4 border-b border-neutral-200 bg-white/80 px-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 dark:border-neutral-800 dark:bg-neutral-950/80">
         <div className="flex items-center justify-between py-4">
           <Link href="/" className="text-lg font-bold tracking-tight">
-            alllovech
+            All Love Church
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
@@ -181,7 +181,7 @@ export default async function LandingPage() {
 
       {/* ── 푸터 ── */}
       <footer className="mt-auto border-t border-neutral-200 py-8 text-center text-sm text-neutral-400 dark:border-neutral-800 dark:text-neutral-500">
-        &copy; {new Date().getFullYear()} alllovech. All rights reserved.
+        &copy; {new Date().getFullYear()} AllLoveChurch. All rights reserved.
       </footer>
     </>
   );

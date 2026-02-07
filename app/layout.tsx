@@ -19,8 +19,8 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "alllovech",
-  description: "alllovech",
+  title: "All Love Church",
+  description: "All Love Church",
 };
 
 export default function RootLayout({

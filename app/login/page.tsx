@@ -52,7 +52,7 @@ export default function LoginPage() {
           href="/"
           className="mb-10 block text-center text-lg font-bold tracking-tight"
         >
-          alllovech
+          All Love Church
         </Link>
 
         <h1 className="mb-6 text-center text-2xl font-bold sm:mb-8">

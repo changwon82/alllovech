@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/src/lib/supabase/server";
 import Container from "@/src/components/Container";
 
-export const metadata = { title: "관리자 — alllovech" };
+export const metadata = { title: "관리자 — All Love Church" };
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -24,6 +24,11 @@ export default async function AdminDashboardPage() {
   ];
 
   const adminLinks = [
+    {
+      href: "/admin/organizations",
+      label: "조직 관리",
+      desc: "소그룹/부서/예배 조직을 관리하고 리더를 지정합니다.",
+    },
     {
       href: "/admin/visibility",
       label: "콘텐츠 공개 관리",

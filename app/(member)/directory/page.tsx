@@ -1,7 +1,7 @@
 import { createClient } from "@/src/lib/supabase/server";
 import Container from "@/src/components/Container";
 
-export const metadata = { title: "교인 명부 — alllovech" };
+export const metadata = { title: "교인 명부 — All Love Church" };
 
 export default async function DirectoryPage() {
   const supabase = await createClient();

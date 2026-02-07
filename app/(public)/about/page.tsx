@@ -1,7 +1,7 @@
 import Container from "@/src/components/Container";
 
 export const metadata = {
-  title: "교회 소개 — alllovech",
+  title: "교회 소개 — All Love Church",
 };
 
 export default function AboutPage() {
@@ -11,7 +11,7 @@ export default function AboutPage() {
         교회 소개
       </h1>
       <p className="mt-4 text-neutral-500 dark:text-neutral-400">
-        alllovech 교회에 오신 것을 환영합니다.
+        All Love Church에 오신 것을 환영합니다.
       </p>
 
       <section className="mt-10 space-y-8">

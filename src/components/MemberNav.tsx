@@ -8,6 +8,7 @@ interface MemberNavProps {
   email: string;
   name?: string;
   isAdmin?: boolean;
+  isLeader?: boolean;
 }
 
 const memberLinks = [
@@ -18,7 +19,7 @@ const memberLinks = [
   { href: "/directory", label: "명부" },
 ];
 
-export default function MemberNav({ email, name, isAdmin }: MemberNavProps) {
+export default function MemberNav({ email, name, isAdmin, isLeader }: MemberNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -29,7 +30,7 @@ export default function MemberNav({ email, name, isAdmin }: MemberNavProps) {
       <div className="flex items-center justify-between py-3">
         {/* 로고 */}
         <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-          alllovech
+          All Love Church
         </Link>
 
         {/* 데스크탑 링크 */}
@@ -50,6 +51,18 @@ export default function MemberNav({ email, name, isAdmin }: MemberNavProps) {
               </Link>
             );
           })}
+          {isLeader && (
+            <Link
+              href="/my-orgs"
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                pathname.startsWith("/my-orgs")
+                  ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white"
+                  : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-white"
+              }`}
+            >
+              내 조직
+            </Link>
+          )}
           {isAdmin && (
             <Link
               href="/admin"
@@ -138,6 +151,19 @@ export default function MemberNav({ email, name, isAdmin }: MemberNavProps) {
                 </Link>
               );
             })}
+            {isLeader && (
+              <Link
+                href="/my-orgs"
+                onClick={() => setOpen(false)}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  pathname.startsWith("/my-orgs")
+                    ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white"
+                    : "text-neutral-600 hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-neutral-800/50"
+                }`}
+              >
+                내 조직
+              </Link>
+            )}
             {isAdmin && (
               <Link
                 href="/admin"
