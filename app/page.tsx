@@ -1,188 +1,79 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/src/lib/supabase/server";
-import Container from "@/src/components/Container";
-import { POST_CATEGORY_LABEL } from "@/src/types/database";
-import type { Post, VisibilitySetting } from "@/src/types/database";
-import { getProfileName } from "@/src/lib/utils";
 
-export default async function LandingPage() {
+export default async function GatePage() {
   const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  /* ── 공개 설정 조회 ── */
-  const { data: visibilityData } = await supabase
-    .from("visibility_settings")
-    .select("*");
-
-  const visibility: Record<string, VisibilitySetting> = {};
-  (visibilityData ?? []).forEach((v: VisibilitySetting) => {
-    visibility[v.section] = v;
-  });
-
-  /* ── 공개 콘텐츠 조회 ── */
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  let publicPosts: any[] = [];
-  let publicGroups: any[] = [];
-
-  if (visibility.community?.is_visible_on_landing) {
-    const { data } = await supabase
-      .from("posts")
-      .select("id, title, category, created_at, profiles(name)")
-      .eq("is_public", true)
-      .order("created_at", { ascending: false })
-      .limit(visibility.community.max_items);
-    publicPosts = data ?? [];
-  }
-
-  if (visibility.groups?.is_visible_on_landing) {
-    const { data } = await supabase
-      .from("groups")
-      .select("id, name, description")
-      .eq("is_public", true)
-      .order("created_at", { ascending: false })
-      .limit(visibility.groups.max_items);
-    publicGroups = data ?? [];
-  }
-
   return (
-    <>
-      {/* ── 네비게이션 ── */}
-      <nav className="sticky top-0 z-10 -mx-4 border-b border-neutral-200 bg-white/80 px-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 dark:border-neutral-800 dark:bg-neutral-950/80">
-        <div className="flex items-center justify-between py-4">
-          <Link href="/" className="text-lg font-bold tracking-tight">
-            All Love Church
-          </Link>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/about"
-              className="text-sm text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-            >
-              교회 소개
-            </Link>
-            {user ? (
-              <Link
-                href="/dashboard"
-                className="rounded-full bg-neutral-900 px-5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-              >
-                교인 페이지
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-full bg-neutral-900 px-5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-              >
-                로그인
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#e8e0d4] px-4 dark:bg-[#2a2520]">
 
-      {/* ── 히어로 ── */}
-      <Container as="header" className="py-16 text-center sm:py-24">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          alllovech
-        </h1>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-neutral-500 dark:text-neutral-400">
-          모든 사랑의 교회에 오신 것을 환영합니다.
-        </p>
-        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/about"
-            className="rounded-full bg-neutral-900 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
-            교회 소개
-          </Link>
-          <Link
-            href={user ? "/dashboard" : "/login"}
-            className="rounded-full border border-neutral-300 px-8 py-3 text-sm font-semibold transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-          >
-            {user ? "교인 페이지" : "로그인"}
-          </Link>
-        </div>
-      </Container>
+      {/* 환영 문구 */}
+      <p className="mb-6 text-center text-sm leading-relaxed text-[#8a7e6e] sm:text-base dark:text-[#a89d8d]">
+        &ldquo; 사랑 안에서 서로를 세우며<br />
+        함께 성장하는 교회 &rdquo;
+      </p>
 
-      {/* ── 예배 안내 ── */}
-      <Container className="pb-12 sm:pb-16">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            { title: "주일 예배", time: "매주 일요일 오전 11:00" },
-            { title: "수요 예배", time: "매주 수요일 오후 7:30" },
-            { title: "금요 기도회", time: "매주 금요일 오후 9:00" },
-          ].map((service) => (
-            <div
-              key={service.title}
-              className="rounded-xl border border-neutral-200 bg-white p-5 text-center dark:border-neutral-800 dark:bg-neutral-900"
-            >
-              <h3 className="font-semibold">{service.title}</h3>
-              <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                {service.time}
-              </p>
-            </div>
-          ))}
-        </div>
-      </Container>
+      {/* 교회 로고 & 이름 */}
+      <Image
+        src="/logo.png"
+        alt="All Love Church"
+        width={100}
+        height={100}
+        className="mb-3"
+        priority
+      />
+      <h1 className="mb-10 text-center text-2xl font-bold tracking-tight text-[#5a4f42] sm:text-3xl dark:text-[#d4c8b8]">
+        All Love Church
+      </h1>
 
-      {/* ── 공개 커뮤니티 글 ── */}
-      {publicPosts.length > 0 && (
-        <Container className="pb-12 sm:pb-16">
-          <h2 className="text-xl font-bold sm:text-2xl">소식</h2>
-          <ul className="mt-4 space-y-3">
-            {publicPosts.map((post) => (
-              <li
-                key={post.id}
-                className="rounded-xl border border-neutral-200 bg-white p-4 sm:p-5 dark:border-neutral-800 dark:bg-neutral-900"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-semibold">{post.title}</h3>
-                  <span className="shrink-0 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-                    {POST_CATEGORY_LABEL[
-                      post.category as Post["category"]
-                    ] ?? post.category}
-                  </span>
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-sm text-neutral-400 dark:text-neutral-500">
-                  <span>{getProfileName(post.profiles)}</span>
-                  <span>·</span>
-                  <time>
-                    {new Date(post.created_at).toLocaleDateString("ko-KR")}
-                  </time>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Container>
-      )}
+      {/* 카드 2개 */}
+      <div className="flex w-full max-w-xl flex-col gap-4 sm:flex-row sm:gap-5">
 
-      {/* ── 공개 소그룹 ── */}
-      {publicGroups.length > 0 && (
-        <Container className="pb-12 sm:pb-16">
-          <h2 className="text-xl font-bold sm:text-2xl">소그룹</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {publicGroups.map((group) => (
-              <div
-                key={group.id}
-                className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
-              >
-                <h3 className="font-semibold">{group.name}</h3>
-                {group.description && (
-                  <p className="mt-1 line-clamp-2 text-sm text-neutral-500 dark:text-neutral-400">
-                    {group.description}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </Container>
-      )}
+        {/* 처음 오셨나요? */}
+        <Link
+          href="/about"
+          className="group flex flex-1 flex-col items-center rounded-2xl bg-white px-6 py-10 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:py-12 dark:bg-neutral-900"
+        >
+          <span className="text-3xl">🤗</span>
+          <h2 className="mt-4 text-lg font-bold text-neutral-800 dark:text-neutral-100">
+            처음 오셨나요?
+          </h2>
+          <p className="mt-1 text-sm text-neutral-400 dark:text-neutral-500">
+            교회 소개 · 오시는 길
+          </p>
+          <span className="mt-5 text-sm font-semibold text-amber-600 transition-colors group-hover:text-amber-700 dark:text-amber-400 dark:group-hover:text-amber-300">
+            둘러보기 &rsaquo;
+          </span>
+        </Link>
 
-      {/* ── 푸터 ── */}
-      <footer className="mt-auto border-t border-neutral-200 py-8 text-center text-sm text-neutral-400 dark:border-neutral-800 dark:text-neutral-500">
-        &copy; {new Date().getFullYear()} AllLoveChurch. All rights reserved.
-      </footer>
-    </>
+        {/* 성도 로그인 */}
+        <Link
+          href={user ? "/dashboard" : "/login"}
+          className="group flex flex-1 flex-col items-center rounded-2xl bg-white px-6 py-10 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:py-12 dark:bg-neutral-900"
+        >
+          <span className="text-3xl">🙏</span>
+          <h2 className="mt-4 text-lg font-bold text-neutral-800 dark:text-neutral-100">
+            우리 교회 성도입니다
+          </h2>
+          <p className="mt-1 text-sm text-neutral-400 dark:text-neutral-500">
+            {user ? "교인 전용 페이지" : "로그인 · 교인 서비스"}
+          </p>
+          <span className="mt-5 text-sm font-semibold text-blue-600 transition-colors group-hover:text-blue-700 dark:text-blue-400 dark:group-hover:text-blue-300">
+            {user ? "입장하기" : "로그인"} &rsaquo;
+          </span>
+        </Link>
+
+      </div>
+
+      {/* 푸터 */}
+      <p className="absolute bottom-5 text-xs text-[#b0a698] dark:text-[#5a5248]">
+        &copy; {new Date().getFullYear()} All Love Church
+      </p>
+    </div>
   );
 }
