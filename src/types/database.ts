@@ -168,3 +168,42 @@ export const ATTENDANCE_STATUS_LABEL: Record<Attendance["status"], string> = {
   absent: "결석",
   excused: "사유",
 };
+
+// ── 공개 사이트 메뉴 (관리자 메뉴 관리) ──
+
+export interface PublicMenu {
+  id: string;
+  label: string;
+  href: string;
+  description: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface PublicMenuGroup {
+  id: string;
+  menu_id: string;
+  title: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface PublicMenuItem {
+  id: string;
+  group_id: string;
+  label: string;
+  href: string;
+  sort_order: number;
+  created_at: string;
+}
+
+/** 네비에 표시할 메뉴 트리 (대메뉴 → 그룹 → 소메뉴) */
+export interface PublicMenuTreeItem {
+  label: string;
+  href: string;
+  description: string;
+  groups: {
+    title: string;
+    items: { label: string; href: string }[];
+  }[];
+}

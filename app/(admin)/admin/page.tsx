@@ -25,6 +25,11 @@ export default async function AdminDashboardPage() {
 
   const adminLinks = [
     {
+      href: "/admin/menus",
+      label: "메뉴 관리",
+      desc: "공개 사이트 상단 메뉴(대메뉴·그룹·소메뉴)를 편집합니다.",
+    },
+    {
       href: "/admin/organizations",
       label: "조직 관리",
       desc: "소그룹/부서/예배 조직을 관리하고 리더를 지정합니다.",
