@@ -44,6 +44,11 @@ export default async function AdminDashboardPage() {
       label: "교인 관리",
       desc: "교인 목록 및 역할(관리자/멤버)을 관리합니다.",
     },
+    {
+      href: "/admin/banners",
+      label: "배너 관리",
+      desc: "웰컴 페이지 메인 비주얼(히어로)과 행사 광고 배너를 관리합니다.",
+    },
   ];
 
   return (

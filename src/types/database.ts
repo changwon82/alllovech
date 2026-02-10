@@ -207,3 +207,24 @@ export interface PublicMenuTreeItem {
     items: { label: string; href: string }[];
   }[];
 }
+
+/** public_banners 테이블 (메인 비주얼·행사 광고) */
+export interface PublicBanner {
+  id: string;
+  type: "hero" | "promotion";
+  title: string;
+  subtitle: string | null;
+  link: string | null;
+  image_url: string;
+  sort_order: number;
+  is_active: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const BANNER_TYPE_LABEL: Record<PublicBanner["type"], string> = {
+  hero: "메인 비주얼(히어로)",
+  promotion: "행사 광고",
+};

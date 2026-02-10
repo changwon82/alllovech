@@ -1,36 +1,82 @@
 import Link from "next/link";
 import Container from "@/src/components/Container";
+import HeroCarousel from "@/src/components/HeroCarousel";
+import { createClient } from "@/src/lib/supabase/server";
 
 export const metadata = { title: "처음 오신 분 — 다애교회" };
 
-export default function WelcomeIndexPage() {
+export default async function WelcomeIndexPage() {
+  const supabase = await createClient();
+
+  const { data: heroBanners } = await supabase
+    .from("public_banners")
+    .select("id, image_url, title, subtitle")
+    .eq("type", "hero")
+    .eq("is_active", true)
+    .order("sort_order");
+
+  const { data: allPromotions } = await supabase
+    .from("public_banners")
+    .select("id, title, subtitle, link, image_url, starts_at, ends_at")
+    .eq("type", "promotion")
+    .eq("is_active", true)
+    .order("sort_order");
+
+  const promotionBanners = allPromotions?.filter((b) => {
+    if (b.starts_at && new Date(b.starts_at) > new Date()) return false;
+    if (b.ends_at && new Date(b.ends_at) < new Date()) return false;
+    return true;
+  }) ?? null;
+
+  const heroSlides =
+    heroBanners?.map((b) => ({
+      image_url: b.image_url,
+      title: b.title || "나를 따르라",
+      subtitle: b.subtitle ?? null,
+    })) ?? null;
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-sky-100 to-slate-200 px-4 py-12 dark:from-slate-800 dark:to-slate-900 sm:py-16">
-        <Container size="xl" className="relative">
-          <div className="flex flex-col items-start gap-4 sm:gap-6">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-slate-100 sm:text-4xl md:text-5xl">
-              나를 따르라
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              Follow Me! Deny yourself and take up the cross (Mt 16:24)
-            </p>
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              자기를 부인하고, 자기 십자가를 지고 (마 16:24)
-            </p>
-          </div>
-          <div className="absolute bottom-4 right-4 sm:right-8 opacity-20">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-700 dark:text-slate-300">
-              <path d="M12 2v20M5 9h14l-4 6 4 6H5l4-6-4-6z" />
-            </svg>
-          </div>
-          <div className="mt-6 flex justify-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-slate-400" />
-            <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600" />
-          </div>
-        </Container>
-      </section>
+      {/* Hero: DB 배너 또는 기본 이미지 */}
+      <HeroCarousel slides={heroSlides} />
+
+      {/* 행사 광고 배너 (관리자에서 등록한 것만 노출) */}
+      {promotionBanners && promotionBanners.length > 0 && (
+        <section className="border-b border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <Container size="xl" className="py-4">
+            <div className="flex flex-wrap gap-4">
+              {promotionBanners.map((b) => {
+                const content = (
+                  <div className="flex min-w-0 flex-1 items-center gap-4 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800/50 sm:min-w-[280px]">
+                    <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-lg bg-neutral-200 dark:bg-neutral-700">
+                      <img
+                        src={b.image_url}
+                        alt={b.title}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-neutral-800 dark:text-neutral-100">{b.title}</p>
+                      {b.subtitle && (
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">{b.subtitle}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+                return b.link ? (
+                  <Link key={b.id} href={b.link} className="block min-w-0 flex-1 sm:min-w-[280px]">
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={b.id} className="block min-w-0 flex-1 sm:min-w-[280px]">
+                    {content}
+                  </div>
+                );
+              })}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* 퀵링크 4개 */}
       <section className="-mt-2 px-4 pb-8 sm:-mt-4">
