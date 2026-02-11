@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/src/lib/supabase/server";
+import YouTubePlayer from "./YouTubePlayer";
+import TextSizeControl from "./TextSizeControl";
 
 export const metadata = {
   title: "365 성경읽기 | 다애교회",
@@ -228,7 +230,7 @@ export default async function BiblePage({
             : "border-neutral-200 bg-neutral-50"
         }`}>
           <p className={`text-sm font-medium ${isToday ? "text-blue" : "text-neutral-500"}`}>
-            {day}일차{isToday && " (오늘)"}
+            {day}일차{isToday && " (오늘)"} · {new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })} ({new Date().toLocaleDateString("ko-KR", { weekday: "short" })})
           </p>
           <p className="mt-1 text-xl font-bold text-neutral-800">
             {reading.title}
@@ -243,46 +245,40 @@ export default async function BiblePage({
       {/* 유튜브 영상 */}
       {reading?.youtube_id && (
         <section className="mt-6">
-          <div className="relative w-full overflow-hidden rounded-xl pt-[56.25%]">
-            <iframe
-              className="absolute inset-0 h-full w-full"
-              src={`https://www.youtube.com/embed/${reading.youtube_id}`}
-              title="성경읽기 영상"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+          <YouTubePlayer videoId={reading.youtube_id} />
         </section>
       )}
 
       {/* 성경 본문 */}
       {verses.length > 0 && (
         <section className="mt-8">
-          {verses.map((v, i) => {
-            const showChapterHeader =
-              i === 0 || verses[i - 1].chapter !== v.chapter || verses[i - 1].book !== v.book;
+          <TextSizeControl>
+            {verses.map((v, i) => {
+              const showChapterHeader =
+                i === 0 || verses[i - 1].chapter !== v.chapter || verses[i - 1].book !== v.book;
 
-            return (
-              <div key={`${v.book}-${v.chapter}-${v.verse}`}>
-                {showChapterHeader && (
-                  <h2 className="mt-8 mb-4 border-b border-neutral-200 pb-2 text-lg font-bold text-navy first:mt-0">
-                    {v.book.normalize("NFC")} {v.chapter}장
-                  </h2>
-                )}
-                {v.heading && (
-                  <p className="mt-5 mb-2 text-sm font-bold text-blue">
-                    {v.heading}
+              return (
+                <div key={`${v.book}-${v.chapter}-${v.verse}`}>
+                  {showChapterHeader && (
+                    <h2 className={`${i === 0 ? "mt-0" : "mt-10"} mb-4 border-b border-neutral-200 pb-2 text-lg font-bold text-navy`}>
+                      {v.book.normalize("NFC")} {v.chapter}장
+                    </h2>
+                  )}
+                  {v.heading && (
+                    <p className="mt-5 mb-2 font-bold text-blue">
+                      {v.heading}
+                    </p>
+                  )}
+                  <p className="flex text-neutral-700">
+                    <span className="mr-1.5 mt-[0.3em] min-w-[1.5em] shrink-0 text-right text-[0.75em] font-medium text-neutral-400">
+                      {v.verse}
+                    </span>
+                    <span>{v.content}</span>
                   </p>
-                )}
-                <p className="leading-relaxed text-neutral-700">
-                  <span className="mr-1.5 text-xs font-medium text-neutral-400">
-                    {v.verse}
-                  </span>
-                  {v.content}
-                </p>
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
+          </TextSizeControl>
         </section>
       )}
 
