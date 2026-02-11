@@ -125,6 +125,11 @@ export default async function BiblePage({
   const day = params.day ? Math.max(1, Math.min(365, parseInt(params.day))) : today;
   const isToday = day === today;
 
+  // 해당 일차의 실제 날짜 계산
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
+
   // 읽기표
   const { data: reading } = await supabase
     .from("bible_readings")
@@ -230,7 +235,7 @@ export default async function BiblePage({
             : "border-neutral-200 bg-neutral-50"
         }`}>
           <p className={`text-sm font-medium ${isToday ? "text-blue" : "text-neutral-500"}`}>
-            {day}일차{isToday && " (오늘)"} · {new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })} ({new Date().toLocaleDateString("ko-KR", { weekday: "short" })})
+            {day}일차{isToday && " (오늘)"} · {dayDate.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })} ({dayDate.toLocaleDateString("ko-KR", { weekday: "short" })})
           </p>
           <p className="mt-1 text-xl font-bold text-neutral-800">
             {reading.title}
