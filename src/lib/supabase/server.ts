@@ -15,14 +15,13 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
+              cookieStore.set(name, value, options)
             );
           } catch {
-            // setAll이 Server Component에서 호출될 경우 무시.
-            // middleware에서 세션을 갱신하므로 안전합니다.
+            // Server Component에서는 무시
           }
         },
       },
-    },
+    }
   );
 }

@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# data (일회성 업로드 스크립트 + 성경 원문 txt)
+/data
+
 # vercel
 .vercel
 

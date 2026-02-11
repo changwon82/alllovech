@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
@@ -19,8 +9,8 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "All Love Church",
-  description: "All Love Church",
+  title: "다애교회",
+  description: "대한예수교장로회(합신) 다애교회",
 };
 
 export default function RootLayout({
@@ -30,12 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansKR.variable} antialiased`}
-      >
-        <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 sm:px-6 lg:px-8">
-          {children}
-        </div>
+      <body className={`${notoSansKR.variable} antialiased`}>
+        {children}
       </body>
     </html>
   );
