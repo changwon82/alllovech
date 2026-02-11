@@ -1,0 +1,168 @@
+"use client";
+
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import YouTubePlayer from "./YouTubePlayer";
+import TextSizeControl from "./TextSizeControl";
+
+function getLocalDayOfYear(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+type Verse = { book: string; chapter: number; verse: number; heading: string | null; content: string };
+type Reading = { day: number; title: string | null; youtube_id: string | null };
+
+export default function BiblePageContent({
+  day,
+  dayDateIso,
+  reading,
+  verses,
+  serverToday,
+}: {
+  day: number;
+  dayDateIso: string;
+  reading: Reading | null;
+  verses: Verse[];
+  serverToday: number;
+}) {
+  const [localToday, setLocalToday] = useState(serverToday);
+  useEffect(() => {
+    setLocalToday(getLocalDayOfYear());
+  }, []);
+  const isToday = day === localToday;
+
+  const dayDate = new Date(dayDateIso);
+  const dateStr = dayDate.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const weekdayStr = dayDate.toLocaleDateString("ko-KR", { weekday: "short" });
+
+  return (
+    <>
+      {/* 날짜 네비게이션 */}
+      <div className="mt-8 flex items-center justify-between">
+        {day > 1 ? (
+          <Link
+            href={`/365bible?day=${day - 1}`}
+            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+          >
+            ← {day - 1}일차
+          </Link>
+        ) : (
+          <div />
+        )}
+
+        {!isToday && (
+          <Link
+            href="/365bible"
+            className="rounded-lg bg-navy px-3 py-2 text-sm font-medium text-white hover:bg-navy/90"
+          >
+            오늘로
+          </Link>
+        )}
+
+        {day < 365 ? (
+          <Link
+            href={`/365bible?day=${day + 1}`}
+            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+          >
+            {day + 1}일차 →
+          </Link>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      {/* 읽기 정보 */}
+      {reading ? (
+        <section
+          className={`mt-4 rounded-2xl border p-5 md:p-6 ${
+            isToday ? "border-blue/20 bg-blue/5" : "border-neutral-200 bg-neutral-50"
+          }`}
+        >
+          <p
+            className={`text-sm font-medium ${isToday ? "text-blue" : "text-neutral-500"}`}
+          >
+            {day}일차{isToday && " (오늘)"} · {dateStr} ({weekdayStr})
+          </p>
+          <p className="mt-1 text-xl font-bold text-neutral-800">{reading.title}</p>
+        </section>
+      ) : (
+        <section className="mt-4 rounded-2xl border border-neutral-200 p-6 text-center text-neutral-500">
+          읽기표를 불러올 수 없습니다
+        </section>
+      )}
+
+      {/* 유튜브 영상 */}
+      {reading?.youtube_id && (
+        <section className="mt-6">
+          <YouTubePlayer videoId={reading.youtube_id} />
+        </section>
+      )}
+
+      {/* 성경 본문 */}
+      {verses.length > 0 && (
+        <section className="mt-8">
+          <TextSizeControl>
+            {verses.map((v, i) => {
+              const showChapterHeader =
+                i === 0 ||
+                verses[i - 1].chapter !== v.chapter ||
+                verses[i - 1].book !== v.book;
+
+              return (
+                <div key={`${v.book}-${v.chapter}-${v.verse}`}>
+                  {showChapterHeader && (
+                    <h2
+                      className={`${i === 0 ? "mt-0" : "mt-10"} mb-4 border-b border-neutral-200 pb-2 text-lg font-bold text-navy`}
+                    >
+                      {v.book.normalize("NFC")} {v.chapter}장
+                    </h2>
+                  )}
+                  {v.heading && (
+                    <p className="mt-5 mb-2 font-bold text-blue">{v.heading}</p>
+                  )}
+                  <p className="mt-3 flex text-neutral-700">
+                    <span className="mr-1.5 mt-[0.3em] min-w-[1.5em] shrink-0 text-right text-[0.75em] font-medium text-neutral-400">
+                      {v.verse}
+                    </span>
+                    <span>{v.content}</span>
+                  </p>
+                </div>
+              );
+            })}
+          </TextSizeControl>
+        </section>
+      )}
+
+      {/* 하단 네비게이션 */}
+      <div className="mt-12 flex items-center justify-between border-t border-neutral-200 pt-6 pb-8">
+        {day > 1 ? (
+          <Link
+            href={`/365bible?day=${day - 1}`}
+            className="text-sm text-neutral-500 hover:text-navy"
+          >
+            ← 이전
+          </Link>
+        ) : (
+          <div />
+        )}
+        {day < 365 ? (
+          <Link
+            href={`/365bible?day=${day + 1}`}
+            className="text-sm text-neutral-500 hover:text-navy"
+          >
+            다음 →
+          </Link>
+        ) : (
+          <div />
+        )}
+      </div>
+    </>
+  );
+}

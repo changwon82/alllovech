@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/src/lib/supabase/server";
-import YouTubePlayer from "./YouTubePlayer";
-import TextSizeControl from "./TextSizeControl";
 import ReadingPlanModal from "./ReadingPlanModal";
+import BiblePageContent from "./BiblePageContent";
+import RedirectToLocalToday from "./RedirectToLocalToday";
 
 export const metadata = {
   title: "365 성경읽기 | 다애교회",
@@ -153,11 +153,28 @@ export default async function BiblePage({
 }) {
   const supabase = await createClient();
   const params = await searchParams;
-  const today = getDayOfYear();
-  const day = params.day ? Math.max(1, Math.min(365, parseInt(params.day))) : today;
-  const isToday = day === today;
+  const serverToday = getDayOfYear();
 
-  // 해당 일차의 실제 날짜 계산
+  // URL에 day가 없으면 클라이언트에서 지역 기준 오늘 일차로 리다이렉트
+  if (!params.day) {
+    return (
+      <div className="mx-auto min-h-screen max-w-2xl px-4 py-8 md:py-12">
+        <Link
+          href="/"
+          className="text-sm text-neutral-400 hover:text-neutral-600"
+        >
+          ← 홈
+        </Link>
+        <div className="mt-6 flex items-baseline gap-2">
+          <h1 className="text-2xl font-bold text-navy md:text-3xl">365 성경읽기</h1>
+        </div>
+        <div className="mt-2 h-1 w-12 rounded bg-blue" />
+        <RedirectToLocalToday />
+      </div>
+    );
+  }
+
+  const day = Math.max(1, Math.min(365, parseInt(params.day)));
   const now = new Date();
   const yearStart = new Date(now.getFullYear(), 0, 1);
   const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
@@ -215,123 +232,13 @@ export default async function BiblePage({
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
 
-      {/* 날짜 네비게이션 */}
-      <div className="mt-8 flex items-center justify-between">
-        {day > 1 ? (
-          <Link
-            href={`/365bible?day=${day - 1}`}
-            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
-          >
-            ← {day - 1}일차
-          </Link>
-        ) : (
-          <div />
-        )}
-
-        {!isToday && (
-          <Link
-            href="/365bible"
-            className="rounded-lg bg-navy px-3 py-2 text-sm font-medium text-white hover:bg-navy/90"
-          >
-            오늘로
-          </Link>
-        )}
-
-        {day < 365 ? (
-          <Link
-            href={`/365bible?day=${day + 1}`}
-            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
-          >
-            {day + 1}일차 →
-          </Link>
-        ) : (
-          <div />
-        )}
-      </div>
-
-      {/* 읽기 정보 */}
-      {reading ? (
-        <section className={`mt-4 rounded-2xl border p-5 md:p-6 ${
-          isToday
-            ? "border-blue/20 bg-blue/5"
-            : "border-neutral-200 bg-neutral-50"
-        }`}>
-          <p className={`text-sm font-medium ${isToday ? "text-blue" : "text-neutral-500"}`}>
-            {day}일차{isToday && " (오늘)"} · {dayDate.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })} ({dayDate.toLocaleDateString("ko-KR", { weekday: "short" })})
-          </p>
-          <p className="mt-1 text-xl font-bold text-neutral-800">
-            {reading.title}
-          </p>
-        </section>
-      ) : (
-        <section className="mt-4 rounded-2xl border border-neutral-200 p-6 text-center text-neutral-500">
-          읽기표를 불러올 수 없습니다
-        </section>
-      )}
-
-      {/* 유튜브 영상 */}
-      {reading?.youtube_id && (
-        <section className="mt-6">
-          <YouTubePlayer videoId={reading.youtube_id} />
-        </section>
-      )}
-
-      {/* 성경 본문 */}
-      {verses.length > 0 && (
-        <section className="mt-8">
-          <TextSizeControl>
-            {verses.map((v, i, arr) => {
-              const showChapterHeader =
-                i === 0 || verses[i - 1].chapter !== v.chapter || verses[i - 1].book !== v.book;
-
-              return (
-                <div key={`${v.book}-${v.chapter}-${v.verse}`}>
-                  {showChapterHeader && (
-                    <h2 className={`${i === 0 ? "mt-0" : "mt-10"} mb-4 border-b border-neutral-200 pb-2 text-lg font-bold text-navy`}>
-                      {v.book.normalize("NFC")} {v.chapter}장
-                    </h2>
-                  )}
-                  {v.heading && (
-                    <p className="mt-5 mb-2 font-bold text-blue">
-                      {v.heading}
-                    </p>
-                  )}
-                  <p className="mt-3 flex text-neutral-700">
-                    <span className="mr-1.5 mt-[0.3em] min-w-[1.5em] shrink-0 text-right text-[0.75em] font-medium text-neutral-400">
-                      {v.verse}
-                    </span>
-                    <span>{v.content}</span>
-                  </p>
-                </div>
-              );
-            })}
-          </TextSizeControl>
-        </section>
-      )}
-
-      {/* 하단 네비게이션 */}
-      <div className="mt-12 flex items-center justify-between border-t border-neutral-200 pt-6 pb-8">
-        {day > 1 ? (
-          <Link
-            href={`/365bible?day=${day - 1}`}
-            className="text-sm text-neutral-500 hover:text-navy"
-          >
-            ← 이전
-          </Link>
-        ) : (
-          <div />
-        )}
-        {day < 365 ? (
-          <Link
-            href={`/365bible?day=${day + 1}`}
-            className="text-sm text-neutral-500 hover:text-navy"
-          >
-            다음 →
-          </Link>
-        ) : (
-          <div />
-        )}
-      </div>
+      <BiblePageContent
+        day={day}
+        dayDateIso={dayDate.toISOString()}
+        reading={reading}
+        verses={verses}
+        serverToday={serverToday}
+      />
     </div>
   );
 }
