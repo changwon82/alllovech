@@ -244,7 +244,6 @@ export default function SpendReportPage() {
             type="file"
             accept="image/*"
             multiple
-            capture="environment"
             onChange={handleFile}
             className="hidden"
           />
