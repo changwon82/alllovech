@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/src/lib/supabase/server";
 import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
+import ReadingPlanModal from "./ReadingPlanModal";
 
 export const metadata = {
   title: "365 성경읽기 | 다애교회",
@@ -64,54 +65,85 @@ function resolveBook(name: string): string {
   return full.normalize("NFD");
 }
 
-function parseTitle(title: string) {
-  // 쉼표로 구분된 제목은 첫 번째 구간만 파싱
-  const firstSection = title.split(",")[0].trim();
-  const normalized = firstSection.replace(/편/g, "장");
+type BookChapters = { book: string; chapters: number[] };
 
-  // "Book N-M장" or "Book N-M" (가장 일반적인 장 범위)
-  const chapterRange = normalized.match(/^(.+?)\s+(\d+)-(\d+)/);
-  if (chapterRange && +chapterRange[3] > +chapterRange[2]) {
-    return { book: resolveBook(chapterRange[1].trim()), startCh: +chapterRange[2], endCh: +chapterRange[3] };
+function expandRange(start: number, end: number): number[] {
+  if (end < start) return [start];
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+function parseChapterRefs(str: string): number[] {
+  const trimmed = str.trim();
+  const has장 = /장/.test(trimmed);
+  const clean = trimmed.replace(/장.*$/, "").replace(/[a-z]/g, "").trim();
+
+  // "N:V-M:V" (양쪽에 콜론 → 장을 넘나드는 절 범위)
+  const crossCh = clean.match(/^(\d+):\d+\s*-\s*(\d+):\d+/);
+  if (crossCh) return expandRange(+crossCh[1], +crossCh[2]);
+
+  // 콜론 없음 → 장 참조
+  if (!clean.includes(":")) {
+    const range = clean.match(/^(\d+)\s*-\s*(\d+)/);
+    if (range) return expandRange(+range[1], +range[2]);
+    const num = clean.match(/^(\d+)/);
+    if (num) return [+num[1]];
+    return [];
   }
 
-  // "Book N:V-M:V" or "Book N:V-M장" (장을 넘나드는 절 범위)
-  const crossChVerse = normalized.match(/^(.+?)\s+(\d+):\d+\s*-\s*(\d+)/);
-  if (crossChVerse && +crossChVerse[3] > +crossChVerse[2]) {
-    return { book: resolveBook(crossChVerse[1].trim()), startCh: +crossChVerse[2], endCh: +crossChVerse[3] };
+  // "N:V-M장" (장 표시 있음 → 장을 넘나드는 범위)
+  if (has장) {
+    const m = clean.match(/^(\d+):\d+\s*-\s*(\d+)/);
+    if (m) return expandRange(+m[1], +m[2]);
   }
 
-  // "BookN-M" (띄어쓰기 없음, 예: "요1-2:12")
-  const noSpaceRange = normalized.match(/^([가-힣]+)(\d+)\s*-\s*(\d+)/);
-  if (noSpaceRange && +noSpaceRange[3] >= +noSpaceRange[2]) {
-    return { book: resolveBook(noSpaceRange[1].trim()), startCh: +noSpaceRange[2], endCh: +noSpaceRange[3] };
+  // "N:V-V" 또는 "N:V" (절 범위 → 해당 장만)
+  const m = clean.match(/^(\d+)/);
+  if (m) return [+m[1]];
+  return [];
+}
+
+function parseTitle(title: string): BookChapters[] {
+  const normalized = title.replace(/편/g, "장");
+  const sections = normalized.split(",").map((s) => s.trim());
+
+  const result: BookChapters[] = [];
+  let currentBook = "";
+
+  for (const section of sections) {
+    let book = "";
+    let rest = section;
+
+    // 띄어쓰기 있는 책 이름: "삼상 25-26장"
+    const withSpace = section.match(/^([가-힣]+)\s+(\d.*)$/);
+    // 띄어쓰기 없는 책 이름: "요1-2:12"
+    const noSpace = section.match(/^([가-힣]+)(\d.*)$/);
+
+    if (withSpace) {
+      book = resolveBook(withSpace[1].trim());
+      rest = withSpace[2];
+    } else if (noSpace) {
+      book = resolveBook(noSpace[1].trim());
+      rest = noSpace[2];
+    } else if (currentBook) {
+      book = currentBook;
+    } else {
+      continue;
+    }
+
+    currentBook = book;
+    const chapters = parseChapterRefs(rest);
+
+    if (chapters.length > 0) {
+      const existing = result.find((r) => r.book === book);
+      if (existing) {
+        existing.chapters.push(...chapters);
+      } else {
+        result.push({ book, chapters });
+      }
+    }
   }
 
-  // "Book N장" (단일 장)
-  const oneChapter = normalized.match(/^(.+?)\s+(\d+)장/);
-  if (oneChapter) {
-    return { book: resolveBook(oneChapter[1].trim()), startCh: +oneChapter[2], endCh: +oneChapter[2] };
-  }
-
-  // "Book N:V..." (절 참조에서 장 추출)
-  const verseRef = normalized.match(/^(.+?)\s+(\d+):\d+/);
-  if (verseRef) {
-    return { book: resolveBook(verseRef[1].trim()), startCh: +verseRef[2], endCh: +verseRef[2] };
-  }
-
-  // "BookN..." (띄어쓰기 없는 참조, 예: "행20:2b")
-  const noSpaceRef = normalized.match(/^([가-힣]+)(\d+)/);
-  if (noSpaceRef) {
-    return { book: resolveBook(noSpaceRef[1].trim()), startCh: +noSpaceRef[2], endCh: +noSpaceRef[2] };
-  }
-
-  // "Book N" (장 표시 없는 숫자)
-  const bare = normalized.match(/^(.+?)\s+(\d+)$/);
-  if (bare) {
-    return { book: resolveBook(bare[1].trim()), startCh: +bare[2], endCh: +bare[2] };
-  }
-
-  return null;
+  return result;
 }
 
 export default async function BiblePage({
@@ -130,52 +162,34 @@ export default async function BiblePage({
   const yearStart = new Date(now.getFullYear(), 0, 1);
   const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
 
-  // 읽기표
+  // 읽기표 (해당 일차)
   const { data: reading } = await supabase
     .from("bible_readings")
     .select("day, title, youtube_id")
     .eq("day", day)
     .single();
 
+  // 전체 365일 읽기표 (모달용)
+  const { data: allReadings } = await supabase
+    .from("bible_readings")
+    .select("day, title")
+    .order("day");
+
   // 본문 가져오기
   let verses: { book: string; chapter: number; verse: number; heading: string | null; content: string }[] = [];
 
   if (reading) {
-    const parsed = parseTitle(reading.title);
-    if (parsed) {
-      if ("endBook" in parsed && parsed.endBook) {
-        const { data: v1 } = await supabase
-          .from("bible_text")
-          .select("book, chapter, verse, heading, content")
-          .eq("book", parsed.book)
-          .gte("chapter", parsed.startCh)
-          .eq("version", "개역개정")
-          .order("chapter")
-          .order("verse");
-
-        const { data: v2 } = await supabase
-          .from("bible_text")
-          .select("book, chapter, verse, heading, content")
-          .eq("book", parsed.endBook)
-          .lte("chapter", parsed.endCh)
-          .eq("version", "개역개정")
-          .order("chapter")
-          .order("verse");
-
-        verses = [...(v1 || []), ...(v2 || [])];
-      } else {
-        const { data: v } = await supabase
-          .from("bible_text")
-          .select("book, chapter, verse, heading, content")
-          .eq("book", parsed.book)
-          .gte("chapter", parsed.startCh)
-          .lte("chapter", parsed.endCh)
-          .eq("version", "개역개정")
-          .order("chapter")
-          .order("verse");
-
-        verses = v || [];
-      }
+    const readings = parseTitle(reading.title);
+    for (const r of readings) {
+      const { data } = await supabase
+        .from("bible_text")
+        .select("book, chapter, verse, heading, content")
+        .eq("book", r.book)
+        .in("chapter", r.chapters)
+        .eq("version", "개역개정")
+        .order("chapter")
+        .order("verse");
+      verses.push(...(data || []));
     }
   }
 
@@ -188,9 +202,17 @@ export default async function BiblePage({
         ← 홈
       </Link>
 
-      <h1 className="mt-6 text-2xl font-bold text-navy md:text-3xl">
-        365 성경읽기
-      </h1>
+      <div className="mt-6 flex items-baseline gap-2">
+        <h1 className="text-2xl font-bold text-navy md:text-3xl">
+          365 성경읽기
+        </h1>
+        {allReadings && allReadings.length > 0 && (
+          <ReadingPlanModal
+            readings={allReadings.map((r) => ({ day: r.day, title: r.title ?? "" }))}
+            currentDay={day}
+          />
+        )}
+      </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
 
       {/* 날짜 네비게이션 */}
