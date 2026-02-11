@@ -258,7 +258,7 @@ export default async function BiblePage({
       {verses.length > 0 && (
         <section className="mt-8">
           <TextSizeControl>
-            {verses.map((v, i) => {
+            {verses.map((v, i, arr) => {
               const showChapterHeader =
                 i === 0 || verses[i - 1].chapter !== v.chapter || verses[i - 1].book !== v.book;
 
@@ -274,7 +274,7 @@ export default async function BiblePage({
                       {v.heading}
                     </p>
                   )}
-                  <p className="flex text-neutral-700">
+                  <p className="mt-3 flex text-neutral-700">
                     <span className="mr-1.5 mt-[0.3em] min-w-[1.5em] shrink-0 text-right text-[0.75em] font-medium text-neutral-400">
                       {v.verse}
                     </span>
