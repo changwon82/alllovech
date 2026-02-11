@@ -69,11 +69,13 @@ export default function BiblePageContent({
         )}
 
         <div
-          className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+          className={`flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-2 rounded-lg border px-2 py-2 sm:px-3 ${
             isToday ? "border-blue/20 bg-blue/5 font-medium text-blue" : "border-neutral-200 bg-neutral-50 text-neutral-700"
           }`}
         >
-          <span>{dateStr} ({weekdayStr})</span>
+          <span className="min-w-0 shrink truncate text-xs whitespace-nowrap sm:text-sm">
+            {dateStr} ({weekdayStr})
+          </span>
           {!isToday && (
             <Link
               href="/365bible"
