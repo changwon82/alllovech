@@ -21,12 +21,14 @@ export default function BiblePageContent({
   day,
   dayDateIso,
   reading,
+  displayTitle,
   verses,
   serverToday,
 }: {
   day: number;
   dayDateIso: string;
   reading: Reading | null;
+  displayTitle: string;
   verses: Verse[];
   serverToday: number;
 }) {
@@ -105,7 +107,7 @@ export default function BiblePageContent({
             isToday ? "border-blue/20 bg-blue/5" : "border-neutral-200 bg-neutral-50"
           }`}
         >
-          <p className="text-xl font-bold text-neutral-800">{reading.title}</p>
+          <p className="text-xl font-bold text-neutral-800">{displayTitle}</p>
         </section>
       ) : (
         <section className="mt-4 rounded-2xl border border-neutral-200 p-6 text-center text-neutral-500">

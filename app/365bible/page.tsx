@@ -14,56 +14,6 @@ function getDayOfYear() {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-const BOOK_MAP: Record<string, string> = {
-  창세기: "창세기", 출애굽기: "출애굽기", 레위기: "레위기", 민수기: "민수기", 신명기: "신명기",
-  여호수아: "여호수아", 사사기: "사사기", 룻기: "룻기",
-  사무엘상: "사무엘상", 사무엘하: "사무엘하", 열왕기상: "열왕기상", 열왕기하: "열왕기하",
-  역대상: "역대상", 역대하: "역대하", 에스라: "에스라", 느헤미야: "느헤미야", 에스더: "에스더",
-  욥기: "욥기", 시편: "시편", 잠언: "잠언", 전도서: "전도서", 아가: "아가",
-  이사야: "이사야", 예레미야: "예레미야", 예레미야애가: "예레미야애가",
-  에스겔: "에스겔", 다니엘: "다니엘",
-  호세아: "호세아", 요엘: "요엘", 아모스: "아모스", 오바댜: "오바댜", 요나: "요나",
-  미가: "미가", 나훔: "나훔", 하박국: "하박국", 스바냐: "스바냐", 학개: "학개",
-  스가랴: "스가랴", 말라기: "말라기",
-  마태복음: "마태복음", 마가복음: "마가복음", 누가복음: "누가복음", 요한복음: "요한복음",
-  사도행전: "사도행전", 로마서: "로마서",
-  고린도전서: "고린도전서", 고린도후서: "고린도후서",
-  갈라디아서: "갈라디아서", 에베소서: "에베소서", 빌립보서: "빌립보서", 골로새서: "골로새서",
-  데살로니가전서: "데살로니가전서", 데살로니가후서: "데살로니가후서",
-  디모데전서: "디모데전서", 디모데후서: "디모데후서", 디도서: "디도서", 빌레몬서: "빌레몬서",
-  히브리서: "히브리서", 야고보서: "야고보서",
-  베드로전서: "베드로전서", 베드로후서: "베드로후서",
-  요한일서: "요한일서", 요한이서: "요한이서", 요한삼서: "요한삼서",
-  유다서: "유다서", 요한계시록: "요한계시록",
-  // 약어
-  창: "창세기", 출: "출애굽기", 레: "레위기", 민: "민수기", 신: "신명기",
-  수: "여호수아", 삿: "사사기", 룻: "룻기",
-  삼상: "사무엘상", 삼하: "사무엘하", 왕상: "열왕기상", 왕하: "열왕기하",
-  대상: "역대상", 대하: "역대하", 라: "에스라", 느: "느헤미야", 더: "에스더",
-  욥: "욥기", 시: "시편", 잠: "잠언", 전: "전도서", 아: "아가",
-  사: "이사야", 렘: "예레미야", 애: "예레미야애가",
-  겔: "에스겔", 단: "다니엘",
-  호: "호세아", 욜: "요엘", 암: "아모스", 옵: "오바댜", 욘: "요나",
-  미: "미가", 나: "나훔", 합: "하박국", 습: "스바냐", 학: "학개",
-  슥: "스가랴", 말: "말라기",
-  마: "마태복음", 막: "마가복음", 눅: "누가복음", 요: "요한복음",
-  행: "사도행전", 롬: "로마서",
-  고전: "고린도전서", 고후: "고린도후서",
-  갈: "갈라디아서", 엡: "에베소서", 빌: "빌립보서", 골: "골로새서",
-  살전: "데살로니가전서", 살후: "데살로니가후서",
-  딤전: "디모데전서", 딤후: "디모데후서", 딛: "디도서", 몬: "빌레몬서",
-  히: "히브리서", 약: "야고보서",
-  벧전: "베드로전서", 벧후: "베드로후서",
-  요일: "요한일서", 요이: "요한이서", 요삼: "요한삼서",
-  유: "유다서", 계: "요한계시록",
-};
-
-function resolveBook(name: string): string {
-  const full = BOOK_MAP[name] || name;
-  // DB에 NFD(macOS 파일명)로 저장되어 있어 맞춰줌
-  return full.normalize("NFD");
-}
-
 type BookChapters = { book: string; chapters: number[] };
 
 function expandRange(start: number, end: number): number[] {
@@ -102,7 +52,7 @@ function parseChapterRefs(str: string): number[] {
 }
 
 function parseTitle(title: string): BookChapters[] {
-  const normalized = title.replace(/편/g, "장");
+  const normalized = title.replace(/(\d)편/g, "$1장");
   const sections = normalized.split(",").map((s) => s.trim());
 
   const result: BookChapters[] = [];
@@ -118,10 +68,10 @@ function parseTitle(title: string): BookChapters[] {
     const noSpace = section.match(/^([가-힣]+)(\d.*)$/);
 
     if (withSpace) {
-      book = resolveBook(withSpace[1].trim());
+      book = withSpace[1].trim().normalize("NFC");
       rest = withSpace[2];
     } else if (noSpace) {
-      book = resolveBook(noSpace[1].trim());
+      book = noSpace[1].trim().normalize("NFC");
       rest = noSpace[2];
     } else if (currentBook) {
       book = currentBook;
@@ -185,16 +135,29 @@ export default async function BiblePage({
     .select("day, title")
     .order("day");
 
+  // 전체명 → 약어 매핑 (각 책 1:1 절만 조회 → 66행)
+  const { data: bookPairs } = await supabase
+    .from("bible_text")
+    .select("book, book_code")
+    .eq("chapter", 1)
+    .eq("verse", 1)
+    .eq("version", "개역개정");
+  const fullToCode: Record<string, string> = {};
+  for (const p of bookPairs || []) {
+    if (p.book && p.book_code) fullToCode[p.book.normalize("NFC")] = p.book_code;
+  }
+
   // 본문 가져오기
   let verses: { book: string; chapter: number; verse: number; heading: string | null; content: string }[] = [];
 
   if (reading) {
     const readings = parseTitle(reading.title);
     for (const r of readings) {
+      const bookCode = fullToCode[r.book] ?? r.book;
       const { data } = await supabase
         .from("bible_text")
         .select("book, chapter, verse, heading, content")
-        .eq("book", r.book)
+        .eq("book_code", bookCode)
         .in("chapter", r.chapters)
         .eq("version", "개역개정")
         .order("chapter")
@@ -211,7 +174,12 @@ export default async function BiblePage({
         </h1>
         {allReadings && allReadings.length > 0 && (
           <ReadingPlanModal
-            readings={allReadings.map((r) => ({ day: r.day, title: r.title ?? "" }))}
+            readings={allReadings.map((r) => {
+              let title = (r.title ?? "").normalize("NFC");
+              const fulls = Object.keys(fullToCode).sort((a, b) => b.length - a.length);
+              for (const full of fulls) title = title.replaceAll(full, fullToCode[full]);
+              return { day: r.day, title };
+            })}
             currentDay={day}
           />
         )}
@@ -222,6 +190,7 @@ export default async function BiblePage({
         day={day}
         dayDateIso={dayDate.toISOString()}
         reading={reading}
+        displayTitle={(reading?.title ?? "").normalize("NFC")}
         verses={verses}
         serverToday={serverToday}
       />
