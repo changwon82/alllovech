@@ -204,8 +204,8 @@ export default async function BiblePage({
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl px-4 py-8 md:py-12">
-      <div className="mt-6 flex items-baseline gap-2">
+    <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-8 md:pt-4 md:pb-12">
+      <div className="mt-2 flex items-baseline gap-2">
         <h1 className="text-2xl font-bold text-navy md:text-3xl">
           365 성경읽기
         </h1>

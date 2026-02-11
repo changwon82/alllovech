@@ -46,14 +46,23 @@ export default function BiblePageContent({
 
   return (
     <>
-      {/* 날짜 네비게이션 */}
-      <div className="mt-8 flex items-center justify-between gap-2">
+      {/* Day 번호 (상자 위) */}
+      <p
+        className={`mt-0.5 text-center text-[2.5rem] font-bold leading-tight tracking-tight ${
+          isToday ? "text-blue" : "text-neutral-800"
+        }`}
+      >
+        Day {day}
+      </p>
+
+      {/* 날짜 네비게이션 - 이전/날짜/다음 수직 정렬 동일 */}
+      <div className="mt-2 flex items-stretch justify-between gap-2">
         {day > 1 ? (
           <Link
             href={`/365bible?day=${day - 1}`}
-            className="shrink-0 rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
           >
-            ← {day - 1}일차
+            ← Day {day - 1}
           </Link>
         ) : (
           <div className="w-20 shrink-0" />
@@ -64,9 +73,7 @@ export default function BiblePageContent({
             isToday ? "border-blue/20 bg-blue/5 font-medium text-blue" : "border-neutral-200 bg-neutral-50 text-neutral-700"
           }`}
         >
-          <span>
-            {day}일차 · {dateStr} ({weekdayStr})
-          </span>
+          <span>{dateStr} ({weekdayStr})</span>
           {!isToday && (
             <Link
               href="/365bible"
@@ -80,9 +87,9 @@ export default function BiblePageContent({
         {day < 365 ? (
           <Link
             href={`/365bible?day=${day + 1}`}
-            className="shrink-0 rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
           >
-            {day + 1}일차 →
+            Day {day + 1} →
           </Link>
         ) : (
           <div className="w-20 shrink-0" />
