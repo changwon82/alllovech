@@ -15,6 +15,8 @@ function getLocalDayOfYear(): number {
 type Verse = { book: string; chapter: number; verse: number; heading: string | null; content: string };
 type Reading = { day: number; title: string | null; youtube_id: string | null };
 
+const BIBLE_VERSION = "개역개정";
+
 export default function BiblePageContent({
   day,
   dayDateIso,
@@ -45,36 +47,45 @@ export default function BiblePageContent({
   return (
     <>
       {/* 날짜 네비게이션 */}
-      <div className="mt-8 flex items-center justify-between">
+      <div className="mt-8 flex items-center justify-between gap-2">
         {day > 1 ? (
           <Link
             href={`/365bible?day=${day - 1}`}
-            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+            className="shrink-0 rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
           >
             ← {day - 1}일차
           </Link>
         ) : (
-          <div />
+          <div className="w-20 shrink-0" />
         )}
 
-        {!isToday && (
-          <Link
-            href="/365bible"
-            className="rounded-lg bg-navy px-3 py-2 text-sm font-medium text-white hover:bg-navy/90"
-          >
-            오늘로
-          </Link>
-        )}
+        <div
+          className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+            isToday ? "border-blue/20 bg-blue/5 font-medium text-blue" : "border-neutral-200 bg-neutral-50 text-neutral-700"
+          }`}
+        >
+          <span>
+            {day}일차 · {dateStr} ({weekdayStr})
+          </span>
+          {!isToday && (
+            <Link
+              href="/365bible"
+              className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white hover:bg-navy/90"
+            >
+              오늘로
+            </Link>
+          )}
+        </div>
 
         {day < 365 ? (
           <Link
             href={`/365bible?day=${day + 1}`}
-            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+            className="shrink-0 rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
           >
             {day + 1}일차 →
           </Link>
         ) : (
-          <div />
+          <div className="w-20 shrink-0" />
         )}
       </div>
 
@@ -85,12 +96,7 @@ export default function BiblePageContent({
             isToday ? "border-blue/20 bg-blue/5" : "border-neutral-200 bg-neutral-50"
           }`}
         >
-          <p
-            className={`text-sm font-medium ${isToday ? "text-blue" : "text-neutral-500"}`}
-          >
-            {day}일차{isToday && " (오늘)"} · {dateStr} ({weekdayStr})
-          </p>
-          <p className="mt-1 text-xl font-bold text-neutral-800">{reading.title}</p>
+          <p className="text-xl font-bold text-neutral-800">{reading.title}</p>
         </section>
       ) : (
         <section className="mt-4 rounded-2xl border border-neutral-200 p-6 text-center text-neutral-500">
@@ -101,14 +107,14 @@ export default function BiblePageContent({
       {/* 유튜브 영상 */}
       {reading?.youtube_id && (
         <section className="mt-6">
-          <YouTubePlayer videoId={reading.youtube_id} />
+          <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
         </section>
       )}
 
       {/* 성경 본문 */}
       {verses.length > 0 && (
         <section className="mt-8">
-          <TextSizeControl>
+          <TextSizeControl version={BIBLE_VERSION}>
             {verses.map((v, i) => {
               const showChapterHeader =
                 i === 0 ||
