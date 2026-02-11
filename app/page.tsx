@@ -11,6 +11,12 @@ export default function Home() {
       >
         365 성경읽기
       </Link>
+      <Link
+        href="/spend-report"
+        className="rounded-full border border-navy px-6 py-2.5 text-sm font-medium text-navy hover:bg-navy/5"
+      >
+        지출 보고
+      </Link>
     </div>
   );
 }

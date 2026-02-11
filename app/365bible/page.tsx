@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/src/lib/supabase/server";
 import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
@@ -159,12 +158,6 @@ export default async function BiblePage({
   if (!params.day) {
     return (
       <div className="mx-auto min-h-screen max-w-2xl px-4 py-8 md:py-12">
-        <Link
-          href="/"
-          className="text-sm text-neutral-400 hover:text-neutral-600"
-        >
-          ← 홈
-        </Link>
         <div className="mt-6 flex items-baseline gap-2">
           <h1 className="text-2xl font-bold text-navy md:text-3xl">365 성경읽기</h1>
         </div>
@@ -212,13 +205,6 @@ export default async function BiblePage({
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 py-8 md:py-12">
-      <Link
-        href="/"
-        className="text-sm text-neutral-400 hover:text-neutral-600"
-      >
-        ← 홈
-      </Link>
-
       <div className="mt-6 flex items-baseline gap-2">
         <h1 className="text-2xl font-bold text-navy md:text-3xl">
           365 성경읽기
