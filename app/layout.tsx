@@ -19,11 +19,19 @@ export const metadata: Metadata = {
   openGraph: {
     title: "다애교회",
     description: "대한예수교장로회(합신) 다애교회",
-    images: ["/logo.png"],
+    url: siteUrl,
+    images: [
+      {
+        url: `${siteUrl}/logo.png`,
+        width: 280,
+        height: 280,
+        alt: "다애교회",
+      },
+    ],
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "다애교회",
     description: "대한예수교장로회(합신) 다애교회",
   },

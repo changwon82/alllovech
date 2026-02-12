@@ -3,16 +3,28 @@ import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
 import RedirectToLocalToday from "./RedirectToLocalToday";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const metadata = {
   title: "365 성경읽기 | 다애교회",
   openGraph: {
     title: "365 성경읽기 | 다애교회",
     description: "365 성경읽기",
-    images: ["/logo.png"],
+    url: `${siteUrl}/365bible`,
+    images: [
+      {
+        url: `${siteUrl}/logo.png`,
+        width: 280,
+        height: 280,
+        alt: "다애교회",
+      },
+    ],
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "365 성경읽기 | 다애교회",
     description: "365 성경읽기",
   },
