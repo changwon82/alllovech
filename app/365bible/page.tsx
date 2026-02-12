@@ -5,6 +5,17 @@ import RedirectToLocalToday from "./RedirectToLocalToday";
 
 export const metadata = {
   title: "365 성경읽기 | 다애교회",
+  openGraph: {
+    title: "365 성경읽기 | 다애교회",
+    description: "365 성경읽기",
+    images: ["/logo.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "365 성경읽기 | 다애교회",
+    description: "365 성경읽기",
+  },
 };
 
 function getDayOfYear() {
