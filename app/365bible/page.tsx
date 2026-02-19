@@ -204,6 +204,7 @@ type DisplayVerse = {
   book: string; chapter: number; verse: number;
   heading: string | null; content: string;
   highlighted: boolean;
+  compareContent?: string | null;
 };
 type DisplaySection = {
   book: string; chapter: number;
@@ -336,7 +337,7 @@ function parseTitle(title: string): Section[] {
 export default async function BiblePage({
   searchParams,
 }: {
-  searchParams: Promise<{ day?: string; version?: string }>;
+  searchParams: Promise<{ day?: string; version?: string; compare?: string }>;
 }) {
   const params = await searchParams;
 
@@ -365,6 +366,8 @@ export default async function BiblePage({
   const versionId = activeVersion?.id ?? 1;
   const nkrvId = versions.find((v) => v.code === "NKRV")?.id ?? 1;
   const needHeadings = versionId !== nkrvId;
+  const compareMode = params.compare === "true";
+  const compareVersion = compareMode ? versions.find((v) => v.id !== versionId) ?? null : null;
 
   // 본문 가져오기 (캐시)
   let displaySections: DisplaySection[] = [];
@@ -392,18 +395,26 @@ export default async function BiblePage({
       bookEntries.map(async ([book, chaptersSet]) => {
         const bookCode = BOOK_FULL_TO_CODE[book] ?? book;
         const sortedChapters = [...chaptersSet].sort((a, b) => a - b);
-        const [verses, headings] = await Promise.all([
+        const [verses, headings, compareVerses] = await Promise.all([
           getCachedBibleText(bookCode, sortedChapters, versionId),
           needHeadings
             ? getCachedBibleHeadings(bookCode, sortedChapters, nkrvId)
             : Promise.resolve([] as { chapter: number; verse: number; heading: string }[]),
+          compareVersion
+            ? getCachedBibleText(bookCode, sortedChapters, compareVersion.id)
+            : Promise.resolve([] as { book: string; chapter: number; verse: number; heading: string | null; content: string }[]),
         ]);
         const headingMap = new Map(
           headings.map((h) => [`${h.chapter}:${h.verse}`, h.heading])
         );
-        const merged = needHeadings
-          ? verses.map((v) => ({ ...v, heading: headingMap.get(`${v.chapter}:${v.verse}`) ?? null }))
-          : verses;
+        const compareMap = new Map(
+          compareVerses.map((v) => [`${v.chapter}:${v.verse}`, v.content])
+        );
+        const merged = verses.map((v) => ({
+          ...v,
+          heading: needHeadings ? (headingMap.get(`${v.chapter}:${v.verse}`) ?? null) : v.heading,
+          compareContent: compareVersion ? (compareMap.get(`${v.chapter}:${v.verse}`) ?? null) : undefined,
+        }));
         return {
           book,
           byChapter: merged.reduce(
@@ -473,7 +484,7 @@ export default async function BiblePage({
           365 성경읽기
         </h1>
         {allReadings.length > 0 && (
-          <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} />
+          <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} />
         )}
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
@@ -487,6 +498,8 @@ export default async function BiblePage({
         serverToday={serverToday}
         versions={versions}
         versionCode={versionCode}
+        compareMode={compareMode}
+        compareVersionName={compareVersion?.name}
       />
     </div>
   );

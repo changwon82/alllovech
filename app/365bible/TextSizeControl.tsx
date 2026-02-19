@@ -22,10 +22,12 @@ function getSavedSize(): number {
 }
 
 export default function TextSizeControl({
-  versionSelector,
+  headerLeft,
+  subRow,
   children,
 }: {
-  versionSelector?: React.ReactNode;
+  headerLeft?: React.ReactNode;
+  subRow?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [sizeIdx, setSizeIdx] = useState(1);
@@ -36,28 +38,33 @@ export default function TextSizeControl({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <div>{versionSelector ?? null}</div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-400">글자 크기</span>
-          <button
-            onClick={() => setSizeIdx((i) => { const v = Math.max(0, i - 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
-            disabled={sizeIdx === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
-          >
-            −
-          </button>
-          <span className="min-w-[4rem] text-center text-xs text-neutral-500">
-            {SIZES[sizeIdx].label}
-          </span>
-          <button
-            onClick={() => setSizeIdx((i) => { const v = Math.min(SIZES.length - 1, i + 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
-            disabled={sizeIdx === SIZES.length - 1}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
-          >
-            +
-          </button>
+      <div className="mb-4">
+        {/* 버튼 행: 번역 버튼 + 글자 크기 */}
+        <div className="flex items-center justify-between gap-2">
+          <div>{headerLeft ?? null}</div>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="text-xs text-neutral-400">글자 크기</span>
+            <button
+              onClick={() => setSizeIdx((i) => { const v = Math.max(0, i - 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
+              disabled={sizeIdx === 0}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
+            >
+              −
+            </button>
+            <span className="min-w-[4rem] text-center text-xs text-neutral-500">
+              {SIZES[sizeIdx].label}
+            </span>
+            <button
+              onClick={() => setSizeIdx((i) => { const v = Math.min(SIZES.length - 1, i + 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
+              disabled={sizeIdx === SIZES.length - 1}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
+            >
+              +
+            </button>
+          </div>
         </div>
+        {/* 하위 행: 대한성서공회 링크 등 */}
+        {subRow && <div className="mt-1.5">{subRow}</div>}
       </div>
       <div className={SIZES[sizeIdx].className}>{children}</div>
     </div>
