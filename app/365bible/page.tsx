@@ -1,8 +1,13 @@
 import { redirect } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getUnreadCount } from "@/lib/notifications";
 import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
+import UserMenu from "@/app/components/UserMenu";
+import BottomNav from "@/app/components/BottomNav";
 import { BOOK_FULL_TO_CODE } from "./plan";
 
 const siteUrl =
@@ -353,6 +358,46 @@ export default async function BiblePage({
   const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
   const serverToday = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
+  // 인증 상태 + 체크 데이터 조회
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let checkedDays: number[] = [];
+  let userProfile: { name: string; status: string } | null = null;
+  let isAdmin = false;
+  let unreadCount = 0;
+
+  let existingReflection: { id: string; content: string; visibility: "private" | "group" | "public"; created_at: string; updated_at: string } | null = null;
+
+  if (user) {
+    const [checksResult, profileResult, reflectionResult, roles, unread] = await Promise.all([
+      supabase
+        .from("bible_checks")
+        .select("day")
+        .eq("user_id", user.id)
+        .eq("year", koreaYear),
+      supabase
+        .from("profiles")
+        .select("name, status")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("reflections")
+        .select("id, content, visibility, created_at, updated_at")
+        .eq("user_id", user.id)
+        .eq("day", day)
+        .eq("year", koreaYear)
+        .maybeSingle(),
+      getUserRoles(supabase, user.id),
+      getUnreadCount(supabase, user.id),
+    ]);
+    checkedDays = (checksResult.data ?? []).map((d: { day: number }) => d.day);
+    userProfile = profileResult.data;
+    existingReflection = reflectionResult.data;
+    isAdmin = isAdminRole(roles);
+    unreadCount = unread;
+  }
+
   // 365일 읽기표 + 번역본 목록 (병렬 캐시)
   const [allReadings, versions] = await Promise.all([
     getCachedAllReadings(),
@@ -478,13 +523,25 @@ export default async function BiblePage({
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-8 md:pt-4 md:pb-12">
-      <div className="mt-2 flex items-baseline gap-2">
-        <h1 className="text-2xl font-bold text-navy md:text-3xl">
-          365 성경읽기
-        </h1>
-        {allReadings.length > 0 && (
-          <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} />
+    <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
+      <div className="mt-2 flex items-center justify-between">
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-2xl font-bold text-navy md:text-3xl">
+            365 성경읽기
+          </h1>
+          {allReadings.length > 0 && (
+            <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} />
+          )}
+        </div>
+        {user ? (
+          <UserMenu name={userProfile?.name ?? "이름 없음"} />
+        ) : (
+          <a
+            href="/login?next=/365bible"
+            className="rounded-full border border-neutral-300 px-3 py-1 text-xs text-neutral-600 hover:border-navy hover:text-navy"
+          >
+            로그인
+          </a>
         )}
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
@@ -500,7 +557,13 @@ export default async function BiblePage({
         versionCode={versionCode}
         compareMode={compareMode}
         compareVersionName={compareVersion?.name}
+        user={user ? { id: user.id, name: userProfile?.name ?? "이름 없음", status: userProfile?.status ?? "pending" } : null}
+        checkedDays={checkedDays}
+        year={koreaYear}
+        existingReflection={existingReflection}
       />
+
+      {user && <BottomNav isAdmin={isAdmin} unreadCount={unreadCount} />}
     </div>
   );
 }

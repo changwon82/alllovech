@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useTransition } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
 import { BOOK_FULL_TO_CODE } from "./plan";
+import { saveReflection, deleteReflection, type Reflection } from "./actions";
+import { createClient } from "@/lib/supabase/client";
 
 // 한글 책코드 → 대한성서공회 book 파라미터
 const BSK_BOOK_CODE: Record<string, string> = {
@@ -65,6 +67,8 @@ function getSectionHeader(sec: DisplaySection): string {
   return header;
 }
 
+type UserInfo = { id: string; name: string; status: string } | null;
+
 export default function BiblePageContent({
   day,
   dayDateIso,
@@ -76,6 +80,10 @@ export default function BiblePageContent({
   versionCode,
   compareMode,
   compareVersionName,
+  user,
+  checkedDays: initialCheckedDays,
+  year,
+  existingReflection,
 }: {
   day: number;
   dayDateIso: string;
@@ -87,12 +95,112 @@ export default function BiblePageContent({
   versionCode: string;
   compareMode: boolean;
   compareVersionName?: string;
+  user: UserInfo;
+  checkedDays: number[];
+  year: number;
+  existingReflection: Reflection | null;
 }) {
   const [localToday, setLocalToday] = useState(serverToday);
   useEffect(() => {
     setLocalToday(getLocalDayOfYear());
   }, []);
   const isToday = day === localToday;
+
+  // 체크 기능
+  const [checkedDays, setCheckedDays] = useState<Set<number>>(new Set(initialCheckedDays));
+  const isChecked = checkedDays.has(day);
+  const isActive = user?.status === "active";
+
+  // day가 바뀔 때만 서버 데이터로 동기화 (같은 day에서 서버 액션 후 re-render 시 덮어쓰기 방지)
+  useEffect(() => {
+    setCheckedDays(new Set(initialCheckedDays));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day]);
+
+  async function handleToggleCheck() {
+    if (!user || !isActive) return;
+    const willCheck = !checkedDays.has(day);
+
+    // 낙관적 업데이트
+    setCheckedDays((prev) => {
+      const next = new Set(prev);
+      if (willCheck) next.add(day);
+      else next.delete(day);
+      return next;
+    });
+
+    try {
+      const supabase = createClient();
+
+      if (willCheck) {
+        // upsert: 이미 있으면 무시, 없으면 삽입
+        const { error } = await supabase
+          .from("bible_checks")
+          .upsert(
+            { user_id: user.id, day, year },
+            { onConflict: "user_id,day,year", ignoreDuplicates: true }
+          );
+        if (error) throw error;
+      } else {
+        // 삭제
+        const { error } = await supabase
+          .from("bible_checks")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("day", day)
+          .eq("year", year);
+        if (error) throw error;
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string; code?: string; details?: string };
+      console.error("체크 실패:", e.message, e.code, e.details);
+      // 실패 시 되돌리기
+      setCheckedDays((prev) => {
+        const next = new Set(prev);
+        if (willCheck) next.delete(day);
+        else next.add(day);
+        return next;
+      });
+    }
+  }
+
+  // 묵상 기능
+  const [reflection, setReflection] = useState<Reflection | null>(existingReflection);
+  const [reflectionText, setReflectionText] = useState(existingReflection?.content ?? "");
+  const [reflectionVisibility, setReflectionVisibility] = useState<"private" | "group" | "public">(existingReflection?.visibility ?? "private");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, startSaving] = useTransition();
+
+  useEffect(() => {
+    setReflection(existingReflection);
+    setReflectionText(existingReflection?.content ?? "");
+    setReflectionVisibility(existingReflection?.visibility ?? "private");
+    setIsEditing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day]);
+
+  function handleSaveReflection() {
+    if (!reflectionText.trim()) return;
+    startSaving(async () => {
+      const result = await saveReflection(day, year, reflectionText.trim(), reflectionVisibility);
+      if ("reflection" in result && result.reflection) {
+        setReflection(result.reflection);
+        setIsEditing(false);
+      }
+    });
+  }
+
+  function handleDeleteReflection() {
+    if (!confirm("묵상을 삭제하시겠습니까?")) return;
+    startSaving(async () => {
+      const result = await deleteReflection(day, year);
+      if ("deleted" in result) {
+        setReflection(null);
+        setReflectionText("");
+        setIsEditing(false);
+      }
+    });
+  }
 
   const infoRef = useRef<HTMLElement>(null);
   const [showSticky, setShowSticky] = useState(false);
@@ -239,7 +347,26 @@ export default function BiblePageContent({
             isToday ? "border-blue/20 bg-blue/5" : "border-neutral-200 bg-neutral-50"
           }`}
         >
-          <p className="text-xl font-bold text-neutral-800">{displayTitle}</p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-xl font-bold text-neutral-800">{displayTitle}</p>
+            {user && isActive && (
+              <button
+                onClick={handleToggleCheck}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                  isChecked
+                    ? "bg-blue text-white"
+                    : "border border-neutral-300 text-neutral-500 hover:border-blue hover:text-blue"
+                }`}
+              >
+                {isChecked ? "읽음 ✓" : "읽음 체크"}
+              </button>
+            )}
+          </div>
+          {user && !isActive && (
+            <p className="mt-2 text-xs text-neutral-400">
+              관리자 승인 후 체크 기능을 이용할 수 있습니다.
+            </p>
+          )}
         </section>
       ) : (
         <section ref={infoRef} className="mt-4 rounded-2xl border border-neutral-200 p-6 text-center text-neutral-500">
@@ -361,6 +488,90 @@ export default function BiblePageContent({
                 </div>
             ))}
           </TextSizeControl>
+        </section>
+      )}
+
+      {/* 묵상 기록 */}
+      {user && isActive && (
+        <section className="mt-10">
+          <h3 className="mb-3 text-sm font-bold text-navy">오늘의 묵상</h3>
+
+          {reflection && !isEditing ? (
+            <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+                {reflection.content}
+              </p>
+              <div className="mt-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-400">
+                    {reflectionVisibility === "private" ? "나만 보기" : reflectionVisibility === "public" ? "공개" : "소그룹 공유"}
+                  </span>
+                  {reflectionVisibility === "group" && (
+                    <a href="/groups" className="text-xs text-blue hover:underline">
+                      소그룹 피드에서 보기 &rarr;
+                    </a>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-xs text-neutral-500 hover:text-navy"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={handleDeleteReflection}
+                    disabled={isSaving}
+                    className="text-xs text-neutral-400 hover:text-red-500"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-neutral-200 p-4">
+              <textarea
+                value={reflectionText}
+                onChange={(e) => setReflectionText(e.target.value)}
+                placeholder="오늘 말씀을 통해 느낀 점을 기록해보세요..."
+                rows={4}
+                className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-neutral-400 focus:border-navy focus:ring-1 focus:ring-navy"
+              />
+              <div className="mt-2 flex items-center justify-between">
+                <select
+                  value={reflectionVisibility}
+                  onChange={(e) => setReflectionVisibility(e.target.value as "private" | "group" | "public")}
+                  className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
+                >
+                  <option value="private">나만 보기</option>
+                  <option value="group">소그룹 공유</option>
+                  <option value="public">공개</option>
+                </select>
+                <div className="flex gap-2">
+                  {(reflection || isEditing) && (
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setReflectionText(reflection?.content ?? "");
+                        setReflectionVisibility(reflection?.visibility ?? "private");
+                      }}
+                      className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+                    >
+                      취소
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSaveReflection}
+                    disabled={isSaving || !reflectionText.trim()}
+                    className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+                  >
+                    {isSaving ? "저장 중..." : reflection ? "수정" : "저장"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       )}
 

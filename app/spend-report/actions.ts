@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 const BUCKET = "spend-report-receipts";
 
