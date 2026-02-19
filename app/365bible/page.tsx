@@ -1,7 +1,9 @@
-import { createClient } from "@/src/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
-import RedirectToLocalToday from "./RedirectToLocalToday";
+import { BOOK_FULL_TO_CODE } from "./plan";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -30,12 +32,76 @@ export const metadata = {
   },
 };
 
-function getDayOfYear() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now.getTime() - start.getTime();
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+// Asia/Seoul 기준 연중 일차 계산 (서버사이드)
+function getKoreaDayOfYear(): number {
+  const seoulDateStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Seoul",
+  }); // "YYYY-MM-DD"
+  const [year, month, day] = seoulDateStr.split("-").map(Number);
+  const seoulDate = new Date(year, month - 1, day);
+  const yearStart = new Date(year, 0, 0);
+  return Math.floor((seoulDate.getTime() - yearStart.getTime()) / 86400000);
 }
+
+function getKoreaYear(): number {
+  const seoulDateStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Seoul",
+  });
+  return Number(seoulDateStr.split("-")[0]);
+}
+
+// ---------------------------------------------------------------------------
+// 캐시된 DB 조회 함수 (모듈 레벨 정의)
+// ---------------------------------------------------------------------------
+
+function makeAnonClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
+// 365일 읽기표 전체 (제목 + 유튜브 ID) — 1시간 캐시
+const getCachedAllReadings = unstable_cache(
+  async () => {
+    const client = makeAnonClient();
+    const { data } = await client
+      .from("bible_readings")
+      .select("day, title, youtube_id")
+      .order("day");
+    return (data ?? []) as { day: number; title: string | null; youtube_id: string | null }[];
+  },
+  ["bible-readings-all"],
+  { revalidate: 3600 }
+);
+
+// 성경 본문 (책코드 + 장 목록) — 영구 캐시 (내용 불변)
+const getCachedBibleText = unstable_cache(
+  async (bookCode: string, sortedChapters: number[]) => {
+    const client = makeAnonClient();
+    const { data } = await client
+      .from("bible_text")
+      .select("book, chapter, verse, heading, content")
+      .eq("book_code", bookCode)
+      .in("chapter", sortedChapters)
+      .eq("version", "개역개정")
+      .order("chapter")
+      .order("verse");
+    return (data ?? []) as {
+      book: string;
+      chapter: number;
+      verse: number;
+      heading: string | null;
+      content: string;
+    }[];
+  },
+  ["bible-text"],
+  { revalidate: false }
+);
+
+// ---------------------------------------------------------------------------
+// 타입 정의
+// ---------------------------------------------------------------------------
 
 type VerseRange = {
   chapter: number;
@@ -57,6 +123,10 @@ type DisplaySection = {
   showFullChapter: boolean;
   verses: DisplayVerse[];
 };
+
+// ---------------------------------------------------------------------------
+// 파싱 헬퍼
+// ---------------------------------------------------------------------------
 
 function expandRange(start: number, end: number): VerseRange[] {
   if (end < start) return [{ chapter: start }];
@@ -97,7 +167,7 @@ function parseChapterRefs(str: string): VerseRange[] {
     }
   }
 
-  // 3. "N-M:V" (콜론이 오른쪽에만 → 시작 장부터 끝 장:절까지) — 버그 수정
+  // 3. "N-M:V" (콜론이 오른쪽에만 → 시작 장부터 끝 장:절까지)
   const nMV = clean.match(/^(\d+)\s*-\s*(\d+):(\d+)$/);
   if (nMV) {
     const [, startCh, endCh, endV] = nMV;
@@ -171,62 +241,45 @@ function parseTitle(title: string): Section[] {
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// 페이지 컴포넌트
+// ---------------------------------------------------------------------------
+
 export default async function BiblePage({
   searchParams,
 }: {
   searchParams: Promise<{ day?: string }>;
 }) {
-  const supabase = await createClient();
   const params = await searchParams;
-  const serverToday = getDayOfYear();
 
-  // URL에 day가 없으면 클라이언트에서 지역 기준 오늘 일차로 리다이렉트
+  // URL에 day가 없으면 서버에서 Asia/Seoul 기준 오늘 일차로 redirect
   if (!params.day) {
-    return (
-      <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-8 md:pt-4 md:pb-12">
-        <div className="mt-2 flex items-baseline gap-2">
-          <h1 className="text-2xl font-bold text-navy md:text-3xl">365 성경읽기</h1>
-        </div>
-        <div className="mt-2 h-1 w-12 rounded bg-blue" />
-        <RedirectToLocalToday />
-      </div>
-    );
+    const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
+    redirect(`/365bible?day=${today}`);
   }
 
   const day = Math.max(1, Math.min(365, parseInt(params.day)));
-  const now = new Date();
-  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const koreaYear = getKoreaYear();
+  const yearStart = new Date(koreaYear, 0, 1);
   const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
+  const serverToday = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  // 읽기표 (해당 일차)
-  const { data: reading } = await supabase
-    .from("bible_readings")
-    .select("day, title, youtube_id")
-    .eq("day", day)
-    .single();
+  // 365일 읽기표 (캐시)
+  const allReadings = await getCachedAllReadings();
+  const reading = allReadings.find((r) => r.day === day) ?? null;
 
-  // 전체 365일 읽기표 (모달용)
-  const { data: allReadings } = await supabase
-    .from("bible_readings")
-    .select("day, title")
-    .order("day");
+  // 모달용 축약 제목 생성 (BOOK_FULL_TO_CODE 사용 — DB 호출 없음)
+  const fullsSorted = Object.keys(BOOK_FULL_TO_CODE).sort((a, b) => b.length - a.length);
+  const modalReadings = allReadings.map((r) => {
+    let title = (r.title ?? "").normalize("NFC");
+    for (const full of fullsSorted) title = title.replaceAll(full, BOOK_FULL_TO_CODE[full]);
+    return { day: r.day, title };
+  });
 
-  // 전체명 → 약어 매핑 (각 책 1:1 절만 조회 → 66행)
-  const { data: bookPairs } = await supabase
-    .from("bible_text")
-    .select("book, book_code")
-    .eq("chapter", 1)
-    .eq("verse", 1)
-    .eq("version", "개역개정");
-  const fullToCode: Record<string, string> = {};
-  for (const p of bookPairs || []) {
-    if (p.book && p.book_code) fullToCode[p.book.normalize("NFC")] = p.book_code;
-  }
-
-  // 본문 가져오기
+  // 본문 가져오기 (캐시)
   let displaySections: DisplaySection[] = [];
 
-  if (reading) {
+  if (reading?.title) {
     const sections = parseTitle(reading.title);
 
     // 장 출현 횟수 계산 (같은 책·장이 여러 섹션에 나오면 범위만 표시)
@@ -243,25 +296,27 @@ export default async function BiblePage({
         chaptersPerBook.get(s.book)!.add(r.chapter);
       }
 
-    // Supabase 쿼리 (책별 1회)
-    const allVerses = new Map<string, Map<number, { book: string; chapter: number; verse: number; heading: string | null; content: string }[]>>();
-    for (const [book, chapters] of chaptersPerBook) {
-      const bookCode = fullToCode[book] ?? book;
-      const { data } = await supabase
-        .from("bible_text")
-        .select("book, chapter, verse, heading, content")
-        .eq("book_code", bookCode)
-        .in("chapter", [...chapters])
-        .eq("version", "개역개정")
-        .order("chapter")
-        .order("verse");
-      const byChapter = new Map<number, typeof data>();
-      for (const v of data || []) {
-        if (!byChapter.has(v.chapter)) byChapter.set(v.chapter, []);
-        byChapter.get(v.chapter)!.push(v);
-      }
-      allVerses.set(book, byChapter as Map<number, { book: string; chapter: number; verse: number; heading: string | null; content: string }[]>);
-    }
+    // 책별 본문 조회 (캐시된 함수 — 병렬)
+    const bookEntries = [...chaptersPerBook.entries()];
+    const allVersesArr = await Promise.all(
+      bookEntries.map(([book, chaptersSet]) => {
+        const bookCode = BOOK_FULL_TO_CODE[book] ?? book;
+        const sortedChapters = [...chaptersSet].sort((a, b) => a - b);
+        return getCachedBibleText(bookCode, sortedChapters).then((data) => ({
+          book,
+          byChapter: data.reduce(
+            (acc, v) => {
+              if (!acc.has(v.chapter)) acc.set(v.chapter, []);
+              acc.get(v.chapter)!.push(v);
+              return acc;
+            },
+            new Map<number, typeof data>()
+          ),
+        }));
+      })
+    );
+
+    const allVerses = new Map(allVersesArr.map((e) => [e.book, e.byChapter]));
 
     // DisplaySection[] 조립
     for (const section of sections) {
@@ -272,7 +327,6 @@ export default async function BiblePage({
         const isMulti = appearances > 1;
 
         if (!hasRange) {
-          // 전체 장 → 모두 highlighted
           displaySections.push({
             book: section.book,
             chapter: range.chapter,
@@ -280,7 +334,6 @@ export default async function BiblePage({
             verses: chapterVerses.map((v) => ({ ...v, highlighted: true })),
           });
         } else if (isMulti) {
-          // 같은 장 여러 번 → 해당 절만 표시 (회색 문맥 없음)
           const start = range.startVerse ?? 1;
           const end = range.endVerse ?? Infinity;
           const filtered = chapterVerses.filter((v) => v.verse >= start && v.verse <= end);
@@ -293,7 +346,6 @@ export default async function BiblePage({
             verses: filtered.map((v) => ({ ...v, highlighted: true })),
           });
         } else {
-          // 장 1회 + 절 범위 → 전체 장 표시, 범위 밖 회색
           const start = range.startVerse ?? 1;
           const end = range.endVerse ?? Infinity;
           displaySections.push({
@@ -318,16 +370,8 @@ export default async function BiblePage({
         <h1 className="text-2xl font-bold text-navy md:text-3xl">
           365 성경읽기
         </h1>
-        {allReadings && allReadings.length > 0 && (
-          <ReadingPlanModal
-            readings={allReadings.map((r) => {
-              let title = (r.title ?? "").normalize("NFC");
-              const fulls = Object.keys(fullToCode).sort((a, b) => b.length - a.length);
-              for (const full of fulls) title = title.replaceAll(full, fullToCode[full]);
-              return { day: r.day, title };
-            })}
-            currentDay={day}
-          />
+        {modalReadings.length > 0 && (
+          <ReadingPlanModal readings={modalReadings} currentDay={day} />
         )}
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
