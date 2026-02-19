@@ -177,7 +177,7 @@ export default function BiblePageContent({
           </span>
           {!isToday && (
             <Link
-              href="/365bible"
+              href={`/365bible?day=${localToday}`}
               className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white hover:bg-navy/90"
             >
               오늘로
