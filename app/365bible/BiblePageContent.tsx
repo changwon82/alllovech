@@ -24,6 +24,7 @@ const BSK_BOOK_CODE: Record<string, string> = {
   요일: "1jo", 요이: "2jo", 요삼: "3jo", 유: "jud", 계: "rev",
 };
 
+
 function getBSKUrl(bookCode: string, chapter: number): string {
   const bsk = BSK_BOOK_CODE[bookCode];
   if (!bsk) return "";
@@ -345,7 +346,9 @@ export default function BiblePageContent({
                           {v.verse}
                         </span>
                         <span className="flex-1">
-                          <span className="block">{v.content}</span>
+                          <span className="block font-bold" style={{ fontFamily: "var(--font-noto-serif-kr), Georgia, serif" }}>
+                            {v.content}
+                          </span>
                           {compareMode && v.compareContent && (
                             <span className="mt-1 block text-[0.88em] text-neutral-400">
                               {v.compareContent}
