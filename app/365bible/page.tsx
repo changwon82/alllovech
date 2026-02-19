@@ -9,28 +9,43 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
-export const metadata = {
-  title: "365 성경읽기 | 다애교회",
-  openGraph: {
+function clampDay(n: number): number {
+  return Math.max(1, Math.min(365, n));
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: { day?: string | string[] };
+}) {
+  const raw = Array.isArray(searchParams?.day) ? searchParams.day[0] : searchParams?.day;
+  const day = raw ? clampDay(parseInt(raw)) : clampDay(getKoreaDayOfYear());
+
+  const reading = await getCachedReadingByDay(day);
+  const ogDescription = reading?.title ?? "365 성경읽기";
+  const ogUrl = `${siteUrl}/365bible${raw ? `?day=${day}` : ""}`;
+
+  const ogImage = reading?.youtube_id
+    ? await getCachedYoutubeThumbnail(reading.youtube_id)
+    : null;
+
+  return {
     title: "365 성경읽기 | 다애교회",
-    description: "365 성경읽기",
-    url: `${siteUrl}/365bible`,
-    images: [
-      {
-        url: `${siteUrl}/logo.png`,
-        width: 280,
-        height: 280,
-        alt: "다애교회",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "365 성경읽기 | 다애교회",
-    description: "365 성경읽기",
-  },
-};
+    openGraph: {
+      title: "365 성경읽기 | 다애교회",
+      description: ogDescription,
+      url: ogUrl,
+      ...(ogImage ? { images: [{ ...ogImage, alt: ogDescription }] } : {}),
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "365 성경읽기 | 다애교회",
+      description: ogDescription,
+      ...(ogImage ? { images: [ogImage.url] } : {}),
+    },
+  };
+}
 
 // Asia/Seoul 기준 연중 일차 계산 (서버사이드)
 function getKoreaDayOfYear(): number {
@@ -73,6 +88,45 @@ const getCachedAllReadings = unstable_cache(
   },
   ["bible-readings-all"],
   { revalidate: 3600 }
+);
+
+// day 단건 조회 — 24시간 캐시, day별 캐시 키 분리
+const getCachedReadingByDay = unstable_cache(
+  async (day: number) => {
+    const client = makeAnonClient();
+    const { data, error } = await client
+      .from("bible_readings")
+      .select("day, title, youtube_id")
+      .eq("day", day)
+      .maybeSingle();
+    if (error) return null;
+    return data as { day: number; title: string | null; youtube_id: string | null } | null;
+  },
+  ["bible-reading-by-day"],
+  { revalidate: 86400 }
+);
+
+// 유튜브 썸네일 URL 결정 — 24시간 캐시
+// maxresdefault(1280×720) → sddefault(640×480) → hqdefault(480×360) 순으로 시도
+// YouTube는 없는 사이즈 요청 시 120×90 플레이스홀더를 200 OK로 반환 → content-length 10KB 기준으로 구분
+const getCachedYoutubeThumbnail = unstable_cache(
+  async (youtubeId: string): Promise<{ url: string; width: number; height: number }> => {
+    const candidates = [
+      { url: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`, width: 1280, height: 720 },
+      { url: `https://img.youtube.com/vi/${youtubeId}/sddefault.jpg`,     width: 640,  height: 480 },
+      { url: `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`,     width: 480,  height: 360 },
+    ];
+    for (const candidate of candidates) {
+      try {
+        const res = await fetch(candidate.url, { method: "HEAD" });
+        const len = Number(res.headers.get("content-length") ?? 0);
+        if (res.ok && len > 10_000) return candidate;
+      } catch {}
+    }
+    return candidates[2]; // hqdefault는 항상 존재
+  },
+  ["youtube-thumbnail"],
+  { revalidate: 86400 }
 );
 
 // 성경 본문 (책코드 + 장 목록) — 영구 캐시 (내용 불변)
