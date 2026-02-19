@@ -129,16 +129,31 @@ const getCachedYoutubeThumbnail = unstable_cache(
   { revalidate: 86400 }
 );
 
-// 성경 본문 (책코드 + 장 목록) — 영구 캐시 (내용 불변)
+// 번역본 목록 — 1시간 캐시
+const getCachedVersions = unstable_cache(
+  async () => {
+    const client = makeAnonClient();
+    const { data } = await client
+      .from("bible_versions")
+      .select("id, code, name")
+      .eq("is_active", true)
+      .order("id");
+    return (data ?? []) as { id: number; code: string; name: string }[];
+  },
+  ["bible-versions"],
+  { revalidate: 3600 }
+);
+
+// 성경 본문 (책코드 + 장 목록 + 번역본 ID) — 영구 캐시 (내용 불변)
 const getCachedBibleText = unstable_cache(
-  async (bookCode: string, sortedChapters: number[]) => {
+  async (bookCode: string, sortedChapters: number[], versionId: number) => {
     const client = makeAnonClient();
     const { data } = await client
       .from("bible_text")
       .select("book, chapter, verse, heading, content")
       .eq("book_code", bookCode)
       .in("chapter", sortedChapters)
-      .eq("version", "개역개정")
+      .eq("version_id", versionId)
       .order("chapter")
       .order("verse");
     return (data ?? []) as {
@@ -150,6 +165,25 @@ const getCachedBibleText = unstable_cache(
     }[];
   },
   ["bible-text"],
+  { revalidate: false }
+);
+
+// 소제목만 조회 (NKRV 고정) — 영구 캐시
+const getCachedBibleHeadings = unstable_cache(
+  async (bookCode: string, sortedChapters: number[], nkrvId: number) => {
+    const client = makeAnonClient();
+    const { data } = await client
+      .from("bible_text")
+      .select("chapter, verse, heading")
+      .eq("book_code", bookCode)
+      .in("chapter", sortedChapters)
+      .eq("version_id", nkrvId)
+      .not("heading", "is", null)
+      .order("chapter")
+      .order("verse");
+    return (data ?? []) as { chapter: number; verse: number; heading: string }[];
+  },
+  ["bible-headings"],
   { revalidate: false }
 );
 
@@ -302,7 +336,7 @@ function parseTitle(title: string): Section[] {
 export default async function BiblePage({
   searchParams,
 }: {
-  searchParams: Promise<{ day?: string }>;
+  searchParams: Promise<{ day?: string; version?: string }>;
 }) {
   const params = await searchParams;
 
@@ -318,9 +352,19 @@ export default async function BiblePage({
   const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
   const serverToday = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  // 365일 읽기표 (캐시)
-  const allReadings = await getCachedAllReadings();
+  // 365일 읽기표 + 번역본 목록 (병렬 캐시)
+  const [allReadings, versions] = await Promise.all([
+    getCachedAllReadings(),
+    getCachedVersions(),
+  ]);
   const reading = allReadings[day - 1] ?? null;
+
+  // 번역본 결정 (URL param → 기본값 NKRV)
+  const versionCode = params.version ?? "NKRV";
+  const activeVersion = versions.find((v) => v.code === versionCode) ?? versions[0];
+  const versionId = activeVersion?.id ?? 1;
+  const nkrvId = versions.find((v) => v.code === "NKRV")?.id ?? 1;
+  const needHeadings = versionId !== nkrvId;
 
   // 본문 가져오기 (캐시)
   let displaySections: DisplaySection[] = [];
@@ -345,20 +389,32 @@ export default async function BiblePage({
     // 책별 본문 조회 (캐시된 함수 — 병렬)
     const bookEntries = [...chaptersPerBook.entries()];
     const allVersesArr = await Promise.all(
-      bookEntries.map(([book, chaptersSet]) => {
+      bookEntries.map(async ([book, chaptersSet]) => {
         const bookCode = BOOK_FULL_TO_CODE[book] ?? book;
         const sortedChapters = [...chaptersSet].sort((a, b) => a - b);
-        return getCachedBibleText(bookCode, sortedChapters).then((data) => ({
+        const [verses, headings] = await Promise.all([
+          getCachedBibleText(bookCode, sortedChapters, versionId),
+          needHeadings
+            ? getCachedBibleHeadings(bookCode, sortedChapters, nkrvId)
+            : Promise.resolve([] as { chapter: number; verse: number; heading: string }[]),
+        ]);
+        const headingMap = new Map(
+          headings.map((h) => [`${h.chapter}:${h.verse}`, h.heading])
+        );
+        const merged = needHeadings
+          ? verses.map((v) => ({ ...v, heading: headingMap.get(`${v.chapter}:${v.verse}`) ?? null }))
+          : verses;
+        return {
           book,
-          byChapter: data.reduce(
+          byChapter: merged.reduce(
             (acc, v) => {
               if (!acc.has(v.chapter)) acc.set(v.chapter, []);
               acc.get(v.chapter)!.push(v);
               return acc;
             },
-            new Map<number, typeof data>()
+            new Map<number, typeof merged>()
           ),
-        }));
+        };
       })
     );
 
@@ -417,7 +473,7 @@ export default async function BiblePage({
           365 성경읽기
         </h1>
         {allReadings.length > 0 && (
-          <ReadingPlanModal readings={allReadings} currentDay={day} />
+          <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} />
         )}
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
@@ -429,6 +485,8 @@ export default async function BiblePage({
         displayTitle={(reading?.title ?? "").normalize("NFC")}
         sections={displaySections}
         serverToday={serverToday}
+        versions={versions}
+        versionCode={versionCode}
       />
     </div>
   );

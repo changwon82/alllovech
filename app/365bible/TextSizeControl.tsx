@@ -22,10 +22,10 @@ function getSavedSize(): number {
 }
 
 export default function TextSizeControl({
-  version,
+  versionSelector,
   children,
 }: {
-  version?: string;
+  versionSelector?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [sizeIdx, setSizeIdx] = useState(1);
@@ -37,7 +37,7 @@ export default function TextSizeControl({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-2">
-        <span className="text-xs text-neutral-500">{version ?? ""}</span>
+        <div>{versionSelector ?? null}</div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-neutral-400">글자 크기</span>
           <button

@@ -19,9 +19,11 @@ function abbreviateTitle(title: string | null): string {
 export default function ReadingPlanModal({
   readings,
   currentDay,
+  versionCode,
 }: {
   readings: Reading[];
   currentDay: number;
+  versionCode: string;
 }) {
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -98,7 +100,7 @@ export default function ReadingPlanModal({
                 <Link
                   key={r.day}
                   data-day={r.day}
-                  href={`/365bible?day=${r.day}`}
+                  href={`/365bible?day=${r.day}&version=${versionCode}`}
                   onClick={() => setOpen(false)}
                   className={`flex items-baseline gap-3 rounded-lg px-3 py-2 ${
                     r.day === currentDay

@@ -24,8 +24,7 @@ type DisplaySection = {
   verses: DisplayVerse[];
 };
 type Reading = { day: number; title: string | null; youtube_id: string | null };
-
-const BIBLE_VERSION = "개역개정";
+type BibleVersion = { id: number; code: string; name: string };
 
 function getSectionHeader(sec: DisplaySection): string {
   let header = `${sec.book.normalize("NFC")} ${sec.chapter}장`;
@@ -46,6 +45,8 @@ export default function BiblePageContent({
   displayTitle,
   sections,
   serverToday,
+  versions,
+  versionCode,
 }: {
   day: number;
   dayDateIso: string;
@@ -53,6 +54,8 @@ export default function BiblePageContent({
   displayTitle: string;
   sections: DisplaySection[];
   serverToday: number;
+  versions: BibleVersion[];
+  versionCode: string;
 }) {
   const [localToday, setLocalToday] = useState(serverToday);
   useEffect(() => {
@@ -158,7 +161,7 @@ export default function BiblePageContent({
       <div className="mt-2 flex items-stretch justify-between gap-2">
         {day > 1 ? (
           <Link
-            href={`/365bible?day=${day - 1}`}
+            href={`/365bible?day=${day - 1}&version=${versionCode}`}
             className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
           >
             ← Day {day - 1}
@@ -177,7 +180,7 @@ export default function BiblePageContent({
           </span>
           {!isToday && (
             <Link
-              href={`/365bible?day=${localToday}`}
+              href={`/365bible?day=${localToday}&version=${versionCode}`}
               className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white hover:bg-navy/90"
             >
               오늘로
@@ -187,7 +190,7 @@ export default function BiblePageContent({
 
         {day < 365 ? (
           <Link
-            href={`/365bible?day=${day + 1}`}
+            href={`/365bible?day=${day + 1}&version=${versionCode}`}
             className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
           >
             Day {day + 1} →
@@ -223,7 +226,28 @@ export default function BiblePageContent({
       {/* 성경 본문 */}
       {sections.length > 0 && (
         <section className="mt-8">
-          <TextSizeControl version={BIBLE_VERSION}>
+          <TextSizeControl
+            versionSelector={
+              versions.length > 1 ? (
+                <div className="flex gap-1.5">
+                  {versions.map((v) => (
+                    <Link
+                      key={v.code}
+                      href={`/365bible?day=${day}&version=${v.code}`}
+                      scroll={false}
+                      className={
+                        v.code === versionCode
+                          ? "rounded-full bg-navy px-3 py-1 text-xs font-medium text-white"
+                          : "rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
+                      }
+                    >
+                      {v.name}
+                    </Link>
+                  ))}
+                </div>
+              ) : null
+            }
+          >
             {sections.map((sec, si) => (
                 <div key={`${sec.book}-${sec.chapter}-${si}`} data-section-idx={si} ref={sectionRef}>
                   <h2
@@ -256,7 +280,7 @@ export default function BiblePageContent({
       <div className="mt-12 flex items-center justify-between border-t border-neutral-200 pt-6 pb-8">
         {day > 1 ? (
           <Link
-            href={`/365bible?day=${day - 1}`}
+            href={`/365bible?day=${day - 1}&version=${versionCode}`}
             className="text-sm text-neutral-500 hover:text-navy"
           >
             ← 이전
@@ -266,7 +290,7 @@ export default function BiblePageContent({
         )}
         {day < 365 ? (
           <Link
-            href={`/365bible?day=${day + 1}`}
+            href={`/365bible?day=${day + 1}&version=${versionCode}`}
             className="text-sm text-neutral-500 hover:text-navy"
           >
             다음 →
