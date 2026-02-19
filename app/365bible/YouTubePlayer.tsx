@@ -26,7 +26,7 @@ export default function YouTubePlayer({ videoId }: { videoId: string }) {
       className="relative block w-full overflow-hidden rounded-xl pt-[56.25%]"
     >
       <Image
-        src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+        src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
         alt="영상 썸네일"
         fill
         className="object-cover"

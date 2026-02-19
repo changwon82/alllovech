@@ -1,9 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { BOOK_FULL_TO_CODE } from "./plan";
 
-type Reading = { day: number; title: string };
+type Reading = { day: number; title: string | null };
+
+// 축약 제목용 정렬 (길이 내림차순 — 한 번만 계산)
+const fullsSorted = Object.keys(BOOK_FULL_TO_CODE).sort((a, b) => b.length - a.length);
+
+function abbreviateTitle(title: string | null): string {
+  if (!title) return "";
+  let t = title.normalize("NFC");
+  for (const full of fullsSorted) t = t.replaceAll(full, BOOK_FULL_TO_CODE[full]);
+  return t;
+}
 
 export default function ReadingPlanModal({
   readings,
@@ -14,6 +25,12 @@ export default function ReadingPlanModal({
 }) {
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // 모달이 열릴 때만 축약 제목 계산
+  const abbreviated = useMemo(
+    () => open ? readings.map((r) => ({ day: r.day, title: abbreviateTitle(r.title) })) : [],
+    [open, readings]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -77,7 +94,7 @@ export default function ReadingPlanModal({
             </div>
 
             <div ref={listRef} className="min-h-0 overflow-y-auto px-5 py-3">
-              {readings.map((r) => (
+              {abbreviated.map((r) => (
                 <Link
                   key={r.day}
                   data-day={r.day}

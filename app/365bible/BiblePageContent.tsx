@@ -76,7 +76,9 @@ export default function BiblePageContent({
   // 현재 보이는 섹션 추적
   const sectionEls = useRef<(HTMLDivElement | null)[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
-  const sectionRef = useCallback((idx: number) => (el: HTMLDivElement | null) => {
+  const sectionRef = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+    const idx = Number(el.dataset.sectionIdx);
     sectionEls.current[idx] = el;
   }, []);
 
@@ -93,8 +95,8 @@ export default function BiblePageContent({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          const idx = els.indexOf(entry.target as HTMLDivElement);
-          if (idx === -1) continue;
+          const idx = Number((entry.target as HTMLElement).dataset.sectionIdx);
+          if (isNaN(idx)) continue;
           if (entry.isIntersecting) visible.add(idx);
           else visible.delete(idx);
         }
@@ -223,7 +225,7 @@ export default function BiblePageContent({
         <section className="mt-8">
           <TextSizeControl version={BIBLE_VERSION}>
             {sections.map((sec, si) => (
-                <div key={`${sec.book}-${sec.chapter}-${si}`} ref={sectionRef(si)}>
+                <div key={`${sec.book}-${sec.chapter}-${si}`} data-section-idx={si} ref={sectionRef}>
                   <h2
                     className={`${si === 0 ? "mt-0" : "mt-10"} mb-4 border-b border-neutral-200 pb-2 text-lg font-bold text-navy`}
                   >

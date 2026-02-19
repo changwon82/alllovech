@@ -266,15 +266,7 @@ export default async function BiblePage({
 
   // 365일 읽기표 (캐시)
   const allReadings = await getCachedAllReadings();
-  const reading = allReadings.find((r) => r.day === day) ?? null;
-
-  // 모달용 축약 제목 생성 (BOOK_FULL_TO_CODE 사용 — DB 호출 없음)
-  const fullsSorted = Object.keys(BOOK_FULL_TO_CODE).sort((a, b) => b.length - a.length);
-  const modalReadings = allReadings.map((r) => {
-    let title = (r.title ?? "").normalize("NFC");
-    for (const full of fullsSorted) title = title.replaceAll(full, BOOK_FULL_TO_CODE[full]);
-    return { day: r.day, title };
-  });
+  const reading = allReadings[day - 1] ?? null;
 
   // 본문 가져오기 (캐시)
   let displaySections: DisplaySection[] = [];
@@ -370,8 +362,8 @@ export default async function BiblePage({
         <h1 className="text-2xl font-bold text-navy md:text-3xl">
           365 성경읽기
         </h1>
-        {modalReadings.length > 0 && (
-          <ReadingPlanModal readings={modalReadings} currentDay={day} />
+        {allReadings.length > 0 && (
+          <ReadingPlanModal readings={allReadings} currentDay={day} />
         )}
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
