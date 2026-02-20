@@ -23,7 +23,7 @@ export default async function ForgotPasswordPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-neutral-500">
-          <a href="/login" className="font-medium text-navy hover:underline">로그인으로 돌아가기</a>
+          <a href="/" className="font-medium text-navy hover:underline">홈으로 돌아가기</a>
         </p>
       </div>
     </div>
