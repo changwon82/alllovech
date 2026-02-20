@@ -163,6 +163,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       <GroupFeed
         feed={feedData}
         currentUserId={user.id}
+        groupId={groupId}
       />
 
       <BottomNav isAdmin={isAdmin} unreadCount={unreadCount} />

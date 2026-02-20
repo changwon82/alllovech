@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useRef, useMemo, useTransition } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { addComment, deleteComment, toggleAmen } from "./actions";
 
 type Comment = {
@@ -40,52 +41,26 @@ function timeAgo(dateStr: string): string {
 function ReflectionCard({
   item,
   currentUserId,
+  onToggleAmen,
+  onAddComment,
+  onDeleteComment,
 }: {
   item: FeedItem;
   currentUserId: string;
+  onToggleAmen: () => void;
+  onAddComment: (text: string) => void;
+  onDeleteComment: (commentId: string) => void;
 }) {
-  const [amenCount, setAmenCount] = useState(item.amenCount);
-  const [myAmen, setMyAmen] = useState(item.myAmen);
-  const [comments, setComments] = useState(item.comments);
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  function handleToggleAmen() {
-    const wasAmen = myAmen;
-    setMyAmen(!wasAmen);
-    setAmenCount((prev) => prev + (wasAmen ? -1 : 1));
-
-    startTransition(async () => {
-      const result = await toggleAmen(item.id);
-      if ("error" in result) {
-        setMyAmen(wasAmen);
-        setAmenCount((prev) => prev + (wasAmen ? 1 : -1));
-      }
-    });
-  }
 
   function handleAddComment() {
     if (!commentText.trim()) return;
     const text = commentText.trim();
     setCommentText("");
-
-    startTransition(async () => {
-      const result = await addComment(item.id, text);
-      if ("comment" in result && result.comment) {
-        setComments((prev) => [...prev, result.comment as unknown as Comment]);
-      }
-    });
-  }
-
-  function handleDeleteComment(commentId: string) {
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
-    startTransition(async () => {
-      const result = await deleteComment(commentId);
-      if ("error" in result) {
-        // 실패 시 새로고침으로 복구
-        window.location.reload();
-      }
+    startTransition(() => {
+      onAddComment(text);
     });
   }
 
@@ -118,28 +93,27 @@ function ReflectionCard({
       {/* 아멘 + 댓글 버튼 */}
       <div className="mt-3 flex items-center gap-4 border-t border-neutral-100 pt-3">
         <button
-          onClick={handleToggleAmen}
-          disabled={isPending}
+          onClick={onToggleAmen}
           className={`flex items-center gap-1 text-xs transition-colors ${
-            myAmen ? "font-bold text-blue" : "text-neutral-500 hover:text-blue"
+            item.myAmen ? "font-bold text-blue" : "text-neutral-500 hover:text-blue"
           }`}
         >
-          {myAmen ? "아멘 ✓" : "아멘"}
-          {amenCount > 0 && <span className="text-neutral-400">{amenCount}</span>}
+          {item.myAmen ? "아멘 ✓" : "아멘"}
+          {item.amenCount > 0 && <span className="text-neutral-400">{item.amenCount}</span>}
         </button>
         <button
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-1 text-xs text-neutral-500 hover:text-navy"
         >
           댓글
-          {comments.length > 0 && <span className="text-neutral-400">{comments.length}</span>}
+          {item.comments.length > 0 && <span className="text-neutral-400">{item.comments.length}</span>}
         </button>
       </div>
 
       {/* 댓글 영역 */}
       {showComments && (
         <div className="mt-3 space-y-2 border-t border-neutral-100 pt-3">
-          {comments.map((c) => (
+          {item.comments.map((c) => (
             <div key={c.id} className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-bold text-neutral-700">{c.profiles?.name ?? "이름 없음"}</span>
@@ -148,7 +122,7 @@ function ReflectionCard({
               </div>
               {c.user_id === currentUserId && (
                 <button
-                  onClick={() => handleDeleteComment(c.id)}
+                  onClick={() => onDeleteComment(c.id)}
                   className="shrink-0 text-xs text-neutral-300 hover:text-red-500"
                 >
                   삭제
@@ -183,11 +157,132 @@ function ReflectionCard({
 export default function GroupFeed({
   feed,
   currentUserId,
+  groupId,
 }: {
   feed: FeedItem[];
   currentUserId: string;
+  groupId: string;
 }) {
-  if (feed.length === 0) {
+  const [items, setItems] = useState(feed);
+  const supabase = useMemo(() => createClient(), []);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  // Realtime broadcast 구독
+  useEffect(() => {
+    const channel = supabase.channel(`group-feed-${groupId}`);
+    channelRef.current = channel;
+
+    channel
+      .on("broadcast", { event: "amen" }, ({ payload }) => {
+        if (payload.senderId === currentUserId) return;
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === payload.reflectionId
+              ? { ...item, amenCount: item.amenCount + (payload.toggled ? 1 : -1) }
+              : item
+          )
+        );
+      })
+      .on("broadcast", { event: "comment_add" }, ({ payload }) => {
+        if (payload.senderId === currentUserId) return;
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === payload.reflectionId
+              ? { ...item, comments: [...item.comments, payload.comment] }
+              : item
+          )
+        );
+      })
+      .on("broadcast", { event: "comment_delete" }, ({ payload }) => {
+        if (payload.senderId === currentUserId) return;
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === payload.reflectionId
+              ? { ...item, comments: item.comments.filter((c) => c.id !== payload.commentId) }
+              : item
+          )
+        );
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [groupId, currentUserId, supabase]);
+
+  function broadcast(event: string, payload: Record<string, unknown>) {
+    channelRef.current?.send({
+      type: "broadcast",
+      event,
+      payload: { ...payload, senderId: currentUserId },
+    });
+  }
+
+  function handleToggleAmen(reflectionId: string) {
+    const item = items.find((i) => i.id === reflectionId);
+    if (!item) return;
+    const wasAmen = item.myAmen;
+
+    // 낙관적 업데이트
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === reflectionId
+          ? { ...i, myAmen: !wasAmen, amenCount: i.amenCount + (wasAmen ? -1 : 1) }
+          : i
+      )
+    );
+
+    toggleAmen(reflectionId).then((result) => {
+      if ("error" in result) {
+        // 롤백
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === reflectionId
+              ? { ...i, myAmen: wasAmen, amenCount: i.amenCount + (wasAmen ? 1 : -1) }
+              : i
+          )
+        );
+      } else {
+        broadcast("amen", { reflectionId, toggled: !wasAmen });
+      }
+    });
+  }
+
+  function handleAddComment(reflectionId: string, text: string) {
+    addComment(reflectionId, text).then((result) => {
+      if ("comment" in result && result.comment) {
+        const comment = result.comment as unknown as Comment;
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === reflectionId
+              ? { ...i, comments: [...i.comments, comment] }
+              : i
+          )
+        );
+        broadcast("comment_add", { reflectionId, comment });
+      }
+    });
+  }
+
+  function handleDeleteComment(reflectionId: string, commentId: string) {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === reflectionId
+          ? { ...i, comments: i.comments.filter((c) => c.id !== commentId) }
+          : i
+      )
+    );
+
+    deleteComment(commentId).then((result) => {
+      if ("error" in result) {
+        window.location.reload();
+      } else {
+        broadcast("comment_delete", { reflectionId, commentId });
+      }
+    });
+  }
+
+  if (items.length === 0) {
     return (
       <div className="mt-12 text-center">
         <p className="text-neutral-500">아직 공유된 묵상이 없습니다</p>
@@ -200,11 +295,14 @@ export default function GroupFeed({
 
   return (
     <div className="mt-6 space-y-4">
-      {feed.map((item) => (
+      {items.map((item) => (
         <ReflectionCard
           key={item.id}
           item={item}
           currentUserId={currentUserId}
+          onToggleAmen={() => handleToggleAmen(item.id)}
+          onAddComment={(text) => handleAddComment(item.id, text)}
+          onDeleteComment={(commentId) => handleDeleteComment(item.id, commentId)}
         />
       ))}
     </div>
