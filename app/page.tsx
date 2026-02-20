@@ -29,21 +29,13 @@ export default async function Home() {
         </div>
 
         {user ? (
-          <div className="mt-2 w-full rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-5 text-center text-sm text-neutral-500">
+          <div className="mt-2 w-full rounded-2xl bg-white p-5 shadow-sm">
+            <p className="mb-4 text-center text-sm text-neutral-500">
               {profileName ?? "이름 없음"}님, 환영합니다
             </p>
-            <div className="flex flex-col gap-3">
-              <Link href="/365bible" className={primaryButtonClass}>
-                365 성경읽기
-              </Link>
-              <Link href="/my" className={primaryButtonClass}>
-                내 기록
-              </Link>
-              <Link href="/groups" className={primaryButtonClass}>
-                내 소그룹
-              </Link>
-            </div>
+            <Link href="/365bible" className={`${primaryButtonClass} w-full`}>
+              365 성경읽기
+            </Link>
           </div>
         ) : (
           <>
