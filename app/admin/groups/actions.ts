@@ -1,11 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 async function checkAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "로그인 필요", supabase: null };
+  if (!user) return { error: "로그인 필요" };
 
   const { data: roles } = await supabase
     .from("user_roles")
@@ -14,17 +15,18 @@ async function checkAdmin() {
 
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("ADMIN") && !roleSet.has("PASTOR") && !roleSet.has("STAFF")) {
-    return { error: "권한 없음", supabase: null };
+    return { error: "권한 없음" };
   }
 
-  return { error: null, supabase };
+  return { error: null };
 }
 
 export async function createGroup(name: string, type: string, description: string) {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { data, error: insertError } = await supabase
+  const admin = createAdminClient();
+  const { data, error: insertError } = await admin
     .from("groups")
     .insert({ name, type, description: description || null })
     .select("id")
@@ -35,10 +37,11 @@ export async function createGroup(name: string, type: string, description: strin
 }
 
 export async function updateGroup(groupId: string, name: string, description: string, isActive: boolean) {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { error: updateError } = await supabase
+  const admin = createAdminClient();
+  const { error: updateError } = await admin
     .from("groups")
     .update({ name, description: description || null, is_active: isActive })
     .eq("id", groupId);
@@ -48,10 +51,11 @@ export async function updateGroup(groupId: string, name: string, description: st
 }
 
 export async function addGroupMember(groupId: string, userId: string, role: string) {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { error: insertError } = await supabase
+  const admin = createAdminClient();
+  const { error: insertError } = await admin
     .from("group_members")
     .upsert(
       { group_id: groupId, user_id: userId, role },
@@ -63,10 +67,11 @@ export async function addGroupMember(groupId: string, userId: string, role: stri
 }
 
 export async function removeGroupMember(groupId: string, userId: string) {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { error: deleteError } = await supabase
+  const admin = createAdminClient();
+  const { error: deleteError } = await admin
     .from("group_members")
     .delete()
     .eq("group_id", groupId)

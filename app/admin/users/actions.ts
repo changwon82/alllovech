@@ -1,11 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 async function checkAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "로그인 필요", supabase: null, user: null };
+  if (!user) return { error: "로그인 필요" };
 
   const { data: roles } = await supabase
     .from("user_roles")
@@ -14,17 +15,18 @@ async function checkAdmin() {
 
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("ADMIN") && !roleSet.has("PASTOR") && !roleSet.has("STAFF")) {
-    return { error: "권한 없음", supabase: null, user: null };
+    return { error: "권한 없음" };
   }
 
-  return { error: null, supabase, user };
+  return { error: null };
 }
 
 export async function updateUserStatus(userId: string, status: "active" | "pending" | "inactive") {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { error: updateError } = await supabase
+  const admin = createAdminClient();
+  const { error: updateError } = await admin
     .from("profiles")
     .update({ status })
     .eq("id", userId);
@@ -34,10 +36,11 @@ export async function updateUserStatus(userId: string, status: "active" | "pendi
 }
 
 export async function addUserRole(userId: string, role: string) {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { error: insertError } = await supabase
+  const admin = createAdminClient();
+  const { error: insertError } = await admin
     .from("user_roles")
     .upsert({ user_id: userId, role }, { onConflict: "user_id,role", ignoreDuplicates: true });
 
@@ -46,10 +49,11 @@ export async function addUserRole(userId: string, role: string) {
 }
 
 export async function removeUserRole(userId: string, role: string) {
-  const { error, supabase } = await checkAdmin();
-  if (error || !supabase) return { error: error ?? "알 수 없는 오류" };
+  const { error } = await checkAdmin();
+  if (error) return { error };
 
-  const { error: deleteError } = await supabase
+  const admin = createAdminClient();
+  const { error: deleteError } = await admin
     .from("user_roles")
     .delete()
     .eq("user_id", userId)
