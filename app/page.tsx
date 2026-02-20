@@ -20,13 +20,13 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-8">
       <div className="flex w-full max-w-xs flex-col items-center gap-5">
         {/* 로고 + 제목 */}
         <div className="flex items-center gap-4">
           <Image src="/logo.png" alt="다애교회" width={56} height={56} priority />
           <div className="flex flex-col justify-center">
-            <h1 className="text-[28px] font-black leading-tight text-navy">다애교회</h1>
+            <h1 className="text-[28px] font-bold leading-tight text-navy">다애교회</h1>
             <p className="mt-0.5 text-[13px] text-neutral-400">All Love Church</p>
           </div>
         </div>
