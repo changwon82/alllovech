@@ -29,9 +29,12 @@ export default async function SignUpPage() {
 
         <p className="mt-6 text-center text-sm text-neutral-500">
           이미 계정이 있으신가요?{" "}
-          <a href="/login" className="font-medium text-navy hover:underline">
+          <a href="/" className="font-medium text-navy hover:underline">
             로그인
           </a>
+        </p>
+        <p className="mt-2 text-center text-sm text-neutral-500">
+          <a href="/" className="font-medium text-navy hover:underline">홈으로 돌아가기</a>
         </p>
       </div>
     </div>
