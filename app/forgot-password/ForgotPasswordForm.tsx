@@ -31,7 +31,7 @@ export default function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="rounded-xl border border-blue/20 bg-blue/5 p-6 text-center">
+      <div className="rounded-2xl bg-accent-light p-6 text-center shadow-sm">
         <p className="text-lg font-bold text-navy">이메일을 확인해주세요</p>
         <p className="mt-2 text-sm text-neutral-600">
           비밀번호 재설정 링크를 보냈습니다.
@@ -53,7 +53,7 @@ export default function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-navy/90 disabled:opacity-50"
+        className="w-full rounded-xl bg-navy px-4 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
       >
         {loading ? "전송 중..." : "재설정 링크 보내기"}
       </button>

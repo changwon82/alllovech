@@ -34,11 +34,11 @@ export default function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="rounded-xl border border-blue/20 bg-blue/5 p-6 text-center">
+      <div className="rounded-2xl bg-accent-light p-6 text-center shadow-sm">
         <p className="text-lg font-bold text-navy">비밀번호가 변경되었습니다</p>
         <a
           href="/365bible"
-          className="mt-4 inline-block rounded-lg bg-navy px-6 py-2 text-sm font-medium text-white hover:bg-navy/90"
+          className="mt-4 inline-block rounded-xl bg-navy px-6 py-2 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
         >
           성경읽기로 이동
         </a>
@@ -69,7 +69,7 @@ export default function ResetPasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-navy/90 disabled:opacity-50"
+        className="w-full rounded-xl bg-navy px-4 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
       >
         {loading ? "변경 중..." : "비밀번호 변경"}
       </button>

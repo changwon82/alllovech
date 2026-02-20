@@ -12,9 +12,13 @@ export default async function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-1 text-center text-2xl font-bold text-navy">비밀번호 재설정</h1>
-        <p className="mb-8 text-center text-sm text-neutral-500">새 비밀번호를 입력하세요</p>
-        <ResetPasswordForm />
+        <h1 className="text-center text-[32px] font-bold text-navy">비밀번호 재설정</h1>
+        <div className="mx-auto mt-2 mb-8 h-1 w-12 rounded-full bg-accent" />
+
+        <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <p className="mb-4 text-center text-sm text-neutral-500">새 비밀번호를 입력하세요</p>
+          <ResetPasswordForm />
+        </div>
       </div>
     </div>
   );
