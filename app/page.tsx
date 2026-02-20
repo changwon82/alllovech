@@ -58,7 +58,7 @@ export default async function Home() {
             <div className="w-full rounded-2xl bg-white p-6 shadow-sm">
               <p className="mb-1 text-center text-sm font-bold text-navy">로그인</p>
               <p className="mb-5 text-center text-xs text-neutral-400">
-                출석체크·묵상·나눔은 로그인 후 이용할 수 있습니다
+                읽기체크·묵상·나눔은 로그인 후 이용할 수 있습니다
               </p>
               <LoginForm />
               <p className="mt-5 text-center text-sm text-neutral-500">
