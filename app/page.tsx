@@ -46,25 +46,29 @@ export default async function Home() {
             </div>
           </div>
         ) : (
-          <div className="mt-2 w-full rounded-2xl bg-white p-6 shadow-sm">
-            <Link href="/365bible" className={`${primaryButtonClass} w-full`}>
-              365 성경읽기
-            </Link>
-
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-neutral-200" />
-              <span className="text-xs text-neutral-400">로그인</span>
-              <div className="h-px flex-1 bg-neutral-200" />
+          <>
+            {/* 성경읽기 — 누구나 */}
+            <div className="w-full rounded-2xl bg-white p-5 shadow-sm">
+              <Link href="/365bible" className={`${primaryButtonClass} w-full`}>
+                365 성경읽기
+              </Link>
             </div>
 
-            <LoginForm />
-            <p className="mt-5 text-center text-sm text-neutral-500">
-              아직 계정이 없으신가요?{" "}
-              <Link href="/signup" className="font-medium text-navy hover:underline">
-                회원가입
-              </Link>
-            </p>
-          </div>
+            {/* 로그인 — 출석체크·묵상·나눔 */}
+            <div className="w-full rounded-2xl bg-white p-6 shadow-sm">
+              <p className="mb-1 text-center text-sm font-bold text-navy">로그인</p>
+              <p className="mb-5 text-center text-xs text-neutral-400">
+                출석체크·묵상·나눔은 로그인 후 이용할 수 있습니다
+              </p>
+              <LoginForm />
+              <p className="mt-5 text-center text-sm text-neutral-500">
+                아직 계정이 없으신가요?{" "}
+                <Link href="/signup" className="font-medium text-navy hover:underline">
+                  회원가입
+                </Link>
+              </p>
+            </div>
+          </>
         )}
       </div>
     </div>
