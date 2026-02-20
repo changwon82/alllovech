@@ -214,6 +214,10 @@ export default function GroupManager({
     if (!newName.trim()) return;
     startTransition(async () => {
       const result = await createGroup(newName.trim(), newType, newDesc.trim());
+      if ("error" in result) {
+        alert(`그룹 생성 실패: ${result.error}`);
+        return;
+      }
       if ("groupId" in result) {
         setGroups((g) => [...g, {
           id: result.groupId as string,
