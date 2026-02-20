@@ -15,14 +15,17 @@ export default async function SignUpPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-1 text-center text-2xl font-bold text-navy">
+        <h1 className="mb-1 text-center text-[32px] font-bold text-navy">
           회원가입
         </h1>
-        <p className="mb-8 text-center text-sm text-neutral-500">
-          가입 후 관리자 승인이 필요합니다
-        </p>
+        <div className="mx-auto mt-2 mb-8 h-1 w-12 rounded-full bg-accent" />
 
-        <SignUpForm />
+        <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <p className="mb-4 text-center text-sm text-neutral-500">
+            가입 후 관리자 승인이 필요합니다
+          </p>
+          <SignUpForm />
+        </div>
 
         <p className="mt-6 text-center text-sm text-neutral-500">
           이미 계정이 있으신가요?{" "}

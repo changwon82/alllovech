@@ -61,7 +61,7 @@ export default function LoginForm({
       <button
         onClick={handleKakaoLogin}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FEE500] px-4 py-3 text-sm font-medium text-[#191919] transition-colors hover:bg-[#FDD800] disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-4 py-3 text-sm font-medium text-[#191919] transition-all hover:brightness-105 active:scale-95 disabled:opacity-50"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path
@@ -102,7 +102,7 @@ export default function LoginForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-navy/90 disabled:opacity-50"
+          className="w-full rounded-xl bg-navy px-4 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
         >
           {loading ? "로그인 중..." : "이메일로 로그인"}
         </button>

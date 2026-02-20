@@ -76,7 +76,7 @@ export default function SignUpForm() {
       <button
         onClick={handleKakaoSignUp}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FEE500] px-4 py-3 text-sm font-medium text-[#191919] transition-colors hover:bg-[#FDD800] disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-4 py-3 text-sm font-medium text-[#191919] transition-all hover:brightness-105 active:scale-95 disabled:opacity-50"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path

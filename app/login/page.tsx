@@ -20,17 +20,17 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-1 text-center text-2xl font-bold text-navy">
+        <h1 className="mb-1 text-center text-[32px] font-bold text-navy">
           다애교회
         </h1>
-        <p className="mb-8 text-center text-sm text-neutral-500">
-          로그인하여 성경읽기를 시작하세요
-        </p>
+        <div className="mx-auto mt-2 mb-8 h-1 w-12 rounded-full bg-accent" />
 
-        <LoginForm
-          error={params.error}
-          next={params.next}
-        />
+        <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <LoginForm
+            error={params.error}
+            next={params.next}
+          />
+        </div>
 
         <p className="mt-6 text-center text-sm text-neutral-500">
           아직 계정이 없으신가요?{" "}
