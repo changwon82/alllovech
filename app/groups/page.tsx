@@ -25,7 +25,7 @@ export default async function GroupsPage() {
   }
 
   // 프로필 + 역할 + 내가 속한 그룹 목록
-  const [profileResult, roles, membershipsResult, unreadCount] = await Promise.all([
+  const [profileResult, roles, { data: memberships }, unreadCount] = await Promise.all([
     supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
     getUserRoles(supabase, user.id),
     supabase
@@ -46,13 +46,6 @@ export default async function GroupsPage() {
 
   const userName = profileResult.data?.name ?? "이름 없음";
   const isAdmin = isAdminRole(roles);
-
-  // 디버깅: 쿼리 결과 확인
-  const memberships = membershipsResult.data;
-  const queryError = membershipsResult.error;
-  const debugInfo = queryError
-    ? `에러: ${queryError.message}`
-    : `멤버십 ${(memberships ?? []).length}건 조회됨`;
 
   type GroupRow = {
     id: string;
@@ -76,9 +69,6 @@ export default async function GroupsPage() {
         <UserMenu name={userName} />
       </div>
       <div className="mt-2 h-1 w-12 rounded bg-blue" />
-
-      {/* 임시 디버깅 */}
-      <p className="mt-4 text-xs text-red-400">[DEBUG] {debugInfo} | groups: {groups.length}건 | raw: {JSON.stringify(memberships?.slice(0, 2))}</p>
 
       {groups.length === 0 ? (
         <div className="mt-12 text-center">
