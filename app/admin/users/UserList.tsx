@@ -35,35 +35,19 @@ type User = {
   roles: string[];
 };
 
-function UserRow({ user: initial }: { user: User }) {
-  const [user, setUser] = useState(initial);
+function UserRow({
+  user,
+  onStatusChange,
+  onAddRole,
+  onRemoveRole,
+}: {
+  user: User;
+  onStatusChange: (userId: string, status: "active" | "pending" | "inactive") => void;
+  onAddRole: (userId: string, role: string) => void;
+  onRemoveRole: (userId: string, role: string) => void;
+}) {
   const [isPending, startTransition] = useTransition();
   const [showRoles, setShowRoles] = useState(false);
-
-  function handleStatusChange(status: "active" | "pending" | "inactive") {
-    const prev = user.status;
-    setUser((u) => ({ ...u, status }));
-    startTransition(async () => {
-      const result = await updateUserStatus(user.id, status);
-      if ("error" in result) setUser((u) => ({ ...u, status: prev }));
-    });
-  }
-
-  function handleAddRole(role: string) {
-    setUser((u) => ({ ...u, roles: [...u.roles, role] }));
-    startTransition(async () => {
-      const result = await addUserRole(user.id, role);
-      if ("error" in result) setUser((u) => ({ ...u, roles: u.roles.filter((r) => r !== role) }));
-    });
-  }
-
-  function handleRemoveRole(role: string) {
-    setUser((u) => ({ ...u, roles: u.roles.filter((r) => r !== role) }));
-    startTransition(async () => {
-      const result = await removeUserRole(user.id, role);
-      if ("error" in result) setUser((u) => ({ ...u, roles: [...u.roles, role] }));
-    });
-  }
 
   const availableRoles = ALL_ROLES.filter((r) => !user.roles.includes(r));
 
@@ -77,7 +61,7 @@ function UserRow({ user: initial }: { user: User }) {
         <div className="flex items-center gap-2">
           <select
             value={user.status}
-            onChange={(e) => handleStatusChange(e.target.value as "active" | "pending" | "inactive")}
+            onChange={(e) => onStatusChange(user.id, e.target.value as "active" | "pending" | "inactive")}
             disabled={isPending}
             className={`rounded-lg border px-2 py-1 text-xs outline-none ${
               user.status === "active"
@@ -103,7 +87,7 @@ function UserRow({ user: initial }: { user: User }) {
           >
             {ROLE_LABEL[role] ?? role}
             <button
-              onClick={() => handleRemoveRole(role)}
+              onClick={() => onRemoveRole(user.id, role)}
               disabled={isPending}
               className="text-navy/50 hover:text-red-500"
             >
@@ -124,7 +108,7 @@ function UserRow({ user: initial }: { user: User }) {
           {availableRoles.map((role) => (
             <button
               key={role}
-              onClick={() => { handleAddRole(role); setShowRoles(false); }}
+              onClick={() => { onAddRole(user.id, role); setShowRoles(false); }}
               disabled={isPending}
               className="rounded-full border border-neutral-200 px-2 py-0.5 text-xs text-neutral-500 hover:border-navy hover:text-navy"
             >
@@ -137,21 +121,57 @@ function UserRow({ user: initial }: { user: User }) {
   );
 }
 
-export default function UserList({ users }: { users: User[] }) {
-  const [filter, setFilter] = useState<"all" | "pending" | "active">("all");
+export default function UserList({ users: initialUsers }: { users: User[] }) {
+  const [users, setUsers] = useState(initialUsers);
+  const [filter, setFilter] = useState<"all" | "pending" | "active" | "inactive">("all");
+  const [, startTransition] = useTransition();
 
   const filtered = users.filter((u) => {
     if (filter === "pending") return u.status === "pending";
     if (filter === "active") return u.status === "active";
+    if (filter === "inactive") return u.status === "inactive";
     return true;
   });
 
   const pendingCount = users.filter((u) => u.status === "pending").length;
+  const activeCount = users.filter((u) => u.status === "active").length;
+  const inactiveCount = users.filter((u) => u.status === "inactive").length;
+
+  function handleStatusChange(userId: string, status: "active" | "pending" | "inactive") {
+    const prev = users.find((u) => u.id === userId)?.status;
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, status } : u));
+    startTransition(async () => {
+      const result = await updateUserStatus(userId, status);
+      if ("error" in result) {
+        setUsers((all) => all.map((u) => u.id === userId ? { ...u, status: prev ?? "pending" } : u));
+      }
+    });
+  }
+
+  function handleAddRole(userId: string, role: string) {
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, roles: [...u.roles, role] } : u));
+    startTransition(async () => {
+      const result = await addUserRole(userId, role);
+      if ("error" in result) {
+        setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, roles: u.roles.filter((r) => r !== role) } : u));
+      }
+    });
+  }
+
+  function handleRemoveRole(userId: string, role: string) {
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, roles: u.roles.filter((r) => r !== role) } : u));
+    startTransition(async () => {
+      const result = await removeUserRole(userId, role);
+      if ("error" in result) {
+        setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, roles: [...u.roles, role] } : u));
+      }
+    });
+  }
 
   return (
     <div>
       <div className="mb-4 flex gap-2">
-        {(["all", "pending", "active"] as const).map((f) => (
+        {(["all", "pending", "active", "inactive"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -161,14 +181,26 @@ export default function UserList({ users }: { users: User[] }) {
                 : "border border-neutral-200 text-neutral-500 hover:border-neutral-400"
             }`}
           >
-            {f === "all" ? `전체 (${users.length})` : f === "pending" ? `대기 (${pendingCount})` : "활성"}
+            {f === "all"
+              ? `전체 (${users.length})`
+              : f === "pending"
+                ? `대기 (${pendingCount})`
+                : f === "active"
+                  ? `활성 (${activeCount})`
+                  : `비활성 (${inactiveCount})`}
           </button>
         ))}
       </div>
 
       <div className="space-y-2">
         {filtered.map((u) => (
-          <UserRow key={u.id} user={u} />
+          <UserRow
+            key={u.id}
+            user={u}
+            onStatusChange={handleStatusChange}
+            onAddRole={handleAddRole}
+            onRemoveRole={handleRemoveRole}
+          />
         ))}
         {filtered.length === 0 && (
           <p className="py-8 text-center text-sm text-neutral-400">사용자가 없습니다</p>
