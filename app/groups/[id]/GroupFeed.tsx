@@ -157,10 +157,12 @@ function ReflectionCard({
 export default function GroupFeed({
   feed,
   currentUserId,
+  currentUserName,
   groupId,
 }: {
   feed: FeedItem[];
   currentUserId: string;
+  currentUserName: string;
   groupId: string;
 }) {
   const [items, setItems] = useState(feed);
@@ -218,6 +220,22 @@ export default function GroupFeed({
     });
   }
 
+  // 묵상 작성자에게 알림 팝업 전송
+  function notifyAuthor(authorId: string, message: string, reflectionDay: number) {
+    if (authorId === currentUserId) return;
+    const notifChannel = supabase.channel(`user-notifications-${authorId}`);
+    notifChannel.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        notifChannel.send({
+          type: "broadcast",
+          event: "notification",
+          payload: { message, href: `/365bible?day=${reflectionDay}` },
+        });
+        setTimeout(() => supabase.removeChannel(notifChannel), 1000);
+      }
+    });
+  }
+
   function handleToggleAmen(reflectionId: string) {
     const item = items.find((i) => i.id === reflectionId);
     if (!item) return;
@@ -244,11 +262,15 @@ export default function GroupFeed({
         );
       } else {
         broadcast("amen", { reflectionId, toggled: !wasAmen });
+        if (!wasAmen) {
+          notifyAuthor(item.authorId, `${currentUserName}님이 아멘했습니다`, item.day);
+        }
       }
     });
   }
 
   function handleAddComment(reflectionId: string, text: string) {
+    const item = items.find((i) => i.id === reflectionId);
     addComment(reflectionId, text).then((result) => {
       if ("comment" in result && result.comment) {
         const comment = result.comment as unknown as Comment;
@@ -260,6 +282,9 @@ export default function GroupFeed({
           )
         );
         broadcast("comment_add", { reflectionId, comment });
+        if (item) {
+          notifyAuthor(item.authorId, `${currentUserName}님이 댓글을 남겼습니다`, item.day);
+        }
       }
     });
   }

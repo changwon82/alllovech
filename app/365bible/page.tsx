@@ -563,7 +563,7 @@ export default async function BiblePage({
         existingReflection={existingReflection}
       />
 
-      {user && <BottomNav isAdmin={isAdmin} unreadCount={unreadCount} />}
+      {user && <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />}
     </div>
   );
 }

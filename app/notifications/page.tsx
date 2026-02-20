@@ -78,7 +78,7 @@ export default async function NotificationsPage() {
 
       <NotificationList notifications={enrichedNotifications} />
 
-      <BottomNav isAdmin={isAdmin} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} />
     </div>
   );
 }

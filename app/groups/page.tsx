@@ -102,7 +102,7 @@ export default async function GroupsPage() {
         </div>
       )}
 
-      <BottomNav isAdmin={isAdmin} unreadCount={unreadCount} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />
     </div>
   );
 }

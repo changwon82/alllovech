@@ -82,7 +82,7 @@ export default async function MyPage() {
         reflections={reflections}
       />
 
-      <BottomNav isAdmin={isAdmin} unreadCount={unreadCount} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />
     </div>
   );
 }
