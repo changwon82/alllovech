@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, useTransition } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
@@ -100,11 +101,20 @@ export default function BiblePageContent({
   year: number;
   existingReflection: Reflection | null;
 }) {
+  const router = useRouter();
+  const [isNavigating, startNavigation] = useTransition();
+
   const [localToday, setLocalToday] = useState(serverToday);
   useEffect(() => {
     setLocalToday(getLocalDayOfYear());
   }, []);
   const isToday = day === localToday;
+
+  function navigateDay(targetDay: number) {
+    startNavigation(() => {
+      router.push(`/365bible?day=${targetDay}&version=${versionCode}${compareMode ? "&compare=true" : ""}`, { scroll: false });
+    });
+  }
 
   // 체크 기능
   const [checkedDays, setCheckedDays] = useState<Set<number>>(new Set(initialCheckedDays));
@@ -299,12 +309,13 @@ export default function BiblePageContent({
       {/* 날짜 네비게이션 - 이전/날짜/다음 수직 정렬 동일 */}
       <div className="mt-2 flex items-stretch justify-between gap-2">
         {day > 1 ? (
-          <Link
-            href={`/365bible?day=${day - 1}&version=${versionCode}${compareMode ? "&compare=true" : ""}`}
-            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+          <button
+            onClick={() => navigateDay(day - 1)}
+            disabled={isNavigating}
+            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
           >
             ← Day {day - 1}
-          </Link>
+          </button>
         ) : (
           <div className="w-20 shrink-0" />
         )}
@@ -318,22 +329,24 @@ export default function BiblePageContent({
             {dateStr} ({weekdayStr})
           </span>
           {!isToday && (
-            <Link
-              href={`/365bible?day=${localToday}&version=${versionCode}${compareMode ? "&compare=true" : ""}`}
-              className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white hover:bg-navy/90"
+            <button
+              onClick={() => navigateDay(localToday)}
+              disabled={isNavigating}
+              className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
             >
               오늘로
-            </Link>
+            </button>
           )}
         </div>
 
         {day < 365 ? (
-          <Link
-            href={`/365bible?day=${day + 1}&version=${versionCode}${compareMode ? "&compare=true" : ""}`}
-            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+          <button
+            onClick={() => navigateDay(day + 1)}
+            disabled={isNavigating}
+            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
           >
             Day {day + 1} →
-          </Link>
+          </button>
         ) : (
           <div className="w-20 shrink-0" />
         )}
@@ -578,22 +591,24 @@ export default function BiblePageContent({
       {/* 하단 네비게이션 */}
       <div className="mt-12 flex items-center justify-between border-t border-neutral-200 pt-6 pb-8">
         {day > 1 ? (
-          <Link
-            href={`/365bible?day=${day - 1}&version=${versionCode}${compareMode ? "&compare=true" : ""}`}
-            className="text-sm text-neutral-500 hover:text-navy"
+          <button
+            onClick={() => navigateDay(day - 1)}
+            disabled={isNavigating}
+            className="text-sm text-neutral-500 hover:text-navy disabled:opacity-50"
           >
             ← 이전
-          </Link>
+          </button>
         ) : (
           <div />
         )}
         {day < 365 ? (
-          <Link
-            href={`/365bible?day=${day + 1}&version=${versionCode}${compareMode ? "&compare=true" : ""}`}
-            className="text-sm text-neutral-500 hover:text-navy"
+          <button
+            onClick={() => navigateDay(day + 1)}
+            disabled={isNavigating}
+            className="text-sm text-neutral-500 hover:text-navy disabled:opacity-50"
           >
             다음 →
-          </Link>
+          </button>
         ) : (
           <div />
         )}
