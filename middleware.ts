@@ -9,6 +9,8 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     pathname === "/login" ||
     pathname === "/signup" ||
+    pathname.startsWith("/365bible") ||
+    pathname.startsWith("/spend-report") ||
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/reset-password") ||
     pathname.startsWith("/auth/")

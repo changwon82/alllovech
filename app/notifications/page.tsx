@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import NotificationList from "./NotificationList";
 import UserMenu from "@/app/components/UserMenu";
@@ -9,8 +9,7 @@ import BottomNav from "@/app/components/BottomNav";
 export const metadata = { title: "알림 | 다애교회" };
 
 export default async function NotificationsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
 
   if (!user) {
     redirect("/login?next=/notifications");

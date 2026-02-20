@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import GroupFeed from "./GroupFeed";
@@ -25,8 +25,7 @@ function getKoreaYear(): number {
 
 export default async function GroupPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: groupId } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
 
   if (!user) {
     redirect(`/login?next=/groups/${groupId}`);

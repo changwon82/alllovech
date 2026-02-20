@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "@/app/components/UserMenu";
@@ -17,8 +17,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export default async function GroupsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
 
   if (!user) {
     redirect("/login?next=/groups");

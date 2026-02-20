@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import MyPageContent from "./MyPageContent";
@@ -26,8 +26,7 @@ function getKoreaDayOfYear(): number {
 }
 
 export default async function MyPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
 
   if (!user) {
     redirect("/login?next=/my");
