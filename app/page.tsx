@@ -25,7 +25,7 @@ export default async function Home() {
         {/* 로고 + 제목 */}
         <div className="flex items-center gap-4">
           <Image src="/logo.png" alt="다애교회" width={56} height={56} priority />
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col items-center justify-center">
             <h1 className="text-[28px] font-bold leading-tight text-navy">다애교회</h1>
             <p className="mt-0.5 text-[13px] text-neutral-400">All Love Church</p>
           </div>
