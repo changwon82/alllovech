@@ -23,10 +23,12 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="flex w-full max-w-xs flex-col items-center gap-5">
         {/* 로고 + 제목 */}
-        <Image src="/logo.png" alt="다애교회" width={72} height={72} priority />
-        <div className="text-center">
-          <h1 className="text-[32px] font-bold text-navy">다애교회</h1>
-          <div className="mx-auto mt-2 h-1 w-12 rounded-full bg-accent" />
+        <div className="flex items-center gap-4">
+          <Image src="/logo.png" alt="다애교회" width={56} height={56} priority />
+          <div className="flex flex-col justify-center">
+            <h1 className="text-[28px] font-black leading-tight text-navy">다애교회</h1>
+            <p className="mt-0.5 text-[13px] text-neutral-400">All Love Church</p>
+          </div>
         </div>
 
         {user ? (
