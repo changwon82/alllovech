@@ -16,31 +16,31 @@ function getKoreaDayOfYear(): number {
 }
 
 export default async function ReadingsPage() {
-  const { supabase } = await requireAdmin();
+  const { admin } = await requireAdmin();
 
   const year = getKoreaYear();
   const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
   // 모든 활성 사용자
-  const { data: profiles } = await supabase
+  const { data: profiles } = await admin
     .from("profiles")
     .select("id, name")
     .eq("status", "active")
     .order("name");
 
   // 올해 전체 체크 데이터
-  const { data: allChecks } = await supabase
+  const { data: allChecks } = await admin
     .from("bible_checks")
     .select("user_id, day")
     .eq("year", year);
 
   // 그룹별 정리
-  const { data: groupsData } = await supabase
+  const { data: groupsData } = await admin
     .from("groups")
     .select("id, name")
     .eq("is_active", true);
 
-  const { data: membersData } = await supabase
+  const { data: membersData } = await admin
     .from("group_members")
     .select("group_id, user_id");
 

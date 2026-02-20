@@ -3,13 +3,13 @@ import { requireAdmin } from "@/lib/admin";
 export const metadata = { title: "관리자 | 다애교회" };
 
 export default async function AdminDashboard() {
-  const { supabase } = await requireAdmin();
+  const { admin } = await requireAdmin();
 
   const [usersResult, pendingResult, checksResult, groupsResult] = await Promise.all([
-    supabase.from("profiles").select("id", { count: "exact", head: true }),
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    supabase.from("bible_checks").select("user_id", { count: "exact", head: true }),
-    supabase.from("groups").select("id", { count: "exact", head: true }).eq("is_active", true),
+    admin.from("profiles").select("id", { count: "exact", head: true }),
+    admin.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    admin.from("bible_checks").select("user_id", { count: "exact", head: true }),
+    admin.from("groups").select("id", { count: "exact", head: true }).eq("is_active", true),
   ]);
 
   const stats = [

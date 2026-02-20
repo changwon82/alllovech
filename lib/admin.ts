@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** 사용자 역할 조회 */
@@ -16,7 +17,7 @@ export function isAdminRole(roles: Set<string>): boolean {
   return roles.has("ADMIN") || roles.has("PASTOR") || roles.has("STAFF");
 }
 
-/** 관리자 권한 확인. ADMIN이 아니면 홈으로 리다이렉트 */
+/** 관리자 권한 확인. ADMIN이 아니면 홈으로 리다이렉트. admin = service role 클라이언트 */
 export async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -29,5 +30,6 @@ export async function requireAdmin() {
     redirect("/");
   }
 
-  return { user, roles: roleSet, supabase };
+  const admin = createAdminClient();
+  return { user, roles: roleSet, supabase, admin };
 }
