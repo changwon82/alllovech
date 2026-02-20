@@ -146,14 +146,14 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       <div className="mt-2 flex items-center justify-between">
         <div>
           <Link href="/groups" className="text-xs text-neutral-400 hover:text-navy">&larr; 소그룹 목록</Link>
-          <h1 className="text-2xl font-bold text-navy md:text-3xl">{group.name}</h1>
+          <h1 className="text-[32px] leading-[40px] font-bold text-navy">{group.name}</h1>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-neutral-500">{memberCount}명</span>
           <UserMenu name={userName} />
         </div>
       </div>
-      <div className="mt-2 h-1 w-12 rounded bg-blue" />
+      <div className="mt-2 h-1 w-12 rounded-full bg-accent" />
 
       {group.description && (
         <p className="mt-3 text-sm text-neutral-500">{group.description}</p>

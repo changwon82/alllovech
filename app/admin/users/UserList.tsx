@@ -52,7 +52,7 @@ function UserRow({
   const availableRoles = ALL_ROLES.filter((r) => !user.roles.includes(r));
 
   return (
-    <div className={`rounded-xl border p-4 ${user.status === "pending" ? "border-blue/30 bg-blue/5" : "border-neutral-200"}`}>
+    <div className={`rounded-2xl p-4 shadow-sm ${user.status === "pending" ? "bg-accent-light" : "bg-white"}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="font-bold text-neutral-800">{user.name}</p>
@@ -67,7 +67,7 @@ function UserRow({
               user.status === "active"
                 ? "border-green-200 bg-green-50 text-green-700"
                 : user.status === "pending"
-                  ? "border-blue/20 bg-blue/5 text-blue"
+                  ? "border-accent/30 bg-accent-light text-accent"
                   : "border-neutral-200 text-neutral-500"
             }`}
           >
@@ -175,10 +175,10 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
               filter === f
                 ? "bg-navy text-white"
-                : "border border-neutral-200 text-neutral-500 hover:border-neutral-400"
+                : "bg-white text-neutral-500 shadow-sm hover:shadow-md"
             }`}
           >
             {f === "all"

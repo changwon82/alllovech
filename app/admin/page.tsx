@@ -25,13 +25,13 @@ export default async function AdminDashboard() {
         {stats.map((s) => (
           <div
             key={s.label}
-            className={`rounded-xl border p-4 ${
+            className={`rounded-2xl p-4 shadow-sm ${
               s.highlight && s.value > 0
-                ? "border-blue/30 bg-blue/5"
-                : "border-neutral-200 bg-neutral-50"
+                ? "bg-accent-light"
+                : "bg-white"
             }`}
           >
-            <p className={`text-2xl font-bold ${s.highlight && s.value > 0 ? "text-blue" : "text-neutral-800"}`}>
+            <p className={`text-2xl font-bold ${s.highlight && s.value > 0 ? "text-accent" : "text-neutral-800"}`}>
               {s.value}
             </p>
             <p className="text-xs text-neutral-500">{s.label}</p>

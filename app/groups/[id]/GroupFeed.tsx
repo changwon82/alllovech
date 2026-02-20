@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { addComment, deleteComment, toggleAmen } from "./actions";
+import Badge from "@/app/components/ui/Badge";
 
 type Comment = {
   id: string;
@@ -65,7 +66,7 @@ function ReflectionCard({
   }
 
   return (
-    <div className="rounded-xl border border-neutral-200 p-4">
+    <div className="rounded-2xl bg-white p-4 shadow-sm">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -77,11 +78,8 @@ function ReflectionCard({
             <p className="text-xs text-neutral-400">{timeAgo(item.created_at)}</p>
           </div>
         </div>
-        <Link
-          href={`/365bible?day=${item.day}`}
-          className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600 hover:bg-neutral-200"
-        >
-          Day {item.day}
+        <Link href={`/365bible?day=${item.day}`}>
+          <Badge variant="accent">Day {item.day}</Badge>
         </Link>
       </div>
 
@@ -95,7 +93,7 @@ function ReflectionCard({
         <button
           onClick={onToggleAmen}
           className={`flex items-center gap-1 text-xs transition-colors ${
-            item.myAmen ? "font-bold text-blue" : "text-neutral-500 hover:text-blue"
+            item.myAmen ? "font-bold text-accent" : "text-neutral-500 hover:text-accent"
           }`}
         >
           {item.myAmen ? "아멘 ✓" : "아멘"}
@@ -143,7 +141,7 @@ function ReflectionCard({
             <button
               onClick={handleAddComment}
               disabled={isPending || !commentText.trim()}
-              className="shrink-0 rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+              className="shrink-0 rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
             >
               등록
             </button>

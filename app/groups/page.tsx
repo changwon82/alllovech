@@ -5,6 +5,8 @@ import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
+import PageHeader from "@/app/components/ui/PageHeader";
+import Badge from "@/app/components/ui/Badge";
 
 export const metadata = { title: "내 소그룹 | 다애교회" };
 
@@ -63,11 +65,10 @@ export default async function GroupsPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
-      <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-navy md:text-3xl">내 소그룹</h1>
-        <UserMenu name={userName} />
-      </div>
-      <div className="mt-2 h-1 w-12 rounded bg-blue" />
+      <PageHeader
+        title="내 소그룹"
+        action={<UserMenu name={userName} />}
+      />
 
       {groups.length === 0 ? (
         <div className="mt-12 text-center">
@@ -80,21 +81,21 @@ export default async function GroupsPage() {
             <Link
               key={g.id}
               href={`/groups/${g.id}`}
-              className="block rounded-xl border border-neutral-200 p-4 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+              className="block rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <h2 className="font-bold text-neutral-800">{g.name}</h2>
-                <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
+                <Badge variant="default">
                   {TYPE_LABEL[g.type] ?? g.type}
-                </span>
+                </Badge>
               </div>
               {g.description && (
                 <p className="mt-1 text-sm text-neutral-500">{g.description}</p>
               )}
               {g.myRole !== "member" && (
-                <p className="mt-1.5 text-xs text-blue">
+                <Badge variant="accent" className="mt-1.5">
                   {g.myRole === "leader" ? "그룹장" : g.myRole === "sub_leader" ? "부그룹장" : g.myRole}
-                </p>
+                </Badge>
               )}
             </Link>
           ))}

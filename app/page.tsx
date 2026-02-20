@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 const buttonClass =
-  "flex min-w-[11rem] items-center justify-center rounded-full bg-navy px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-navy/90";
+  "flex min-w-[11rem] items-center justify-center rounded-xl bg-navy px-6 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95";
 
 export default async function Home() {
   const supabase = await createClient();

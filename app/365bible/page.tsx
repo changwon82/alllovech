@@ -536,7 +536,7 @@ export default async function BiblePage({
           </a>
         )}
       </div>
-      <div className="mt-2 h-1 w-12 rounded bg-blue" />
+      <div className="mt-2 h-1 w-12 rounded-full bg-accent" />
 
       <BiblePageContent
         day={day}

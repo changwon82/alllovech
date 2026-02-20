@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { updateProfile } from "./actions";
+import Card from "@/app/components/ui/Card";
+import StatCard from "@/app/components/ui/StatCard";
+import Badge from "@/app/components/ui/Badge";
 
 type ReflectionSummary = {
   id: string;
@@ -93,7 +96,7 @@ export default function MyPageContent({
       )}
 
       {/* 프로필 요약 */}
-      <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
+      <Card className="mt-6">
         {isEditing ? (
           <div className="space-y-2">
             <input
@@ -118,7 +121,7 @@ export default function MyPageContent({
               <button
                 onClick={handleSaveProfile}
                 disabled={isPending || !editName.trim()}
-                className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+                className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
               >
                 {isPending ? "저장 중..." : "저장"}
               </button>
@@ -138,20 +141,13 @@ export default function MyPageContent({
             </button>
           </div>
         )}
-        <div className="mt-3 flex gap-6">
-          <div>
-            <p className="text-2xl font-bold text-blue">{totalChecked}</p>
-            <p className="text-xs text-neutral-500">읽은 일수</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-navy">{percentage}%</p>
-            <p className="text-xs text-neutral-500">달성률 (오늘까지)</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-neutral-700">{reflections.length}</p>
-            <p className="text-xs text-neutral-500">묵상</p>
-          </div>
-        </div>
+      </Card>
+
+      {/* 통계 */}
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        <StatCard value={totalChecked} label="읽은 일수" color="accent" />
+        <StatCard value={`${percentage}%`} label="달성률" color="navy" />
+        <StatCard value={reflections.length} label="묵상" color="neutral" />
       </div>
 
       {/* 연간 캘린더 히트맵 */}
@@ -163,10 +159,10 @@ export default function MyPageContent({
               <span className="inline-block h-[10px] w-[10px] rounded-sm bg-neutral-200" /> 미읽음
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-[10px] w-[10px] rounded-sm bg-blue/60" /> 읽음
+              <span className="inline-block h-[10px] w-[10px] rounded-sm bg-accent/60" /> 읽음
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-[10px] w-[10px] rounded-sm bg-blue" /> 읽음+묵상
+              <span className="inline-block h-[10px] w-[10px] rounded-sm bg-accent" /> 읽음+묵상
             </span>
           </div>
         </div>
@@ -182,15 +178,15 @@ export default function MyPageContent({
                     title={`Day ${d.day}${d.checked ? " (읽음)" : ""}${d.hasReflection ? " (묵상)" : ""}`}
                     className={`h-[14px] w-[14px] rounded-sm transition-colors ${
                       d.isToday
-                        ? "ring-2 ring-blue ring-offset-1"
+                        ? "ring-2 ring-accent ring-offset-1"
                         : ""
                     } ${
                       d.isFuture
                         ? "bg-neutral-100"
                         : d.checked
                           ? d.hasReflection
-                            ? "bg-blue"
-                            : "bg-blue/60"
+                            ? "bg-accent"
+                            : "bg-accent/60"
                           : "bg-neutral-200"
                     }`}
                   />
@@ -205,7 +201,7 @@ export default function MyPageContent({
       <section className="mt-10">
         <h2 className="mb-4 text-sm font-bold text-navy">묵상 기록</h2>
         {reflections.length === 0 ? (
-          <p className="rounded-xl border border-neutral-200 p-6 text-center text-sm text-neutral-400">
+          <p className="rounded-2xl bg-white p-6 text-center text-sm text-neutral-400 shadow-sm">
             아직 작성한 묵상이 없습니다
           </p>
         ) : (
@@ -214,10 +210,10 @@ export default function MyPageContent({
               <Link
                 key={r.id}
                 href={`/365bible?day=${r.day}`}
-                className="block rounded-xl border border-neutral-200 p-4 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+                className="block rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue">Day {r.day}</span>
+                  <Badge variant="accent">Day {r.day}</Badge>
                   <span className="text-xs text-neutral-400">
                     {r.visibility === "private" ? "나만 보기" : r.visibility === "public" ? "공개" : "소그룹"}
                   </span>

@@ -272,12 +272,12 @@ export default function BiblePageContent({
     <>
       {/* 스크롤 시 고정 헤더 */}
       <div
-        className={`fixed top-0 right-0 left-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur-sm transition-transform duration-200 ${
+        className={`fixed top-0 right-0 left-0 z-50 bg-white/95 shadow-sm backdrop-blur-sm transition-transform duration-200 ${
           showSticky ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-2.5">
-          <span className={`shrink-0 text-sm font-bold ${isToday ? "text-blue" : "text-neutral-800"}`}>
+          <span className={`shrink-0 text-sm font-bold ${isToday ? "text-accent" : "text-neutral-800"}`}>
             Day {day}
           </span>
           <div className="flex min-w-0 flex-wrap gap-x-1.5 gap-y-0.5">
@@ -300,7 +300,7 @@ export default function BiblePageContent({
       {/* Day 번호 (상자 위) */}
       <p
         className={`mt-0.5 text-center text-[2.5rem] font-bold leading-tight tracking-tight ${
-          isToday ? "text-blue" : "text-neutral-800"
+          isToday ? "text-accent" : "text-neutral-800"
         }`}
       >
         Day {day}
@@ -312,7 +312,7 @@ export default function BiblePageContent({
           <button
             onClick={() => navigateDay(day - 1)}
             disabled={isNavigating}
-            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
+            className="flex shrink-0 items-center rounded-lg bg-white px-3 py-2 text-sm text-neutral-600 shadow-sm transition-all hover:shadow-md active:scale-95 disabled:opacity-50"
           >
             ← Day {day - 1}
           </button>
@@ -321,8 +321,8 @@ export default function BiblePageContent({
         )}
 
         <div
-          className={`flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-2 rounded-lg border px-2 py-2 sm:px-3 ${
-            isToday ? "border-blue/20 bg-blue/5 font-medium text-blue" : "border-neutral-200 bg-neutral-50 text-neutral-700"
+          className={`flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-2 rounded-lg px-2 py-2 sm:px-3 ${
+            isToday ? "bg-accent-light font-medium text-accent" : "bg-white text-neutral-700 shadow-sm"
           }`}
         >
           <span className="min-w-0 shrink truncate text-xs whitespace-nowrap sm:text-sm">
@@ -332,7 +332,7 @@ export default function BiblePageContent({
             <button
               onClick={() => navigateDay(localToday)}
               disabled={isNavigating}
-              className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+              className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
             >
               오늘로
             </button>
@@ -343,7 +343,7 @@ export default function BiblePageContent({
           <button
             onClick={() => navigateDay(day + 1)}
             disabled={isNavigating}
-            className="flex shrink-0 items-center rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
+            className="flex shrink-0 items-center rounded-lg bg-white px-3 py-2 text-sm text-neutral-600 shadow-sm transition-all hover:shadow-md active:scale-95 disabled:opacity-50"
           >
             Day {day + 1} →
           </button>
@@ -356,8 +356,8 @@ export default function BiblePageContent({
       {reading ? (
         <section
           ref={infoRef}
-          className={`mt-4 rounded-2xl border p-5 md:p-6 ${
-            isToday ? "border-blue/20 bg-blue/5" : "border-neutral-200 bg-neutral-50"
+          className={`mt-4 rounded-2xl p-5 md:p-6 ${
+            isToday ? "bg-accent-light" : "bg-white shadow-sm"
           }`}
         >
           <div className="flex items-start justify-between gap-3">
@@ -367,8 +367,8 @@ export default function BiblePageContent({
                 onClick={handleToggleCheck}
                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                   isChecked
-                    ? "bg-blue text-white"
-                    : "border border-neutral-300 text-neutral-500 hover:border-blue hover:text-blue"
+                    ? "bg-accent text-white"
+                    : "border border-neutral-300 text-neutral-500 hover:border-accent hover:text-accent"
                 }`}
               >
                 {isChecked ? "읽음 ✓" : "읽음 체크"}
@@ -382,7 +382,7 @@ export default function BiblePageContent({
           )}
         </section>
       ) : (
-        <section ref={infoRef} className="mt-4 rounded-2xl border border-neutral-200 p-6 text-center text-neutral-500">
+        <section ref={infoRef} className="mt-4 rounded-2xl bg-white p-6 text-center text-neutral-500 shadow-sm">
           읽기표를 불러올 수 없습니다
         </section>
       )}
@@ -408,7 +408,7 @@ export default function BiblePageContent({
         });
         if (links.length === 0) return null;
         return (
-          <section className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+          <section className="mt-4 rounded-2xl bg-white px-4 py-3 shadow-sm">
             <div className="mb-1.5 text-xs font-semibold text-neutral-500">개역개정 (대한성서공회)</div>
             <div className="flex flex-wrap gap-x-1 gap-y-1">
               {links.map((l, i) => (
@@ -510,7 +510,7 @@ export default function BiblePageContent({
           <h3 className="mb-3 text-sm font-bold text-navy">오늘의 묵상</h3>
 
           {reflection && !isEditing ? (
-            <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+            <div className="rounded-2xl bg-white p-4 shadow-sm">
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
                 {reflection.content}
               </p>
@@ -543,7 +543,7 @@ export default function BiblePageContent({
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-neutral-200 p-4">
+            <div className="rounded-2xl bg-white p-4 shadow-sm">
               <textarea
                 value={reflectionText}
                 onChange={(e) => setReflectionText(e.target.value)}
@@ -577,7 +577,7 @@ export default function BiblePageContent({
                   <button
                     onClick={handleSaveReflection}
                     disabled={isSaving || !reflectionText.trim()}
-                    className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+                    className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
                   >
                     {isSaving ? "저장 중..." : reflection ? "수정" : "저장"}
                   </button>

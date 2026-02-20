@@ -5,6 +5,7 @@ import { getUnreadCount } from "@/lib/notifications";
 import MyPageContent from "./MyPageContent";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export const metadata = { title: "내 기록 | 다애교회" };
 
@@ -65,11 +66,10 @@ export default async function MyPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
-      <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-navy md:text-3xl">내 기록</h1>
-        <UserMenu name={profile?.name ?? "이름 없음"} />
-      </div>
-      <div className="mt-2 h-1 w-12 rounded bg-blue" />
+      <PageHeader
+        title="내 기록"
+        action={<UserMenu name={profile?.name ?? "이름 없음"} />}
+      />
 
       <MyPageContent
         name={profile?.name ?? "이름 없음"}

@@ -62,12 +62,12 @@ function GroupCard({
   }
 
   return (
-    <div className={`rounded-xl border p-4 ${group.is_active ? "border-neutral-200" : "border-neutral-100 opacity-60"}`}>
+    <div className={`rounded-2xl bg-white p-4 shadow-sm ${!group.is_active ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
         <button onClick={() => setExpanded(!expanded)} className="min-w-0 text-left">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-neutral-800">{group.name}</h3>
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
+            <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600">
               {TYPE_LABEL[group.type] ?? group.type}
             </span>
             <span className="text-xs text-neutral-400">{group.members.length}명</span>
@@ -80,7 +80,7 @@ function GroupCard({
         <div className="mt-3 space-y-3">
           {/* 그룹 수정 */}
           {isEditingGroup ? (
-            <div className="space-y-2 rounded-lg border border-neutral-200 bg-white p-3">
+            <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
               <input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
@@ -125,7 +125,7 @@ function GroupCard({
                     });
                   }}
                   disabled={isPending || !editName.trim()}
-                  className="rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+                  className="rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
                 >
                   저장
                 </button>
@@ -145,7 +145,7 @@ function GroupCard({
           {/* 멤버 목록 */}
           <div className="space-y-1">
             {group.members.map((m) => (
-              <div key={m.user_id} className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-1.5">
+              <div key={m.user_id} className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-1.5">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-neutral-700">{m.name}</span>
                   <span className="text-xs text-neutral-400">{MEMBER_ROLE_LABEL[m.role] ?? m.role}</span>
@@ -185,7 +185,7 @@ function GroupCard({
             <button
               onClick={handleAddMember}
               disabled={isPending || !addUserId}
-              className="shrink-0 rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white hover:bg-navy/90 disabled:opacity-50"
+              className="shrink-0 rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
             >
               추가
             </button>
@@ -240,14 +240,14 @@ export default function GroupManager({
         <p className="text-sm text-neutral-500">{groups.length}개 그룹</p>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="rounded-lg bg-navy px-4 py-2 text-xs font-medium text-white hover:bg-navy/90"
+          className="rounded-xl bg-navy px-4 py-2 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95"
         >
           + 그룹 생성
         </button>
       </div>
 
       {showCreate && (
-        <div className="mb-4 rounded-xl border border-blue/20 bg-blue/5 p-4 space-y-2">
+        <div className="mb-4 rounded-2xl bg-accent-light p-4 space-y-2 shadow-sm">
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -276,7 +276,7 @@ export default function GroupManager({
             <button
               onClick={handleCreate}
               disabled={isPending || !newName.trim()}
-              className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+              className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
             >
               생성
             </button>
