@@ -5,6 +5,7 @@ import { getUserRoles, isAdminRole } from "@/lib/admin";
 import NotificationList from "./NotificationList";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export const metadata = { title: "알림 | 다애교회" };
 
@@ -69,11 +70,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
-      <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-navy md:text-3xl">알림</h1>
-        <UserMenu name={userName} />
-      </div>
-      <div className="mt-2 h-1 w-12 rounded bg-blue" />
+      <PageHeader title="알림" action={<UserMenu name={userName} />} />
 
       <NotificationList notifications={enrichedNotifications} />
 

@@ -85,10 +85,10 @@ export default function NotificationList({ notifications: initial }: { notificat
               key={n.id}
               href={href}
               onClick={() => handleClick(n)}
-              className={`block rounded-xl border p-4 transition-colors hover:border-neutral-300 ${
+              className={`block rounded-2xl p-4 transition-shadow hover:shadow-md ${
                 n.is_read
-                  ? "border-neutral-100 bg-white"
-                  : "border-blue/20 bg-blue/5"
+                  ? "bg-white shadow-sm"
+                  : "bg-accent-light shadow-sm"
               }`}
             >
               <div className="flex items-center justify-between">
@@ -98,7 +98,7 @@ export default function NotificationList({ notifications: initial }: { notificat
                 <span className="text-xs text-neutral-400">{timeAgo(n.created_at)}</span>
               </div>
               {n.reflection_day && (
-                <p className="mt-1 text-xs text-blue">Day {n.reflection_day}</p>
+                <p className="mt-1 text-xs font-medium text-accent">Day {n.reflection_day}</p>
               )}
             </a>
           );
