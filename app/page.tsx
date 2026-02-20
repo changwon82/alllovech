@@ -50,9 +50,6 @@ export default async function Home() {
               <Link href="/365bible" className={primaryButtonClass}>
                 365 성경읽기
               </Link>
-              <Link href="/spend-report" className={primaryButtonClass}>
-                지출 보고
-              </Link>
             </div>
             <div className="mt-5 flex items-center justify-center gap-3">
               <Link href="/login" className="text-sm text-navy hover:underline">
