@@ -20,10 +20,11 @@ export function isAdminRole(roles: Set<string>): boolean {
 /** 관리자 권한 확인. ADMIN이 아니면 홈으로 리다이렉트. admin = service role 클라이언트 */
 export async function requireAdmin() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!user) redirect("/login?next=/admin");
+  if (!session?.user) redirect("/login?next=/admin");
 
+  const user = session.user;
   const roleSet = await getUserRoles(supabase, user.id);
 
   if (!isAdminRole(roleSet)) {
