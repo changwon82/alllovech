@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-
-const buttonClass =
-  "flex min-w-[11rem] items-center justify-center rounded-xl bg-navy px-6 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95";
+import { primaryButtonClass } from "@/app/components/ui/PrimaryButton";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -20,43 +18,54 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6">
-      <Image src="/logo.png" alt="다애교회" width={80} height={80} priority />
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="flex w-full max-w-xs flex-col items-center gap-5">
+        {/* 로고 + 제목 */}
+        <Image src="/logo.png" alt="다애교회" width={72} height={72} priority />
+        <div className="text-center">
+          <h1 className="text-[32px] font-bold text-navy">다애교회</h1>
+          <div className="mx-auto mt-2 h-1 w-12 rounded-full bg-accent" />
+        </div>
 
-      {user ? (
-        <>
-          <p className="text-sm text-neutral-500">
-            {profileName ?? "이름 없음"}님, 환영합니다
-          </p>
-          <Link href="/365bible" className={buttonClass}>
-            365 성경읽기
-          </Link>
-          <Link href="/my" className={buttonClass}>
-            내 기록
-          </Link>
-          <Link href="/groups" className={buttonClass}>
-            내 소그룹
-          </Link>
-        </>
-      ) : (
-        <>
-          <Link href="/365bible" className={buttonClass}>
-            365 성경읽기
-          </Link>
-          <Link href="/spend-report" className={buttonClass}>
-            지출 보고
-          </Link>
-          <div className="flex gap-3">
-            <Link href="/login" className="text-sm text-navy hover:underline">
-              로그인
-            </Link>
-            <span className="text-neutral-300">|</span>
-            <Link href="/signup" className="text-sm text-navy hover:underline">
-              회원가입
-            </Link>
+        {user ? (
+          <div className="mt-2 w-full rounded-2xl bg-white p-6 shadow-sm">
+            <p className="mb-5 text-center text-sm text-neutral-500">
+              {profileName ?? "이름 없음"}님, 환영합니다
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link href="/365bible" className={primaryButtonClass}>
+                365 성경읽기
+              </Link>
+              <Link href="/my" className={primaryButtonClass}>
+                내 기록
+              </Link>
+              <Link href="/groups" className={primaryButtonClass}>
+                내 소그룹
+              </Link>
+            </div>
           </div>
-        </>
-      )}
+        ) : (
+          <div className="mt-2 w-full rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-3">
+              <Link href="/365bible" className={primaryButtonClass}>
+                365 성경읽기
+              </Link>
+              <Link href="/spend-report" className={primaryButtonClass}>
+                지출 보고
+              </Link>
+            </div>
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <Link href="/login" className="text-sm text-navy hover:underline">
+                로그인
+              </Link>
+              <span className="text-neutral-300">|</span>
+              <Link href="/signup" className="text-sm text-navy hover:underline">
+                회원가입
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
