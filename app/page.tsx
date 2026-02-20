@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { primaryButtonClass } from "@/app/components/ui/PrimaryButton";
 import LoginForm from "@/app/login/LoginForm";
-import UserMenu from "@/app/components/UserMenu";
+import LogoutButton from "@/app/components/LogoutButton";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -35,7 +35,7 @@ export default async function Home() {
               <p className="text-sm text-neutral-500">
                 {profileName ?? "이름 없음"}님, 환영합니다
               </p>
-              <UserMenu name={profileName ?? "이름 없음"} logoutOnly />
+              <LogoutButton />
             </div>
             <Link href="/365bible" className={`${primaryButtonClass} w-full`}>
               365 성경읽기
