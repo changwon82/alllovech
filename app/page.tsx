@@ -47,6 +47,9 @@ export default async function Home() {
           </div>
         ) : (
           <div className="mt-2 w-full rounded-2xl bg-white p-6 shadow-sm">
+            <Link href="/365bible" className={`${primaryButtonClass} w-full mb-5`}>
+              365 성경읽기
+            </Link>
             <LoginForm />
             <p className="mt-5 text-center text-sm text-neutral-500">
               아직 계정이 없으신가요?{" "}
