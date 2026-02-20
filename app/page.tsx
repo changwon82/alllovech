@@ -35,7 +35,7 @@ export default async function Home() {
               <p className="text-sm text-neutral-500">
                 {profileName ?? "이름 없음"}님, 환영합니다
               </p>
-              <UserMenu name={profileName ?? "이름 없음"} />
+              <UserMenu name={profileName ?? "이름 없음"} logoutOnly />
             </div>
             <Link href="/365bible" className={`${primaryButtonClass} w-full`}>
               365 성경읽기
