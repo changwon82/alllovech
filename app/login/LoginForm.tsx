@@ -46,7 +46,7 @@ export default function LoginForm({
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
-      options: { redirectTo },
+      options: { scopes: "profile account_email", redirectTo },
     });
 
     if (error) {
