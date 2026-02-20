@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -346,21 +345,20 @@ export default async function BiblePage({
 }) {
   const params = await searchParams;
 
-  // URL에 day가 없으면 서버에서 Asia/Seoul 기준 오늘 일차로 redirect
-  if (!params.day) {
-    const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
-    redirect(`/365bible?day=${today}`);
-  }
-
-  const day = Math.max(1, Math.min(365, parseInt(params.day)));
+  const serverToday = Math.max(1, Math.min(365, getKoreaDayOfYear()));
+  const day = params.day ? Math.max(1, Math.min(365, parseInt(params.day))) : serverToday;
   const koreaYear = getKoreaYear();
   const yearStart = new Date(koreaYear, 0, 1);
   const dayDate = new Date(yearStart.getTime() + (day - 1) * 86400000);
-  const serverToday = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  // 인증 상태 + 체크 데이터 조회
+  // 인증 + 캐시 데이터를 동시에 조회
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [{ data: { session } }, allReadings, versions] = await Promise.all([
+    supabase.auth.getSession(),
+    getCachedAllReadings(),
+    getCachedVersions(),
+  ]);
+  const user = session?.user ?? null;
 
   let checkedDays: number[] = [];
   let userProfile: { name: string; status: string } | null = null;
@@ -397,12 +395,6 @@ export default async function BiblePage({
     isAdmin = isAdminRole(roles);
     unreadCount = unread;
   }
-
-  // 365일 읽기표 + 번역본 목록 (병렬 캐시)
-  const [allReadings, versions] = await Promise.all([
-    getCachedAllReadings(),
-    getCachedVersions(),
-  ]);
   const reading = allReadings[day - 1] ?? null;
 
   // 번역본 결정 (URL param → 기본값 NKRV)
