@@ -1,10 +1,9 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/server";
 
 export async function markAllRead() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인 필요" };
 
   await supabase
@@ -17,8 +16,7 @@ export async function markAllRead() {
 }
 
 export async function markRead(notificationId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인 필요" };
 
   await supabase

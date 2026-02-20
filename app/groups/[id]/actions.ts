@@ -1,10 +1,9 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/server";
 
 export async function addComment(reflectionId: string, content: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   const { data, error } = await supabase
@@ -35,8 +34,7 @@ export async function addComment(reflectionId: string, content: string) {
 }
 
 export async function deleteComment(commentId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   const { error } = await supabase
@@ -50,8 +48,7 @@ export async function deleteComment(commentId: string) {
 }
 
 export async function toggleAmen(reflectionId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   const { data: existing } = await supabase

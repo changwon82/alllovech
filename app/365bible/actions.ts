@@ -1,10 +1,9 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/server";
 
 export async function toggleCheck(day: number, year: number) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   // 이미 체크돼 있는지 확인
@@ -37,8 +36,7 @@ export async function toggleCheck(day: number, year: number) {
 }
 
 export async function getCheckedDays(year: number): Promise<number[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return [];
 
   const { data } = await supabase
@@ -61,8 +59,7 @@ export type Reflection = {
 };
 
 export async function getReflection(day: number, year: number): Promise<Reflection | null> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return null;
 
   const { data } = await supabase
@@ -82,8 +79,7 @@ export async function saveReflection(
   content: string,
   visibility: "private" | "group" | "public"
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   const { data, error } = await supabase
@@ -125,8 +121,7 @@ export async function saveReflection(
 }
 
 export async function deleteReflection(day: number, year: number) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   const { error } = await supabase
