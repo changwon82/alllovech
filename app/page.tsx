@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { primaryButtonClass } from "@/app/components/ui/PrimaryButton";
+import LoginForm from "@/app/login/LoginForm";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -46,20 +47,13 @@ export default async function Home() {
           </div>
         ) : (
           <div className="mt-2 w-full rounded-2xl bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-3">
-              <Link href="/365bible" className={primaryButtonClass}>
-                365 성경읽기
-              </Link>
-            </div>
-            <div className="mt-5 flex items-center justify-center gap-3">
-              <Link href="/login" className="text-sm text-navy hover:underline">
-                로그인
-              </Link>
-              <span className="text-neutral-300">|</span>
-              <Link href="/signup" className="text-sm text-navy hover:underline">
+            <LoginForm />
+            <p className="mt-5 text-center text-sm text-neutral-500">
+              아직 계정이 없으신가요?{" "}
+              <Link href="/signup" className="font-medium text-navy hover:underline">
                 회원가입
               </Link>
-            </div>
+            </p>
           </div>
         )}
       </div>
