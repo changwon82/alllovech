@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
       { hostname: "img.youtube.com" },
     ],
   },
+  poweredByHeader: false,
+  compress: true,
+  experimental: {
+    optimizeCss: true,
+  },
 };
 
 export default nextConfig;

@@ -5,13 +5,17 @@ import "./globals.css";
 const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
+  weight: ["400", "700"],
+  display: "swap",
+  preload: true,
 });
 
 const notoSerifKR = Noto_Serif_KR({
   variable: "--font-noto-serif-kr",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400"],
+  display: "swap",
+  preload: false,
 });
 
 const siteUrl =
