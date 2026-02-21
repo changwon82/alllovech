@@ -146,17 +146,38 @@ function GroupCard({
           <div className="space-y-1">
             {group.members.map((m) => (
               <div key={m.user_id} className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-1.5">
+                <span className="text-sm text-neutral-700">{m.name}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-neutral-700">{m.name}</span>
-                  <span className="text-xs text-neutral-400">{MEMBER_ROLE_LABEL[m.role] ?? m.role}</span>
+                  <select
+                    value={m.role}
+                    onChange={(e) => {
+                      const newRole = e.target.value;
+                      setGroup((g) => ({
+                        ...g,
+                        members: g.members.map((mem) =>
+                          mem.user_id === m.user_id ? { ...mem, role: newRole } : mem
+                        ),
+                      }));
+                      startTransition(async () => {
+                        const result = await addGroupMember(group.id, m.user_id, newRole);
+                        if ("error" in result) window.location.reload();
+                      });
+                    }}
+                    disabled={isPending}
+                    className="rounded-lg border border-neutral-200 px-2 py-1 text-xs outline-none"
+                  >
+                    {Object.entries(MEMBER_ROLE_LABEL).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => handleRemoveMember(m.user_id)}
+                    disabled={isPending}
+                    className="text-xs text-neutral-300 hover:text-red-500"
+                  >
+                    제거
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleRemoveMember(m.user_id)}
-                  disabled={isPending}
-                  className="text-xs text-neutral-300 hover:text-red-500"
-                >
-                  제거
-                </button>
               </div>
             ))}
           </div>
