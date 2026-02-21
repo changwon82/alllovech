@@ -16,6 +16,18 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/reset-password") ||
     pathname.startsWith("/auth/")
   ) {
+    // 초대 페이지 방문 시 invite_code 쿠키 저장 (OAuth 리다이렉트 유실 대비)
+    const inviteMatch = pathname.match(/^\/invite\/([^/]+)$/);
+    if (inviteMatch) {
+      const response = NextResponse.next();
+      response.cookies.set("invite_code", inviteMatch[1], {
+        path: "/",
+        httpOnly: true,
+        maxAge: 60 * 60, // 1시간
+        sameSite: "lax",
+      });
+      return response;
+    }
     return NextResponse.next();
   }
 

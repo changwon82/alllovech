@@ -29,6 +29,14 @@ export default async function InviteAcceptPage({
     .eq("id", user.id)
     .eq("status", "pending");
 
+  // 성도(MEMBER) 역할 부여 (없으면 추가)
+  await admin
+    .from("user_roles")
+    .upsert(
+      { user_id: user.id, role: "MEMBER" },
+      { onConflict: "user_id,role" }
+    );
+
   // 그룹 가입 (중복 방지)
   await admin
     .from("group_members")
