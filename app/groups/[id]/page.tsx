@@ -51,16 +51,18 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
   const isAdmin = isAdminRole(roles);
   const isLeader = membershipResult.data.role === "leader" || membershipResult.data.role === "sub_leader";
 
-  // 리더일 때 초대 링크 조회
-  let initialInvites: { id: string; code: string; created_at: string; expires_at: string | null }[] = [];
+  // 리더일 때 기존 초대 코드 조회 (1개만)
+  let inviteCode: string | null = null;
   if (isLeader) {
     const { data } = await supabase
       .from("group_invites")
-      .select("id, code, created_at, expires_at")
+      .select("code")
       .eq("group_id", groupId)
       .eq("is_active", true)
-      .order("created_at", { ascending: false });
-    initialInvites = data ?? [];
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    inviteCode = data?.code ?? null;
   }
 
   // 그룹에 공유된 묵상 피드 (최신순)
@@ -177,7 +179,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         <InviteManager
           groupId={groupId}
           groupName={group.name}
-          initialInvites={initialInvites}
+          inviteCode={inviteCode}
         />
       )}
 

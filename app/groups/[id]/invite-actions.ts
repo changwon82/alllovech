@@ -36,32 +36,3 @@ export async function createInviteLink(groupId: string) {
 
   return { error: "초대 링크 생성에 실패했습니다. 다시 시도해주세요." };
 }
-
-/** 그룹의 활성 초대 목록 조회 */
-export async function getGroupInvites(groupId: string) {
-  const { supabase, user } = await getSessionUser();
-  if (!user) return { invites: [] };
-
-  const { data } = await supabase
-    .from("group_invites")
-    .select("id, code, created_at, expires_at")
-    .eq("group_id", groupId)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
-
-  return { invites: data ?? [] };
-}
-
-/** 초대 비활성화 */
-export async function deactivateInvite(inviteId: string) {
-  const { supabase, user } = await getSessionUser();
-  if (!user) return { error: "로그인이 필요합니다." };
-
-  const { error } = await supabase
-    .from("group_invites")
-    .update({ is_active: false })
-    .eq("id", inviteId);
-
-  if (error) return { error: error.message };
-  return { success: true };
-}

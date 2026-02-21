@@ -1,49 +1,38 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createInviteLink, getGroupInvites, deactivateInvite } from "./invite-actions";
-
-type Invite = { id: string; code: string; created_at: string; expires_at: string | null };
+import { createInviteLink } from "./invite-actions";
 
 export default function InviteManager({
   groupId,
   groupName,
-  initialInvites,
+  inviteCode: initialCode,
 }: {
   groupId: string;
   groupName: string;
-  initialInvites: Invite[];
+  inviteCode: string | null;
 }) {
-  const [invites, setInvites] = useState(initialInvites);
+  const [code, setCode] = useState(initialCode);
   const [isPending, startTransition] = useTransition();
-  const [copied, setCopied] = useState<string | null>(null);
+  const [shared, setShared] = useState(false);
 
-  function handleCreate() {
-    startTransition(async () => {
-      const result = await createInviteLink(groupId);
-      if ("code" in result) {
-        const listResult = await getGroupInvites(groupId);
-        if (listResult.invites) setInvites(listResult.invites);
-      }
-    });
+  function handleInvite() {
+    if (code) {
+      share(code);
+    } else {
+      startTransition(async () => {
+        const result = await createInviteLink(groupId);
+        if ("code" in result) {
+          const newCode = result.code as string;
+          setCode(newCode);
+          share(newCode);
+        }
+      });
+    }
   }
 
-  function handleDeactivate(inviteId: string) {
-    setInvites((prev) => prev.filter((i) => i.id !== inviteId));
-    startTransition(async () => {
-      await deactivateInvite(inviteId);
-    });
-  }
-
-  function handleCopy(code: string) {
-    const url = `${window.location.origin}/invite/${code}`;
-    navigator.clipboard.writeText(url);
-    setCopied(code);
-    setTimeout(() => setCopied(null), 2000);
-  }
-
-  async function handleShare(code: string) {
-    const url = `${window.location.origin}/invite/${code}`;
+  async function share(inviteCode: string) {
+    const url = `${window.location.origin}/invite/${inviteCode}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -51,65 +40,23 @@ export default function InviteManager({
           text: `${groupName} 소그룹에 초대합니다. 아래 링크를 눌러 합류하세요!`,
           url,
         });
+        return;
       } catch {
-        handleCopy(code);
+        // 공유 취소 또는 미지원 — 클립보드 복사로 fallback
       }
-    } else {
-      handleCopy(code);
     }
+    await navigator.clipboard.writeText(url);
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
   }
 
   return (
-    <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-neutral-700">초대 링크</h3>
-        <button
-          onClick={handleCreate}
-          disabled={isPending}
-          className="rounded-lg bg-navy px-3 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
-        >
-          + 새 링크
-        </button>
-      </div>
-
-      {invites.length === 0 ? (
-        <p className="mt-2 text-xs text-neutral-400">
-          아직 초대 링크가 없습니다. 새 링크를 만들어 공유하세요.
-        </p>
-      ) : (
-        <div className="mt-2 space-y-2">
-          {invites.map((inv) => (
-            <div
-              key={inv.id}
-              className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-2"
-            >
-              <p className="min-w-0 flex-1 truncate font-mono text-xs text-neutral-600">
-                /invite/{inv.code}
-              </p>
-              <div className="flex shrink-0 items-center gap-1">
-                <button
-                  onClick={() => handleShare(inv.code)}
-                  className="rounded-lg px-2 py-1 text-xs text-navy hover:bg-navy/5"
-                >
-                  공유
-                </button>
-                <button
-                  onClick={() => handleCopy(inv.code)}
-                  className="rounded-lg px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-100"
-                >
-                  {copied === inv.code ? "복사됨!" : "복사"}
-                </button>
-                <button
-                  onClick={() => handleDeactivate(inv.id)}
-                  className="rounded-lg px-2 py-1 text-xs text-neutral-300 hover:text-red-500"
-                >
-                  삭제
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <button
+      onClick={handleInvite}
+      disabled={isPending}
+      className="mt-4 w-full rounded-xl bg-accent px-4 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+    >
+      {isPending ? "준비 중..." : shared ? "링크가 복사되었습니다!" : "초대하기"}
+    </button>
   );
 }
