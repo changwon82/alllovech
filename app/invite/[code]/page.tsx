@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getInviteByCode } from "@/lib/invite";
 import InviteClient from "./InviteClient";
@@ -32,16 +31,6 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   }
 
   const group = invite.groups as unknown as { id: string; name: string; type: string; description: string | null };
-
-  // 쿠키에 초대 코드 저장 (회원가입 플로우를 위해)
-  const cookieStore = await cookies();
-  cookieStore.set("invite_code", code, {
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60, // 1시간
-  });
 
   const { user } = await getSessionUser();
 

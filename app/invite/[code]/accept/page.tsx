@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getInviteByCode } from "@/lib/invite";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -37,10 +36,6 @@ export default async function InviteAcceptPage({
       { group_id: invite.group_id, user_id: user.id, role: "member" },
       { onConflict: "group_id,user_id" }
     );
-
-  // invite_code 쿠키 정리
-  const cookieStore = await cookies();
-  cookieStore.delete("invite_code");
 
   redirect(`/groups/${invite.group_id}`);
 }
