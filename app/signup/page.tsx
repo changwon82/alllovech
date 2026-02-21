@@ -4,13 +4,20 @@ import SignUpForm from "./SignUpForm";
 
 export const metadata = { title: "회원가입 | 다애교회" };
 
-export default async function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ invite?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
     redirect("/365bible");
   }
+
+  const inviteCode = params.invite;
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -22,9 +29,9 @@ export default async function SignUpPage() {
 
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-center text-sm text-neutral-500">
-            가입 후 관리자 승인이 필요합니다
+            {inviteCode ? "가입 후 자동으로 그룹에 합류됩니다" : "가입 후 관리자 승인이 필요합니다"}
           </p>
-          <SignUpForm />
+          <SignUpForm inviteCode={inviteCode} />
         </div>
 
         <p className="mt-6 text-center text-sm text-neutral-500">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function SignUpForm() {
+export default function SignUpForm({ inviteCode }: { inviteCode?: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,9 +16,12 @@ export default function SignUpForm() {
   async function handleKakaoSignUp() {
     setLoading(true);
     setErrMsg("");
+    const callbackUrl = inviteCode
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/invite/${inviteCode}/accept`)}`
+      : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     });
     if (error) {
       setErrMsg("카카오 로그인에 실패했습니다.");
@@ -58,10 +61,12 @@ export default function SignUpForm() {
       <div className="rounded-2xl bg-accent-light p-6 text-center shadow-sm">
         <p className="text-lg font-bold text-navy">가입이 완료되었습니다</p>
         <p className="mt-2 text-sm text-neutral-600">
-          관리자 승인 후 모든 기능을 이용할 수 있습니다.
+          {inviteCode
+            ? "로그인하면 자동으로 그룹에 합류됩니다."
+            : "관리자 승인 후 모든 기능을 이용할 수 있습니다."}
         </p>
         <a
-          href="/login"
+          href={inviteCode ? `/login?next=${encodeURIComponent(`/invite/${inviteCode}/accept`)}` : "/"}
           className="mt-4 inline-block rounded-lg bg-navy px-6 py-2 text-sm font-medium text-white hover:bg-navy/90"
         >
           로그인하기

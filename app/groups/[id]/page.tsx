@@ -4,6 +4,7 @@ import { createClient, getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import GroupFeed from "./GroupFeed";
+import InviteManager from "./InviteManager";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
 
@@ -48,6 +49,19 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
   const year = getKoreaYear();
   const userName = profileResult.data?.name ?? "이름 없음";
   const isAdmin = isAdminRole(roles);
+  const isLeader = membershipResult.data.role === "leader" || membershipResult.data.role === "sub_leader";
+
+  // 리더일 때 초대 링크 조회
+  let initialInvites: { id: string; code: string; created_at: string; expires_at: string | null }[] = [];
+  if (isLeader) {
+    const { data } = await supabase
+      .from("group_invites")
+      .select("id, code, created_at, expires_at")
+      .eq("group_id", groupId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    initialInvites = data ?? [];
+  }
 
   // 그룹에 공유된 묵상 피드 (최신순)
   const { data: shares } = await supabase
@@ -157,6 +171,14 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
 
       {group.description && (
         <p className="mt-3 text-sm text-neutral-500">{group.description}</p>
+      )}
+
+      {isLeader && (
+        <InviteManager
+          groupId={groupId}
+          groupName={group.name}
+          initialInvites={initialInvites}
+        />
       )}
 
       <GroupFeed
