@@ -88,7 +88,8 @@ export default function BiblePageContent({
 
   function navigateDay(targetDay: number) {
     startNavigation(() => {
-      router.push(`/365bible?day=${targetDay}&version=${versionCode}${compareMode ? "&compare=true" : ""}`, { scroll: false });
+      const cw = compareMode && compareVersionCode ? `&compareWith=${compareVersionCode}` : "";
+      router.push(`/365bible?day=${targetDay}&version=${versionCode}${compareMode ? "&compare=true" : ""}${cw}`, { scroll: false });
     });
   }
 

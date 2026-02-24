@@ -526,7 +526,7 @@ export default async function BiblePage({
             365 성경읽기
           </h1>
           {allReadings.length > 0 && (
-            <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} />
+            <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} compareWithCode={compareVersion?.code} />
           )}
         </div>
         {user ? (

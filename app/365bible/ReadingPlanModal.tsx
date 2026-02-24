@@ -21,11 +21,13 @@ export default function ReadingPlanModal({
   currentDay,
   versionCode,
   compareMode,
+  compareWithCode,
 }: {
   readings: Reading[];
   currentDay: number;
   versionCode: string;
   compareMode: boolean;
+  compareWithCode?: string;
 }) {
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -102,7 +104,7 @@ export default function ReadingPlanModal({
                 <Link
                   key={r.day}
                   data-day={r.day}
-                  href={`/365bible?day=${r.day}&version=${versionCode}${compareMode ? "&compare=true" : ""}`}
+                  href={`/365bible?day=${r.day}&version=${versionCode}${compareMode ? "&compare=true" : ""}${compareMode && compareWithCode ? `&compareWith=${compareWithCode}` : ""}`}
                   onClick={() => setOpen(false)}
                   className={`flex items-baseline gap-3 rounded-lg px-3 py-2 ${
                     r.day === currentDay
