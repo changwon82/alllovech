@@ -39,10 +39,8 @@ export default function TextSizeControl({
   return (
     <div>
       <div className="mb-4">
-        {/* 1행: 번역 버튼 + 병행보기 */}
-        {headerLeft && <div>{headerLeft}</div>}
-        {/* 2행: 글자 크기 */}
-        <div className="mt-2 flex items-center justify-end gap-2">
+        {/* 1행: 글자 크기 (우측 정렬) */}
+        <div className="flex items-center justify-end gap-2">
           <span className="text-xs text-neutral-400">글자 크기</span>
           <button
             onClick={() => setSizeIdx((i) => { const v = Math.max(0, i - 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
@@ -62,6 +60,8 @@ export default function TextSizeControl({
             +
           </button>
         </div>
+        {/* 2행: 번역 버튼 + 병행보기 */}
+        {headerLeft && <div className="mt-2">{headerLeft}</div>}
         {/* 하위 행 */}
         {subRow && <div className="mt-1.5">{subRow}</div>}
       </div>

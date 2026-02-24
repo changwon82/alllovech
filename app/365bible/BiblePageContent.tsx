@@ -54,6 +54,7 @@ export default function BiblePageContent({
   versions,
   versionCode,
   compareMode,
+  compareVersionCode,
   compareVersionName,
   user,
   checkedDays: initialCheckedDays,
@@ -69,6 +70,7 @@ export default function BiblePageContent({
   versions: BibleVersion[];
   versionCode: string;
   compareMode: boolean;
+  compareVersionCode?: string;
   compareVersionName?: string;
   user: UserInfo;
   checkedDays: number[];
@@ -378,23 +380,49 @@ export default function BiblePageContent({
                   {[...versions].sort((a, b) => {
                     const order: Record<string, number> = { KRV: 0, NKRV: 1, SAENEW: 2 };
                     return (order[a.code] ?? 9) - (order[b.code] ?? 9);
-                  }).map((v) => (
-                    <Link
-                      key={v.code}
-                      href={`/365bible?day=${day}&version=${v.code}${compareMode ? "&compare=true" : ""}`}
-                      scroll={false}
-                      className={
-                        v.code === versionCode
-                          ? "rounded-full bg-navy px-3 py-1 text-xs font-medium text-white"
-                          : "rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
-                      }
-                    >
-                      {v.name}
-                    </Link>
-                  ))}
+                  }).map((v) => {
+                    const isPrimary = v.code === versionCode;
+                    const isCompare = compareMode && v.code === compareVersionCode;
+
+                    // 클릭 시 URL 결정
+                    let href: string;
+                    if (isPrimary && !compareMode) {
+                      // 이미 선택된 주 번역본 — 변경 없음
+                      href = `/365bible?day=${day}&version=${v.code}`;
+                    } else if (compareMode && !isPrimary) {
+                      // 병행보기 중 다른 번역본 클릭 → 비교 대상 변경
+                      href = `/365bible?day=${day}&version=${versionCode}&compare=true&compareWith=${v.code}`;
+                    } else {
+                      // 주 번역본 변경
+                      const cw = compareMode && compareVersionCode && compareVersionCode !== v.code
+                        ? `&compareWith=${compareVersionCode}` : "";
+                      href = `/365bible?day=${day}&version=${v.code}${compareMode ? "&compare=true" : ""}${cw}`;
+                    }
+
+                    return (
+                      <Link
+                        key={v.code}
+                        href={href}
+                        scroll={false}
+                        className={
+                          isPrimary
+                            ? "rounded-full bg-navy px-3 py-1 text-xs font-medium text-white"
+                            : isCompare
+                              ? "rounded-full bg-neutral-400 px-3 py-1 text-xs font-medium text-white"
+                              : "rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
+                        }
+                      >
+                        {v.name}
+                      </Link>
+                    );
+                  })}
                   {versions.length > 1 && (
                     <Link
-                      href={`/365bible?day=${day}&version=${versionCode}${compareMode ? "" : "&compare=true"}`}
+                      href={
+                        compareMode
+                          ? `/365bible?day=${day}&version=${versionCode}`
+                          : `/365bible?day=${day}&version=${versionCode}&compare=true`
+                      }
                       scroll={false}
                       className={
                         compareMode

@@ -341,7 +341,7 @@ function parseTitle(title: string): Section[] {
 export default async function BiblePage({
   searchParams,
 }: {
-  searchParams: Promise<{ day?: string; version?: string; compare?: string }>;
+  searchParams: Promise<{ day?: string; version?: string; compare?: string; compareWith?: string }>;
 }) {
   const params = await searchParams;
 
@@ -404,7 +404,11 @@ export default async function BiblePage({
   const nkrvId = versions.find((v) => v.code === "NKRV")?.id ?? 1;
   const needHeadings = versionId !== nkrvId;
   const compareMode = params.compare === "true";
-  const compareVersion = compareMode ? versions.find((v) => v.id !== versionId) ?? null : null;
+  const compareVersion = compareMode
+    ? (params.compareWith
+        ? versions.find((v) => v.code === params.compareWith && v.code !== versionCode)
+        : versions.find((v) => v.code !== versionCode)) ?? null
+    : null;
 
   // 본문 가져오기 (캐시)
   let displaySections: DisplaySection[] = [];
@@ -548,6 +552,7 @@ export default async function BiblePage({
         versions={versions}
         versionCode={versionCode}
         compareMode={compareMode}
+        compareVersionCode={compareVersion?.code}
         compareVersionName={compareVersion?.name}
         user={user ? { id: user.id, name: userProfile?.name ?? "이름 없음", status: userProfile?.status ?? "pending" } : null}
         checkedDays={checkedDays}
