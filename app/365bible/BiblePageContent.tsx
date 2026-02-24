@@ -447,7 +447,7 @@ export default function BiblePageContent({
                             ? "rounded-full bg-navy px-3 py-1 text-xs font-medium text-white"
                             : isCompare
                               ? "rounded-full bg-blue px-3 py-1 text-xs font-medium text-white"
-                              : "rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
+                              : "rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700"
                         }
                       >
                         {v.name}
@@ -468,7 +468,7 @@ export default function BiblePageContent({
                       className={
                         compareMode
                           ? "rounded-full bg-blue px-3 py-1 text-xs font-medium text-white"
-                          : "rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
+                          : "rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700"
                       }
                     >
                       병행보기
