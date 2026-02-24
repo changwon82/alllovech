@@ -563,30 +563,14 @@ export default function BiblePageContent({
         </section>
       )}
 
-      {/* 하단 네비게이션 */}
-      <div className="mt-12 flex items-center justify-between border-t border-neutral-200 pt-6 pb-8">
-        {day > 1 ? (
-          <button
-            onClick={() => navigateDay(day - 1)}
-            disabled={isNavigating}
-            className="text-sm text-neutral-500 hover:text-navy disabled:opacity-50"
-          >
-            ← 이전
-          </button>
-        ) : (
-          <div />
-        )}
-        {day < 365 ? (
-          <button
-            onClick={() => navigateDay(day + 1)}
-            disabled={isNavigating}
-            className="text-sm text-neutral-500 hover:text-navy disabled:opacity-50"
-          >
-            다음 →
-          </button>
-        ) : (
-          <div />
-        )}
+      {/* 위로 올라가기 */}
+      <div className="mt-12 flex justify-center border-t border-neutral-200 pt-6 pb-8">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="text-sm text-neutral-500 hover:text-navy"
+        >
+          ↑ 위로
+        </button>
       </div>
       {/* 마지막 섹션이 짧아도 스크롤로 상단 감지 영역까지 올릴 수 있도록 여백 */}
       {sections.length > 0 && <div className="h-[60vh]" />}
