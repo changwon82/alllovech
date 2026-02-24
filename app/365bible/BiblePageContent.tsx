@@ -374,8 +374,11 @@ export default function BiblePageContent({
           <TextSizeControl
             headerLeft={
               versions.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {versions.map((v) => (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {[...versions].sort((a, b) => {
+                    const order: Record<string, number> = { KRV: 0, NKRV: 1, SAENEW: 2 };
+                    return (order[a.code] ?? 9) - (order[b.code] ?? 9);
+                  }).map((v) => (
                     <Link
                       key={v.code}
                       href={`/365bible?day=${day}&version=${v.code}${compareMode ? "&compare=true" : ""}`}
