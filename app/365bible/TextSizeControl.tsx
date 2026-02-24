@@ -52,7 +52,7 @@ export default function TextSizeControl({
           <button
             onClick={() => { setSizeIdx(1); localStorage.setItem(STORAGE_KEY, "1"); }}
             disabled={sizeIdx === 1}
-            className="flex h-7 shrink-0 items-center justify-center rounded-lg border border-neutral-200 px-1.5 text-[11px] text-neutral-500 disabled:opacity-0"
+            className="flex h-7 shrink-0 items-center justify-center rounded-lg border border-neutral-200 px-1.5 text-[11px] text-neutral-500 disabled:text-neutral-300 disabled:border-neutral-100"
           >
             기본
           </button>
