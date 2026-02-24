@@ -39,29 +39,24 @@ export default function TextSizeControl({
   return (
     <div>
       <div className="mb-4">
-        {/* 1행: 글자 크기 (우측 정렬) */}
-        <div className="flex items-center justify-end gap-2">
-          <span className="text-xs text-neutral-400">글자 크기</span>
+        {/* 번역 버튼 + 글자 크기 −/+ */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex-1">{headerLeft ?? null}</div>
           <button
             onClick={() => setSizeIdx((i) => { const v = Math.max(0, i - 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
             disabled={sizeIdx === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
           >
             −
           </button>
-          <span className="min-w-[4rem] text-center text-xs text-neutral-500">
-            {SIZES[sizeIdx].label}
-          </span>
           <button
             onClick={() => setSizeIdx((i) => { const v = Math.min(SIZES.length - 1, i + 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
             disabled={sizeIdx === SIZES.length - 1}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-sm text-neutral-600 disabled:opacity-30"
           >
             +
           </button>
         </div>
-        {/* 2행: 번역 버튼 + 병행보기 */}
-        {headerLeft && <div className="mt-2">{headerLeft}</div>}
         {/* 하위 행 */}
         {subRow && <div className="mt-1.5">{subRow}</div>}
       </div>
