@@ -42,7 +42,7 @@ export default function TextSizeControl({
         {/* 1행: 번역 버튼 + 병행보기 */}
         {headerLeft && <div>{headerLeft}</div>}
         {/* 2행: 글자 크기 */}
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex items-center justify-end gap-2">
           <span className="text-xs text-neutral-400">글자 크기</span>
           <button
             onClick={() => setSizeIdx((i) => { const v = Math.max(0, i - 1); localStorage.setItem(STORAGE_KEY, String(v)); return v; })}
