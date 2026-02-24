@@ -363,17 +363,15 @@ export default function BiblePageContent({
               </LoginButton>
             )}
           </div>
+          {reading?.youtube_id && (
+            <div className="mt-4">
+              <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
+            </div>
+          )}
         </section>
       ) : (
         <section ref={infoRef} className="mt-4 rounded-2xl bg-white p-6 text-center text-neutral-500 shadow-sm">
           읽기표를 불러올 수 없습니다
-        </section>
-      )}
-
-      {/* 유튜브 영상 */}
-      {reading?.youtube_id && (
-        <section className="mt-6">
-          <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
         </section>
       )}
 
