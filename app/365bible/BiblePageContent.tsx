@@ -45,6 +45,32 @@ function getSectionHeader(sec: DisplaySection): string {
 
 type UserInfo = { id: string; name: string; status: string } | null;
 
+function ScrollToTopButton() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setShow(window.scrollY > 400);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="fixed bottom-24 right-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-all hover:brightness-110 active:scale-95"
+      aria-label="위로"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 15l-6-6-6 6" />
+      </svg>
+    </button>
+  );
+}
+
 export default function BiblePageContent({
   day,
   dayDateIso,
@@ -573,17 +599,11 @@ export default function BiblePageContent({
         </section>
       )}
 
-      {/* 위로 올라가기 */}
-      <div className="mt-12 flex justify-center border-t border-neutral-200 pt-6 pb-8">
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="text-sm text-neutral-500 hover:text-navy"
-        >
-          ↑ 위로
-        </button>
-      </div>
       {/* 마지막 섹션이 짧아도 스크롤로 상단 감지 영역까지 올릴 수 있도록 여백 */}
       {sections.length > 0 && <div className="h-[60vh]" />}
+
+      {/* 플로팅 위로 버튼 */}
+      <ScrollToTopButton />
 
     </>
   );
