@@ -461,7 +461,7 @@ export default function BiblePageContent({
                             {v.content}
                           </span>
                           {compareMode && v.compareContent && (
-                            <span className="mt-1 block text-[0.88em] text-neutral-400">
+                            <span className="mt-1 block text-[0.94em] text-neutral-400">
                               {v.compareContent}
                             </span>
                           )}
