@@ -409,7 +409,7 @@ export default function BiblePageContent({
                           isPrimary
                             ? "rounded-full bg-navy px-3 py-1 text-xs font-medium text-white"
                             : isCompare
-                              ? "rounded-full bg-blue/30 px-3 py-1 text-xs font-medium text-white"
+                              ? "rounded-full bg-blue px-3 py-1 text-xs font-medium text-white"
                               : "rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"
                         }
                       >
