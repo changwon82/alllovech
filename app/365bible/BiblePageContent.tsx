@@ -305,15 +305,15 @@ export default function BiblePageContent({
           <span className="min-w-0 shrink truncate text-xs whitespace-nowrap sm:text-sm">
             {dateStr} ({weekdayStr})
           </span>
-          {!isToday && (
+          {!isToday ? (
             <button
               onClick={() => navigateDay(localToday)}
               disabled={isNavigating}
-              className="shrink-0 rounded bg-navy px-2 py-1 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+              className="shrink-0 rounded bg-navy px-1.5 py-0.5 text-[11px] font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
             >
               오늘로
             </button>
-          )}
+          ) : null}
         </div>
 
         {day < 365 ? (
