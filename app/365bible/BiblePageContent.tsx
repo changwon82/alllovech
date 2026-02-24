@@ -605,6 +605,9 @@ export default function BiblePageContent({
             <button onClick={() => setShowLoginModal(false)} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 text-lg">✕</button>
             <h2 className="mb-4 text-lg font-bold text-navy">로그인</h2>
             <LoginForm next="/365bible" />
+            <p className="mt-4 text-center text-sm text-neutral-500">
+              아직 계정이 없으신가요? <a href="/signup" className="font-medium text-navy hover:underline">회원가입</a>
+            </p>
           </div>
         </div>
       )}
