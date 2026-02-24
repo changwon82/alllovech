@@ -63,7 +63,7 @@ export default function TextSizeControl({
             </button>
           </div>
         </div>
-        {/* 하위 행: 대한성서공회 링크 등 */}
+        {/* 하위 행 */}
         {subRow && <div className="mt-1.5">{subRow}</div>}
       </div>
       <div className={SIZES[sizeIdx].className}>{children}</div>

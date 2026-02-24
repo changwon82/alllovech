@@ -5,34 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, useTransition } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
-import { BOOK_FULL_TO_CODE } from "./plan";
 import { saveReflection, deleteReflection, type Reflection } from "./actions";
 import { createClient } from "@/lib/supabase/client";
-
-// 한글 책코드 → 대한성서공회 book 파라미터
-const BSK_BOOK_CODE: Record<string, string> = {
-  창: "gen", 출: "ex",  레: "lev", 민: "num", 신: "deu",
-  수: "jos", 삿: "jdg", 룻: "rut", 삼상: "1sa", 삼하: "2sa",
-  왕상: "1ki", 왕하: "2ki", 대상: "1ch", 대하: "2ch",
-  라: "ezr", 느: "neh", 더: "est", 욥: "job", 시: "psa",
-  잠: "pro", 전: "ecc", 아: "sol", 사: "isa", 렘: "jer",
-  애: "lam", 겔: "eze", 단: "dan", 호: "hos", 욜: "joe",
-  암: "amo", 옵: "oba", 욘: "jon", 미: "mic", 나: "nah",
-  합: "hab", 습: "zep", 학: "hag", 슥: "zec", 말: "mal",
-  마: "mat", 막: "mar", 눅: "luk", 요: "joh", 행: "act",
-  롬: "rom", 고전: "1co", 고후: "2co", 갈: "gal", 엡: "eph",
-  빌: "phi", 골: "col", 살전: "1th", 살후: "2th",
-  딤전: "1ti", 딤후: "2ti", 딛: "tit", 몬: "phm",
-  히: "heb", 약: "jam", 벧전: "1pe", 벧후: "2pe",
-  요일: "1jo", 요이: "2jo", 요삼: "3jo", 유: "jud", 계: "rev",
-};
-
-
-function getBSKUrl(bookCode: string, chapter: number): string {
-  const bsk = BSK_BOOK_CODE[bookCode];
-  if (!bsk) return "";
-  return `https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE&book=${bsk}&chap=${chapter}&sec=1&cVersion=&fontSize=15px&fontWeight=normal`;
-}
 
 function getLocalDayOfYear(): number {
   const now = new Date();
@@ -393,41 +367,6 @@ export default function BiblePageContent({
           <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
         </section>
       )}
-
-      {/* 대한성서공회 개역개정 링크 */}
-      {sections.length > 0 && (() => {
-        const seen = new Set<string>();
-        const links = sections.flatMap((sec) => {
-          const key = `${sec.book}:${sec.chapter}`;
-          if (seen.has(key)) return [];
-          seen.add(key);
-          const bookCode = BOOK_FULL_TO_CODE[sec.book.normalize("NFC")] ?? sec.book;
-          const url = getBSKUrl(bookCode, sec.chapter);
-          if (!url) return [];
-          return [{ key, label: `${sec.book.normalize("NFC")} ${sec.chapter}장`, url }];
-        });
-        if (links.length === 0) return null;
-        return (
-          <section className="mt-4 rounded-2xl bg-white px-4 py-3 shadow-sm">
-            <div className="mb-1.5 text-xs font-semibold text-neutral-500">개역개정 (대한성서공회)</div>
-            <div className="flex flex-wrap gap-x-1 gap-y-1">
-              {links.map((l, i) => (
-                <span key={l.key} className="flex items-center">
-                  <a
-                    href={l.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-md px-2 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900"
-                  >
-                    {l.label} ↗
-                  </a>
-                  {i < links.length - 1 && <span className="text-neutral-300">·</span>}
-                </span>
-              ))}
-            </div>
-          </section>
-        );
-      })()}
 
       {/* 성경 본문 */}
       {sections.length > 0 && (
