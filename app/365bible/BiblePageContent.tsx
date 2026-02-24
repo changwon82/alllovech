@@ -7,7 +7,7 @@ import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
 import { saveReflection, deleteReflection, type Reflection } from "./actions";
 import { createClient } from "@/lib/supabase/client";
-import LoginForm from "@/app/login/LoginForm";
+import LoginButton from "./LoginButton";
 
 function getLocalDayOfYear(): number {
   const now = new Date();
@@ -93,8 +93,6 @@ export default function BiblePageContent({
       router.push(`/365bible?day=${targetDay}&version=${versionCode}${compareMode ? "&compare=true" : ""}${cw}`, { scroll: false });
     });
   }
-
-  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // 체크 기능
   const [checkedDays, setCheckedDays] = useState<Set<number>>(new Set(initialCheckedDays));
@@ -360,12 +358,9 @@ export default function BiblePageContent({
               </p>
             )}
             {!user && (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="shrink-0 text-xs text-neutral-400 hover:text-navy"
-              >
+              <LoginButton className="shrink-0 text-xs text-neutral-400 hover:text-navy">
                 읽기체크·묵상·나눔 등은{"\n"}<span className="text-navy underline">로그인</span> 후 이용 가능
-              </button>
+              </LoginButton>
             )}
           </div>
         </section>
@@ -598,19 +593,6 @@ export default function BiblePageContent({
       {/* 마지막 섹션이 짧아도 스크롤로 상단 감지 영역까지 올릴 수 있도록 여백 */}
       {sections.length > 0 && <div className="h-[60vh]" />}
 
-      {/* 로그인 모달 */}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowLoginModal(false)}>
-          <div className="relative mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setShowLoginModal(false)} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 text-lg">✕</button>
-            <h2 className="mb-4 text-lg font-bold text-navy">로그인</h2>
-            <LoginForm next="/365bible" />
-            <p className="mt-4 text-center text-sm text-neutral-500">
-              아직 계정이 없으신가요? <a href="/signup" className="font-medium text-navy hover:underline">회원가입</a>
-            </p>
-          </div>
-        </div>
-      )}
     </>
   );
 }

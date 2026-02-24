@@ -3,16 +3,22 @@
 import { useState } from "react";
 import LoginForm from "@/app/login/LoginForm";
 
-export default function LoginButton() {
+export default function LoginButton({
+  className,
+  children,
+}: {
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-full border border-neutral-300 px-3 py-1 text-xs text-neutral-600 hover:border-navy hover:text-navy"
+        className={className ?? "rounded-full border border-neutral-300 px-3 py-1 text-xs text-neutral-600 hover:border-navy hover:text-navy"}
       >
-        로그인
+        {children ?? "로그인"}
       </button>
 
       {open && (
