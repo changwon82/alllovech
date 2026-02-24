@@ -94,6 +94,13 @@ export default function BiblePageContent({
     });
   }
 
+  // 병행보기 비교 번역본 기억
+  useEffect(() => {
+    if (compareMode && compareVersionCode) {
+      localStorage.setItem("bible-compare-with", compareVersionCode);
+    }
+  }, [compareMode, compareVersionCode]);
+
   // 체크 기능
   const [checkedDays, setCheckedDays] = useState<Set<number>>(new Set(initialCheckedDays));
   const isChecked = checkedDays.has(day);
@@ -422,13 +429,16 @@ export default function BiblePageContent({
                     );
                   })}
                   {versions.length > 1 && (
-                    <Link
-                      href={
-                        compareMode
-                          ? `/365bible?day=${day}&version=${versionCode}`
-                          : `/365bible?day=${day}&version=${versionCode}&compare=true`
-                      }
-                      scroll={false}
+                    <button
+                      onClick={() => {
+                        if (compareMode) {
+                          router.push(`/365bible?day=${day}&version=${versionCode}`, { scroll: false });
+                        } else {
+                          const saved = localStorage.getItem("bible-compare-with");
+                          const cw = saved && saved !== versionCode ? saved : "";
+                          router.push(`/365bible?day=${day}&version=${versionCode}&compare=true${cw ? `&compareWith=${cw}` : ""}`, { scroll: false });
+                        }
+                      }}
                       className={
                         compareMode
                           ? "rounded-full bg-blue px-3 py-1 text-xs font-medium text-white"
@@ -436,7 +446,7 @@ export default function BiblePageContent({
                       }
                     >
                       병행보기
-                    </Link>
+                    </button>
                   )}
                 </div>
               ) : null
