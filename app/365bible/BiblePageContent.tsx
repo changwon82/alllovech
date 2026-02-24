@@ -357,6 +357,11 @@ export default function BiblePageContent({
               관리자 승인 후 체크 기능을 이용할 수 있습니다.
             </p>
           )}
+          {!user && (
+            <p className="mt-2 text-xs text-neutral-400">
+              읽기체크·묵상·나눔 등은 <a href="/login?next=/365bible" className="text-navy underline">로그인</a> 후 이용할 수 있습니다.
+            </p>
+          )}
         </section>
       ) : (
         <section ref={infoRef} className="mt-4 rounded-2xl bg-white p-6 text-center text-neutral-500 shadow-sm">
