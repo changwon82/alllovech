@@ -7,6 +7,7 @@ import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
 import { saveReflection, deleteReflection, type Reflection } from "./actions";
 import { createClient } from "@/lib/supabase/client";
+import LoginForm from "@/app/login/LoginForm";
 
 function getLocalDayOfYear(): number {
   const now = new Date();
@@ -92,6 +93,8 @@ export default function BiblePageContent({
       router.push(`/365bible?day=${targetDay}&version=${versionCode}${compareMode ? "&compare=true" : ""}${cw}`, { scroll: false });
     });
   }
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // 체크 기능
   const [checkedDays, setCheckedDays] = useState<Set<number>>(new Set(initialCheckedDays));
@@ -351,17 +354,20 @@ export default function BiblePageContent({
                 {isChecked ? "읽음 ✓" : "읽음 체크"}
               </button>
             )}
+            {user && !isActive && (
+              <p className="shrink-0 text-xs text-neutral-400">
+                관리자 승인 대기 중
+              </p>
+            )}
+            {!user && (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="shrink-0 text-xs text-neutral-400 hover:text-navy"
+              >
+                읽기체크·묵상·나눔 등은{"\n"}<span className="text-navy underline">로그인</span> 후 이용 가능
+              </button>
+            )}
           </div>
-          {user && !isActive && (
-            <p className="mt-2 text-xs text-neutral-400">
-              관리자 승인 후 체크 기능을 이용할 수 있습니다.
-            </p>
-          )}
-          {!user && (
-            <p className="mt-2 text-xs text-neutral-400">
-              읽기체크·묵상·나눔 등은 <a href="/login?next=/365bible" className="text-navy underline">로그인</a> 후 이용할 수 있습니다.
-            </p>
-          )}
         </section>
       ) : (
         <section ref={infoRef} className="mt-4 rounded-2xl bg-white p-6 text-center text-neutral-500 shadow-sm">
@@ -591,6 +597,17 @@ export default function BiblePageContent({
       </div>
       {/* 마지막 섹션이 짧아도 스크롤로 상단 감지 영역까지 올릴 수 있도록 여백 */}
       {sections.length > 0 && <div className="h-[60vh]" />}
+
+      {/* 로그인 모달 */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowLoginModal(false)}>
+          <div className="relative mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowLoginModal(false)} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 text-lg">✕</button>
+            <h2 className="mb-4 text-lg font-bold text-navy">로그인</h2>
+            <LoginForm next="/365bible" />
+          </div>
+        </div>
+      )}
     </>
   );
 }
