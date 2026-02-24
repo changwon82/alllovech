@@ -144,7 +144,7 @@ const getCachedVersions = unstable_cache(
       .order("id");
     return (data ?? []) as { id: number; code: string; name: string }[];
   },
-  ["bible-versions"],
+  ["bible-versions-v2"],
   { revalidate: 3600 }
 );
 
