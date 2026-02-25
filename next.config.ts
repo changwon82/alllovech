@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { hostname: "img.youtube.com" },
+      { protocol: "http", hostname: "alllovechurch.org" },
     ],
   },
   poweredByHeader: false,
