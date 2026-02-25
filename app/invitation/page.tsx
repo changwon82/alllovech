@@ -9,9 +9,9 @@ const images = [
 ];
 
 export const metadata: Metadata = {
-  title: "서울필로스연주회 | 새봄을 바라봄 | 2026년 3월 7일(토) 오후 5시",
+  title: "주민초청연주회 | 새봄을 바라봄 | 26년 3월 7일(토) 오후5시",
   openGraph: {
-    title: "서울필로스연주회 | 새봄을 바라봄 | 2026년 3월 7일(토) 오후 5시",
+    title: "주민초청연주회 | 새봄을 바라봄 | 26년 3월 7일(토) 오후5시",
     images: [{ url: images[0] }],
   },
 };
