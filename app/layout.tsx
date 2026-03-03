@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -21,6 +22,10 @@ const notoSerifKR = Noto_Serif_KR({
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+export const viewport: Viewport = {
+  themeColor: "#002c60",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -55,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${notoSansKR.variable} ${notoSerifKR.variable} antialiased`}>
+        <ServiceWorkerRegister />
         {children}
       </body>
     </html>

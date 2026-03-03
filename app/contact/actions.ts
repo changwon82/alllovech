@@ -3,6 +3,8 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Resend } from "resend";
+import { sendPushToUsers } from "@/lib/push";
+import { contactPushPayload } from "@/lib/push-messages";
 
 export async function submitContact(content: string) {
   const { supabase, user } = await getSessionUser();
@@ -45,6 +47,9 @@ export async function submitContact(content: string) {
         message: trimmed,
       }))
     );
+
+    // 푸시 알림 (fire-and-forget)
+    sendPushToUsers(adminIds, contactPushPayload(userName)).catch(() => {});
   }
 
   return { success: true };

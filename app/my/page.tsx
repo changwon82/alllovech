@@ -6,6 +6,7 @@ import { extractBooksFromTitle } from "@/app/365bible/plan";
 import MyPageContent from "./MyPageContent";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
+import PushNotificationToggle from "@/app/components/PushNotificationToggle";
 import PageHeader from "@/app/components/ui/PageHeader";
 
 export const metadata = { title: "마이페이지 | 다애교회" };
@@ -96,6 +97,10 @@ export default async function MyPage() {
         reflections={reflections}
         dayToBooks={dayToBooks}
       />
+
+      <div className="mt-6">
+        <PushNotificationToggle />
+      </div>
 
       <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>

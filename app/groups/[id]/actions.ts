@@ -1,6 +1,8 @@
 "use server";
 
 import { getSessionUser } from "@/lib/supabase/server";
+import { sendPushToUser } from "@/lib/push";
+import { commentPushPayload, amenPushPayload } from "@/lib/push-messages";
 
 export async function addComment(reflectionId: string, content: string) {
   const { supabase, user } = await getSessionUser();
@@ -17,7 +19,7 @@ export async function addComment(reflectionId: string, content: string) {
   // 묵상 작성자에게 알림 (본인 제외)
   const { data: reflection } = await supabase
     .from("reflections")
-    .select("user_id")
+    .select("user_id, day")
     .eq("id", reflectionId)
     .single();
 
@@ -28,6 +30,10 @@ export async function addComment(reflectionId: string, content: string) {
       actor_id: user.id,
       reference_id: reflectionId,
     });
+
+    // 푸시 알림 (fire-and-forget)
+    const actorName = (data as unknown as { profiles?: { name?: string } }).profiles?.name ?? "누군가";
+    sendPushToUser(reflection.user_id, commentPushPayload(actorName, reflection.day)).catch(() => {});
   }
 
   return { comment: data };
@@ -75,17 +81,26 @@ export async function toggleAmen(reflectionId: string) {
     // 묵상 작성자에게 알림 (본인 제외)
     const { data: reflection } = await supabase
       .from("reflections")
-      .select("user_id")
+      .select("user_id, day")
       .eq("id", reflectionId)
       .single();
 
     if (reflection && reflection.user_id !== user.id) {
-      await supabase.from("notifications").insert({
-        user_id: reflection.user_id,
-        type: "amen",
-        actor_id: user.id,
-        reference_id: reflectionId,
-      });
+      const [, { data: actorProfile }] = await Promise.all([
+        supabase.from("notifications").insert({
+          user_id: reflection.user_id,
+          type: "amen",
+          actor_id: user.id,
+          reference_id: reflectionId,
+        }),
+        supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
+      ]);
+
+      // 푸시 알림 (fire-and-forget)
+      sendPushToUser(
+        reflection.user_id,
+        amenPushPayload(actorProfile?.name ?? "누군가", reflection.day)
+      ).catch(() => {});
     }
 
     return { toggled: true };
