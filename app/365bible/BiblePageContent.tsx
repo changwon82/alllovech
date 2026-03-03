@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useCallback, useTransition } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
 import { saveReflection, deleteReflection, type Reflection } from "./actions";
+import { BOOK_FULL_TO_CODE } from "./plan";
 import { createClient } from "@/lib/supabase/client";
 import LoginButton from "./LoginButton";
 
@@ -197,6 +198,7 @@ export default function BiblePageContent({
     setReflectionText(existingReflection?.content ?? "");
     setReflectionVisibility(existingReflection?.visibility ?? "private");
     setIsEditing(false);
+    setReflectionOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day]);
 
@@ -221,6 +223,78 @@ export default function BiblePageContent({
         setIsEditing(false);
       }
     });
+  }
+
+  // 묵상 모달
+  const [reflectionOpen, setReflectionOpen] = useState(false);
+  const reflectionTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 절 클릭 → textarea에 약식 참조 삽입
+  function insertVerseReference(book: string, chapter: number, verse: number) {
+    const shortBook = BOOK_FULL_TO_CODE[book] ?? book;
+    const ref = `[${shortBook} ${chapter}:${verse}]`;
+    const ta = reflectionTextareaRef.current;
+    if (ta) {
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const newText = reflectionText.slice(0, start) + ref + reflectionText.slice(end);
+      setReflectionText(newText);
+      requestAnimationFrame(() => {
+        ta.focus();
+        const pos = start + ref.length;
+        ta.setSelectionRange(pos, pos);
+      });
+    } else {
+      setReflectionText((prev) => prev + ref);
+    }
+  }
+
+  // 읽기 모드에서 [약식이름 장:절] 참조를 링크로 렌더링
+  const codeToFull = useRef(
+    Object.fromEntries(Object.entries(BOOK_FULL_TO_CODE).map(([full, code]) => [code, full]))
+  ).current;
+
+  function renderReflectionContent(content: string) {
+    const pattern = /\[([가-힣a-zA-Z0-9]+ \d+:\d+)\]/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = pattern.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(content.slice(lastIndex, match.index));
+      }
+      const refText = match[1];
+      const refMatch = refText.match(/^(.+) (\d+):(\d+)$/);
+      if (refMatch) {
+        const [, refBook, refChapter, refVerse] = refMatch;
+        // 약식이름이면 원래 이름으로 변환하여 id 검색 (원래 이름이면 그대로 사용)
+        const fullBook = codeToFull[refBook] ?? refBook;
+        parts.push(
+          <button
+            key={`ref-${match.index}`}
+            onClick={() => {
+              const el = document.getElementById(`v-${fullBook}-${refChapter}-${refVerse}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add("bg-accent-light");
+                setTimeout(() => el.classList.remove("bg-accent-light"), 5000);
+              }
+            }}
+            className="font-medium text-navy underline underline-offset-2 hover:text-navy/70"
+          >
+            [{refText}]
+          </button>
+        );
+      } else {
+        parts.push(match[0]);
+      }
+      lastIndex = pattern.lastIndex;
+    }
+    if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex));
+    }
+    return parts;
   }
 
   const infoRef = useRef<HTMLElement>(null);
@@ -486,7 +560,12 @@ export default function BiblePageContent({
                     {getSectionHeader(sec)}
                   </h2>
                   {sec.verses.map((v) => (
-                    <div key={`${v.book}-${v.chapter}-${v.verse}`}>
+                    <div
+                      key={`${v.book}-${v.chapter}-${v.verse}`}
+                      id={`v-${v.book}-${v.chapter}-${v.verse}`}
+                      onClick={reflectionOpen && (isEditing || !reflection) ? () => insertVerseReference(v.book, v.chapter, v.verse) : undefined}
+                      className={`rounded transition-colors duration-700${reflectionOpen && (isEditing || !reflection) ? " cursor-pointer active:bg-accent-light" : ""}`}
+                    >
                       {v.heading && (
                         <p className={`mt-5 mb-2 font-bold ${v.highlighted ? "text-blue" : "text-blue/30"}`}>
                           {v.heading}
@@ -515,92 +594,134 @@ export default function BiblePageContent({
         </section>
       )}
 
-      {/* 묵상 기록 */}
-      {user && isActive && (
-        <section className="mt-10">
-          <h3 className="mb-3 text-sm font-bold text-navy">오늘의 묵상</h3>
+      {/* 마지막 섹션이 짧아도 스크롤로 상단 감지 영역까지 올릴 수 있도록 여백 */}
+      {sections.length > 0 && <div className="h-[60vh]" />}
 
-          {reflection && !isEditing ? (
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
-                {reflection.content}
-              </p>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-400">
-                    {reflectionVisibility === "private" ? "나만 보기" : reflectionVisibility === "public" ? "공개" : "소그룹 공유"}
-                  </span>
-                  {reflectionVisibility === "group" && (
-                    <a href="/groups" className="text-xs text-blue hover:underline">
-                      소그룹 피드에서 보기 &rarr;
-                    </a>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="text-xs text-neutral-500 hover:text-navy"
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={handleDeleteReflection}
-                    disabled={isSaving}
-                    className="text-xs text-neutral-400 hover:text-red-500"
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
-              <textarea
-                value={reflectionText}
-                onChange={(e) => setReflectionText(e.target.value)}
-                placeholder="오늘 말씀을 통해 느낀 점을 기록해보세요..."
-                rows={4}
-                className="w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-neutral-400 focus:border-navy focus:ring-1 focus:ring-navy"
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <select
-                  value={reflectionVisibility}
-                  onChange={(e) => setReflectionVisibility(e.target.value as "private" | "group" | "public")}
-                  className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
+      {/* 묵상 모달 */}
+      {user && isActive && (
+        <>
+          {/* 접힌 상태: pill 버튼 */}
+          {!reflectionOpen && (
+            <button
+              onClick={() => setReflectionOpen(true)}
+              className={`fixed bottom-20 right-4 z-40 flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-all active:scale-95 ${
+                reflection
+                  ? "bg-accent text-white"
+                  : "bg-navy text-white hover:brightness-110"
+              }`}
+            >
+              {reflection ? "묵상 ✓" : "묵상"}
+            </button>
+          )}
+
+          {/* 펼친 상태: 모달 */}
+          {reflectionOpen && (
+            <div
+              style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 56px)" }}
+              className={`fixed right-0 left-0 z-[60] flex max-h-[45vh] flex-col rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.12)] transition-all duration-200 md:bottom-4 md:left-1/2 md:right-auto md:w-[80%] md:max-w-2xl md:-translate-x-1/2 md:rounded-2xl ${
+                isEditing || !reflection
+                  ? "bg-white"
+                  : "bg-white/70 backdrop-blur-sm"
+              }`}
+            >
+              {/* 헤더 */}
+              <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                <span className="text-sm font-bold text-navy">오늘의 묵상</span>
+                <button
+                  onClick={() => {
+                    setReflectionOpen(false);
+                    setIsEditing(false);
+                    setReflectionText(reflection?.content ?? "");
+                    setReflectionVisibility(reflection?.visibility ?? "private");
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
                 >
-                  <option value="private">나만 보기</option>
-                  <option value="group">소그룹 공유</option>
-                  <option value="public">공개</option>
-                </select>
-                <div className="flex gap-2">
-                  {(reflection || isEditing) && (
-                    <button
-                      onClick={() => {
-                        setIsEditing(false);
-                        setReflectionText(reflection?.content ?? "");
-                        setReflectionVisibility(reflection?.visibility ?? "private");
-                      }}
-                      className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* 내용 */}
+              <div className="min-h-0 flex-1 overflow-y-auto px-4">
+                {reflection && !isEditing ? (
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+                    {renderReflectionContent(reflection.content)}
+                  </p>
+                ) : (
+                  <textarea
+                    ref={reflectionTextareaRef}
+                    value={reflectionText}
+                    onChange={(e) => setReflectionText(e.target.value)}
+                    placeholder="오늘 말씀을 통해 느낀 점을 기록해보세요..."
+                    rows={4}
+                    className="w-full resize-none bg-transparent text-sm leading-relaxed text-neutral-700 outline-none placeholder:text-neutral-400"
+                  />
+                )}
+              </div>
+
+              {/* 하단 고정: 액션 버튼 */}
+              <div className="flex items-center justify-between border-t border-neutral-100 px-4 py-2.5">
+                {reflection && !isEditing ? (
+                  <>
+                    <span className="text-xs text-neutral-400">
+                      {reflectionVisibility === "private" ? "나만 보기" : reflectionVisibility === "public" ? "공개" : "소그룹 공유"}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-xs text-neutral-500 hover:text-navy"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={handleDeleteReflection}
+                        disabled={isSaving}
+                        className="text-xs text-neutral-400 hover:text-red-500"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <select
+                      value={reflectionVisibility}
+                      onChange={(e) => setReflectionVisibility(e.target.value as "private" | "group" | "public")}
+                      className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
                     >
-                      취소
-                    </button>
-                  )}
-                  <button
-                    onClick={handleSaveReflection}
-                    disabled={isSaving || !reflectionText.trim()}
-                    className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
-                  >
-                    {isSaving ? "저장 중..." : reflection ? "수정" : "저장"}
-                  </button>
-                </div>
+                      <option value="private">나만 보기</option>
+                      <option value="group">소그룹 공유</option>
+                      <option value="public">공개</option>
+                    </select>
+                    <div className="flex gap-2">
+                      {(reflection || isEditing) && (
+                        <button
+                          onClick={() => {
+                            setIsEditing(false);
+                            setReflectionText(reflection?.content ?? "");
+                            setReflectionVisibility(reflection?.visibility ?? "private");
+                          }}
+                          className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+                        >
+                          취소
+                        </button>
+                      )}
+                      <button
+                        onClick={handleSaveReflection}
+                        disabled={isSaving || !reflectionText.trim()}
+                        className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+                      >
+                        {isSaving ? "저장 중..." : reflection ? "수정" : "저장"}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
-        </section>
+        </>
       )}
-
-      {/* 마지막 섹션이 짧아도 스크롤로 상단 감지 영역까지 올릴 수 있도록 여백 */}
-      {sections.length > 0 && <div className="h-[60vh]" />}
 
       {/* 플로팅 위로 버튼 */}
       <ScrollToTopButton />
