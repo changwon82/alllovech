@@ -5,7 +5,7 @@ import Link from "next/link";
 import { updateProfile } from "./actions";
 import { saveReflection } from "@/app/365bible/actions";
 import { createClient } from "@/lib/supabase/client";
-import { BOOK_FULL_TO_CODE } from "@/app/365bible/plan";
+import { BOOK_FULL_TO_CODE, BOOK_NAMES_ORDERED } from "@/app/365bible/plan";
 import Card from "@/app/components/ui/Card";
 import StatCard from "@/app/components/ui/StatCard";
 import Badge from "@/app/components/ui/Badge";
@@ -40,6 +40,7 @@ export default function MyPageContent({
   today,
   checkedDays,
   reflections,
+  dayToBooks,
 }: {
   userId: string;
   name: string;
@@ -50,6 +51,7 @@ export default function MyPageContent({
   today: number;
   checkedDays: number[];
   reflections: ReflectionSummary[];
+  dayToBooks: Record<number, string[]>;
 }) {
   const [name, setName] = useState(initialName);
   const [phone, setPhone] = useState(initialPhone ?? "");
@@ -60,7 +62,8 @@ export default function MyPageContent({
   const [editPhone, setEditPhone] = useState(initialPhone ?? "");
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [selectedBook, setSelectedBook] = useState("");
+  const [visibleCount, setVisibleCount] = useState(10);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -233,15 +236,32 @@ export default function MyPageContent({
     });
   }
 
-  // 검색 필터 + 페이지네이션
-  const filteredReflections = useMemo(() => {
-    if (!searchQuery.trim()) return localReflections;
-    const q = searchQuery.trim().toLowerCase();
-    return localReflections.filter(r => r.content.toLowerCase().includes(q));
-  }, [localReflections, searchQuery]);
+  // 묵상이 존재하는 책 목록 (성경 순서 유지)
+  const availableBooks = useMemo(() => {
+    const bookSet = new Set<string>();
+    for (const r of localReflections) {
+      const books = dayToBooks[r.day];
+      if (books) books.forEach((b) => bookSet.add(b));
+    }
+    return BOOK_NAMES_ORDERED.filter((b) => bookSet.has(b));
+  }, [localReflections, dayToBooks]);
 
-  const visibleReflections = searchQuery ? filteredReflections : filteredReflections.slice(0, visibleCount);
-  const hasMore = !searchQuery && visibleCount < localReflections.length;
+  // 검색 + 책 필터 + 페이지네이션
+  const filteredReflections = useMemo(() => {
+    let list = localReflections;
+    if (selectedBook) {
+      list = list.filter((r) => (dayToBooks[r.day] ?? []).includes(selectedBook));
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter((r) => r.content.toLowerCase().includes(q));
+    }
+    return list;
+  }, [localReflections, searchQuery, selectedBook, dayToBooks]);
+
+  const isFiltering = !!searchQuery || !!selectedBook;
+  const visibleReflections = isFiltering ? filteredReflections : filteredReflections.slice(0, visibleCount);
+  const hasMore = !isFiltering && visibleCount < localReflections.length;
 
   // 12개월로 그룹핑
   const months: { month: number; days: { day: number; checked: boolean; hasReflection: boolean; isToday: boolean; isFuture: boolean }[] }[] = [];
@@ -350,7 +370,7 @@ export default function MyPageContent({
               <span className="inline-block h-[10px] w-[10px] rounded-sm bg-accent/60" /> 읽음
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-[10px] w-[10px] rounded-sm bg-accent" /> 읽음+묵상
+              <span className="inline-block h-[10px] w-[10px] rounded-sm bg-accent" /> 묵상
             </span>
           </div>
         </div>
@@ -369,9 +389,11 @@ export default function MyPageContent({
                     } ${
                       d.isFuture
                         ? "bg-neutral-100"
-                        : d.checked
-                          ? d.hasReflection ? "bg-accent" : "bg-accent/60"
-                          : "bg-neutral-200"
+                        : d.hasReflection
+                          ? "bg-accent"
+                          : d.checked
+                            ? "bg-accent/60"
+                            : "bg-neutral-200"
                     }`}
                   />
                 ))}
@@ -390,31 +412,45 @@ export default function MyPageContent({
           </p>
         ) : (
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-            {/* 검색 */}
-            <div className="relative px-4 py-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
-              <input
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(20); }}
-                placeholder="묵상 내용 검색"
-                className="w-full bg-transparent py-1 pl-6 pr-6 text-sm outline-none placeholder:text-neutral-400"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+            {/* 검색 + 책 필터 */}
+            <div className="flex items-center gap-2 px-4 py-2.5">
+              <div className="relative flex-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+                <input
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(10); }}
+                  placeholder="묵상 내용 검색"
+                  className="w-full bg-transparent py-1 pl-6 pr-6 text-sm outline-none placeholder:text-neutral-400"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {availableBooks.length > 0 && (
+                <select
+                  value={selectedBook}
+                  onChange={(e) => { setSelectedBook(e.target.value); setVisibleCount(10); }}
+                  className="shrink-0 rounded-lg bg-transparent px-2 py-1.5 text-xs text-neutral-600 outline-none"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
+                  <option value="">전체</option>
+                  {availableBooks.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
               )}
             </div>
 
-            {/* 검색 결과 없음 */}
-            {searchQuery && filteredReflections.length === 0 && (
+            {/* 검색/필터 결과 없음 */}
+            {isFiltering && filteredReflections.length === 0 && (
               <p className="px-4 py-8 text-center text-sm text-neutral-400">검색 결과가 없습니다</p>
             )}
 
@@ -464,9 +500,10 @@ export default function MyPageContent({
                       <>
                         <p
                           ref={(el) => { if (el) contentRefs.current.set(r.id, el); else contentRefs.current.delete(r.id); }}
+                          onClick={() => { if (isOpen || overflowIds.has(r.id)) setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; }); }}
                           className={`text-sm leading-relaxed text-neutral-700 pr-5 ${
                             isOpen || searchQuery ? "whitespace-pre-line" : "line-clamp-2"
-                          }`}
+                          } ${isOpen || overflowIds.has(r.id) ? "cursor-pointer" : ""}`}
                         >
                           {renderContent(r.content)}
                         </p>
@@ -498,7 +535,7 @@ export default function MyPageContent({
             {/* 더 보기 */}
             {hasMore && (
               <button
-                onClick={() => setVisibleCount(prev => prev + 20)}
+                onClick={() => setVisibleCount(prev => prev + 10)}
                 className="w-full py-3 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-50 hover:text-navy"
               >
                 더 보기 ({visibleCount}/{reflections.length})

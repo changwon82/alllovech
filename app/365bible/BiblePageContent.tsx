@@ -619,14 +619,16 @@ export default function BiblePageContent({
               {isChecked ? "읽음 ✓" : "읽음 체크"}
             </button>
             <button
-              onClick={() => setReflectionOpen(true)}
+              onClick={() => isChecked && setReflectionOpen(true)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-all active:scale-95 ${
-                reflection
-                  ? "bg-accent text-white"
-                  : "bg-navy text-white hover:brightness-110"
+                !isChecked
+                  ? "bg-neutral-200 text-neutral-400 cursor-not-allowed"
+                  : reflection
+                    ? "bg-accent text-white"
+                    : "border border-neutral-300 bg-white text-neutral-600 hover:border-accent hover:text-accent"
               }`}
             >
-              {reflection ? "묵상 ✓" : "묵상"}
+              {reflection ? "묵상 ✓" : "묵상 기록"}
             </button>
           </div>
 

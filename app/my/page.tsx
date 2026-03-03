@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
+import { extractBooksFromTitle } from "@/app/365bible/plan";
 import MyPageContent from "./MyPageContent";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
@@ -36,7 +37,7 @@ export default async function MyPage() {
   const year = getKoreaYear();
   const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  const [profileResult, checksResult, reflectionsResult, roles, unreadCount, groupLeader] = await Promise.all([
+  const [profileResult, checksResult, reflectionsResult, readingsResult, roles, unreadCount, groupLeader] = await Promise.all([
     supabase
       .from("profiles")
       .select("name, status, phone, avatar_url")
@@ -53,6 +54,9 @@ export default async function MyPage() {
       .eq("user_id", user.id)
       .eq("year", year)
       .order("day", { ascending: false }),
+    supabase
+      .from("bible_readings")
+      .select("day, title"),
     getUserRoles(supabase, user.id),
     getUnreadCount(supabase, user.id),
     isGroupLeader(supabase, user.id),
@@ -63,6 +67,13 @@ export default async function MyPage() {
   const reflections = (reflectionsResult.data ?? []) as {
     id: string; day: number; content: string; visibility: string; created_at: string;
   }[];
+
+  // day → 책 이름 배열 매핑
+  const dayToBooks: Record<number, string[]> = {};
+  for (const r of (readingsResult.data ?? []) as { day: number; title: string | null }[]) {
+    if (r.title) dayToBooks[r.day] = extractBooksFromTitle(r.title);
+  }
+
   const isAdmin = isAdminRole(roles);
   const canViewGroups = isAdmin || groupLeader;
 
@@ -83,6 +94,7 @@ export default async function MyPage() {
         today={today}
         checkedDays={checkedDays}
         reflections={reflections}
+        dayToBooks={dayToBooks}
       />
 
       <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
