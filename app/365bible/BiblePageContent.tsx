@@ -459,10 +459,10 @@ export default function BiblePageContent({
             {user && isActive && (
               <button
                 onClick={handleToggleCheck}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                   isChecked
-                    ? "bg-accent text-white"
-                    : "border border-neutral-300 text-neutral-500 hover:border-accent hover:text-accent"
+                    ? "border-accent bg-accent text-white"
+                    : "border-neutral-300 text-neutral-500 hover:border-accent hover:text-accent"
                 }`}
               >
                 {isChecked ? "읽음 ✓" : "읽음 체크"}
@@ -604,11 +604,21 @@ export default function BiblePageContent({
       {/* 묵상 모달 */}
       {user && isActive && (
         <>
-          {/* 접힌 상태: pill 버튼 */}
-          {!reflectionOpen && (
+          {/* 플로팅 버튼 (묵상 모달 열리면 반투명) */}
+          <div className={`fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2 transition-opacity ${reflectionOpen ? "pointer-events-none opacity-40" : "opacity-100"}`}>
+            <button
+              onClick={handleToggleCheck}
+              className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-all active:scale-95 ${
+                isChecked
+                  ? "bg-accent text-white"
+                  : "border border-neutral-300 bg-white text-neutral-600 hover:border-accent hover:text-accent"
+              }`}
+            >
+              {isChecked ? "읽음 ✓" : "읽음 체크"}
+            </button>
             <button
               onClick={() => setReflectionOpen(true)}
-              className={`fixed bottom-20 right-4 z-40 flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-all active:scale-95 ${
+              className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-all active:scale-95 ${
                 reflection
                   ? "bg-accent text-white"
                   : "bg-navy text-white hover:brightness-110"
@@ -616,7 +626,7 @@ export default function BiblePageContent({
             >
               {reflection ? "묵상 ✓" : "묵상"}
             </button>
-          )}
+          </div>
 
           {/* 펼친 상태: 모달 */}
           {reflectionOpen && (

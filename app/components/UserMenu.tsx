@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function UserMenu({ name }: { name: string }) {
+export default function UserMenu({ name, canViewGroups = false }: { name: string; canViewGroups?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,12 +37,14 @@ export default function UserMenu({ name }: { name: string }) {
           >
             마이페이지
           </a>
-          <a
-            href="/groups"
-            className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
-          >
-            함께읽기
-          </a>
+          {canViewGroups && (
+            <a
+              href="/groups"
+              className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
+            >
+              함께읽기
+            </a>
+          )}
           <hr className="my-1 border-neutral-100" />
           <button
             onClick={handleLogout}

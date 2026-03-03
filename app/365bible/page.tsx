@@ -534,7 +534,7 @@ export default async function BiblePage({
           )}
         </div>
         {user ? (
-          <UserMenu name={userProfile?.name ?? "이름 없음"} />
+          <UserMenu name={userProfile?.name ?? "이름 없음"} canViewGroups={canViewGroups} />
         ) : (
           <LoginButton />
         )}
