@@ -11,7 +11,6 @@ import {
 import {
   savePushSubscription,
   deletePushSubscription,
-  sendTestPush,
 } from "@/app/notifications/push-actions";
 
 export default function PushNotificationToggle() {
@@ -85,26 +84,15 @@ export default function PushNotificationToggle() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {subscribed && (
-            <button
-              onClick={() => startTransition(async () => { await sendTestPush(); })}
-              disabled={isPending}
-              className="text-xs text-neutral-400 hover:text-navy"
-            >
-              테스트
-            </button>
-          )}
-          <button
-            onClick={handleToggle}
-            disabled={isPending}
-            className={`relative h-7 w-12 rounded-full transition-colors ${subscribed ? "bg-navy" : "bg-neutral-300"}`}
-          >
-            <span
-              className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${subscribed ? "left-[22px]" : "left-0.5"}`}
-            />
-          </button>
-        </div>
+        <button
+          onClick={handleToggle}
+          disabled={isPending}
+          className={`relative h-7 w-12 rounded-full transition-colors ${subscribed ? "bg-navy" : "bg-neutral-300"}`}
+        >
+          <span
+            className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${subscribed ? "left-[22px]" : "left-0.5"}`}
+          />
+        </button>
       </div>
     </div>
   );
