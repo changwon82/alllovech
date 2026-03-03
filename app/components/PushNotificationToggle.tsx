@@ -24,7 +24,7 @@ export default function PushNotificationToggle() {
     setSupported(ok);
     if (ok) {
       setPermission(getNotificationPermission());
-      getExistingSubscription().then((sub) => setSubscribed(!!sub));
+      getExistingSubscription().then((sub) => setSubscribed(!!sub)).catch(() => {});
     }
   }, []);
 
@@ -46,24 +46,28 @@ export default function PushNotificationToggle() {
 
   function handleToggle() {
     startTransition(async () => {
-      if (subscribed) {
-        const sub = await getExistingSubscription();
-        if (sub) {
-          await deletePushSubscription(sub.endpoint);
-          await unsubscribePush();
+      try {
+        if (subscribed) {
+          const sub = await getExistingSubscription();
+          if (sub) {
+            await deletePushSubscription(sub.endpoint);
+            await unsubscribePush();
+          }
+          setSubscribed(false);
+        } else {
+          const sub = await subscribePush();
+          if (sub) {
+            const json = sub.toJSON();
+            await savePushSubscription({
+              endpoint: json.endpoint!,
+              keys: { p256dh: json.keys!.p256dh!, auth: json.keys!.auth! },
+            });
+            setSubscribed(true);
+            setPermission(getNotificationPermission());
+          }
         }
-        setSubscribed(false);
-      } else {
-        const sub = await subscribePush();
-        if (sub) {
-          const json = sub.toJSON();
-          await savePushSubscription({
-            endpoint: json.endpoint!,
-            keys: { p256dh: json.keys!.p256dh!, auth: json.keys!.auth! },
-          });
-          setSubscribed(true);
-          setPermission(getNotificationPermission());
-        }
+      } catch {
+        // 서비스 워커 등록 실패 등 — 무시
       }
     });
   }
