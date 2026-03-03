@@ -220,7 +220,7 @@ export default function MyPageContent({
   }
 
   const checkedSet = new Set(checkedDays);
-  const reflectionDays = new Set(reflections.map((r) => r.day));
+  const reflectionDays = new Set(localReflections.map((r) => r.day));
   const totalChecked = checkedDays.length;
   const percentage = today > 0 ? Math.round((totalChecked / today) * 100) : 0;
 

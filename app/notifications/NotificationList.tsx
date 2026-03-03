@@ -8,6 +8,7 @@ type Notification = {
   type: string;
   actor_name: string | null;
   reference_id: string | null;
+  message: string | null;
   is_read: boolean;
   created_at: string;
   reflection_day: number | null;
@@ -29,6 +30,7 @@ function getMessage(type: string, actorName: string | null): string {
   const name = actorName ?? "누군가";
   if (type === "comment") return `${name}님이 댓글을 남겼습니다`;
   if (type === "amen") return `${name}님이 아멘했습니다`;
+  if (type === "contact") return `${name}님이 문의를 보냈습니다`;
   return `${name}님의 활동이 있습니다`;
 }
 
@@ -79,12 +81,13 @@ export default function NotificationList({ notifications: initial }: { notificat
       )}
       <div className="space-y-2">
         {notifications.map((n) => {
-          const href = n.reflection_day ? `/365bible?day=${n.reflection_day}` : "/groups";
+          const isContact = n.type === "contact";
+          const href = isContact ? "#" : n.reflection_day ? `/365bible?day=${n.reflection_day}` : "/groups";
           return (
             <a
               key={n.id}
               href={href}
-              onClick={() => handleClick(n)}
+              onClick={(e) => { if (isContact) e.preventDefault(); handleClick(n); }}
               className={`block rounded-2xl p-4 transition-shadow hover:shadow-md ${
                 n.is_read
                   ? "bg-white shadow-sm"
@@ -99,6 +102,9 @@ export default function NotificationList({ notifications: initial }: { notificat
               </div>
               {n.reflection_day && (
                 <p className="mt-1 text-xs font-medium text-accent">Day {n.reflection_day}</p>
+              )}
+              {isContact && n.message && (
+                <p className="mt-1.5 line-clamp-3 text-sm text-neutral-600">{n.message}</p>
               )}
             </a>
           );

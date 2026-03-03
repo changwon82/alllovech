@@ -21,7 +21,7 @@ export default async function NotificationsPage() {
     getUserRoles(supabase, user.id),
     supabase
       .from("notifications")
-      .select("id, type, actor_id, reference_id, is_read, created_at")
+      .select("id, type, actor_id, reference_id, message, is_read, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -65,6 +65,7 @@ export default async function NotificationsPage() {
     type: n.type,
     actor_name: n.actor_id ? (actorNames[n.actor_id] ?? null) : null,
     reference_id: n.reference_id,
+    message: (n as { message?: string | null }).message ?? null,
     is_read: n.is_read,
     created_at: n.created_at,
     reflection_day: n.reference_id ? (reflectionDays[n.reference_id] ?? null) : null,
