@@ -379,10 +379,10 @@ export default function MyPageContent({
             const checked = days.filter((d) => d.checked).length;
             const past = days.filter((d) => !d.isFuture).length;
             return (
-            <div key={month} className="flex items-start gap-2">
-              <div className="flex w-[70px] shrink-0 items-baseline gap-1 pt-px">
-                <span className="text-xs font-medium text-neutral-500">{getMonthLabel(month)}</span>
-                <span className="text-[10px] text-neutral-400">{checked}/{past}</span>
+            <div key={month} className="flex items-start gap-1">
+              <div className="flex shrink-0 items-baseline pt-px" style={{ width: 52 }}>
+                <span className="text-xs font-medium text-neutral-500" style={{ minWidth: 28, textAlign: "right" }}>{getMonthLabel(month)}</span>
+                <span className="ml-1 text-[10px] text-neutral-400">{checked}/{past}</span>
               </div>
               <div className="flex flex-wrap gap-[3px]">
                 {days.map((d) => (
