@@ -37,14 +37,14 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
           JSON.stringify(payload)
         );
       } catch (err: unknown) {
-        if (
-          err &&
-          typeof err === "object" &&
-          "statusCode" in err &&
-          ((err as { statusCode: number }).statusCode === 410 ||
-            (err as { statusCode: number }).statusCode === 404)
-        ) {
+        const statusCode =
+          err && typeof err === "object" && "statusCode" in err
+            ? (err as { statusCode: number }).statusCode
+            : null;
+        if (statusCode === 410 || statusCode === 404) {
           staleIds.push(sub.id);
+        } else {
+          console.error("[push] 전송 실패:", sub.endpoint.slice(0, 60), statusCode, err);
         }
       }
     })
