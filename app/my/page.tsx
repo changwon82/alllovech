@@ -70,10 +70,10 @@ const getCachedPushSetting = unstable_cache(
 // 사용자 역할 캐시 — 10분 (user별 캐시 키)
 const getCachedUserMeta = unstable_cache(
   async (userId: string) => {
-    const client = makeAnonClient();
+    const admin = createAdminClient();
     const [rolesResult, groupResult] = await Promise.all([
-      client.from("user_roles").select("role").eq("user_id", userId),
-      client.from("group_members").select("role", { count: "exact", head: true })
+      admin.from("user_roles").select("role").eq("user_id", userId),
+      admin.from("group_members").select("role", { count: "exact", head: true })
         .eq("user_id", userId).in("role", ["leader", "sub_leader"]),
     ]);
     const roles = new Set((rolesResult.data ?? []).map((r: { role: string }) => r.role));
