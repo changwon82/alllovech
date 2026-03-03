@@ -29,6 +29,7 @@ export async function getExistingSubscription(): Promise<PushSubscription | null
 
 export async function subscribePush(): Promise<PushSubscription | null> {
   if (!isPushSupported()) return null;
+  if (location.hostname === "localhost") return null;
 
   const registration = await navigator.serviceWorker.register("/sw.js");
   await navigator.serviceWorker.ready;
