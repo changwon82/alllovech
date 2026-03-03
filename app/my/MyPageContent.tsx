@@ -374,10 +374,16 @@ export default function MyPageContent({
             </span>
           </div>
         </div>
-        <div className="space-y-3">
-          {months.map(({ month, days }) => (
-            <div key={month}>
-              <p className="mb-1 text-xs font-medium text-neutral-500">{getMonthLabel(month)}</p>
+        <div className="space-y-2">
+          {months.map(({ month, days }) => {
+            const checked = days.filter((d) => d.checked).length;
+            const past = days.filter((d) => !d.isFuture).length;
+            return (
+            <div key={month} className="flex items-start gap-2">
+              <div className="flex w-[70px] shrink-0 items-baseline gap-1 pt-px">
+                <span className="text-xs font-medium text-neutral-500">{getMonthLabel(month)}</span>
+                <span className="text-[10px] text-neutral-400">{checked}/{past}</span>
+              </div>
               <div className="flex flex-wrap gap-[3px]">
                 {days.map((d) => (
                   <Link
@@ -399,7 +405,8 @@ export default function MyPageContent({
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
