@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
+import { getUnreadCount } from "@/lib/notifications";
 import NotificationList from "./NotificationList";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
@@ -16,7 +17,7 @@ export default async function NotificationsPage() {
     redirect("/login?next=/notifications");
   }
 
-  const [profileResult, roles, { data: rawNotifications }, groupLeader] = await Promise.all([
+  const [profileResult, roles, { data: rawNotifications }, groupLeader, unreadCount] = await Promise.all([
     supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
     getUserRoles(supabase, user.id),
     supabase
@@ -26,6 +27,7 @@ export default async function NotificationsPage() {
       .order("created_at", { ascending: false })
       .limit(50),
     isGroupLeader(supabase, user.id),
+    getUnreadCount(supabase, user.id),
   ]);
 
   const userName = profileResult.data?.name ?? "이름 없음";
@@ -77,7 +79,7 @@ export default async function NotificationsPage() {
 
       <NotificationList notifications={enrichedNotifications} />
 
-      <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>
   );
 }

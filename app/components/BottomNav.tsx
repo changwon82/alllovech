@@ -87,13 +87,15 @@ export default function BottomNav({
                   isActive ? "font-bold text-navy" : "text-neutral-400"
                 }`}
               >
-                <span className="text-base">{isActive ? item.iconActive : item.iconInactive}</span>
+                <span className="relative text-base">
+                  {isActive ? item.iconActive : item.iconInactive}
+                  {item.href === "/notifications" && realtimeCount > 0 && (
+                    <span className="absolute -top-1.5 -right-3 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
+                      {realtimeCount > 99 ? "99+" : realtimeCount}
+                    </span>
+                  )}
+                </span>
                 <span>{item.label}</span>
-                {item.href === "/notifications" && realtimeCount > 0 && (
-                  <span className="absolute top-1 right-1/2 -translate-x-[-10px] inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
-                    {realtimeCount > 99 ? "99+" : realtimeCount}
-                  </span>
-                )}
               </Link>
             );
           })}

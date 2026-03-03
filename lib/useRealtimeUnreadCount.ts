@@ -8,6 +8,11 @@ export function useRealtimeUnreadCount(userId: string | undefined, initialCount:
   const [count, setCount] = useState(initialCount);
   const supabase = useMemo(() => createClient(), []);
 
+  // 서버에서 전달된 초기값이 바뀌면 동기화
+  useEffect(() => {
+    setCount(initialCount);
+  }, [initialCount]);
+
   useEffect(() => {
     if (!userId) return;
 
