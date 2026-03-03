@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-neutral-600">
             <li>회원 식별 및 로그인</li>
             <li>성경읽기 체크 및 묵상 기록 관리</li>
-            <li>소그룹 활동 지원</li>
+            <li>함께읽기 활동 지원</li>
           </ul>
         </section>
 

@@ -6,9 +6,10 @@ export const metadata = { title: "사용자 관리 | 다애교회" };
 export default async function UsersPage() {
   const { admin } = await requireAdmin();
 
-  const [{ data: profiles }, { data: allRoles }] = await Promise.all([
-    admin.from("profiles").select("id, name, phone, status, created_at").order("created_at", { ascending: false }),
+  const [{ data: profiles }, { data: allRoles }, { data: authData }] = await Promise.all([
+    admin.from("profiles").select("id, name, phone, status, avatar_url, created_at").order("created_at", { ascending: false }),
     admin.from("user_roles").select("user_id, role"),
+    admin.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
   const rolesMap: Record<string, string[]> = {};
@@ -17,8 +18,18 @@ export default async function UsersPage() {
     rolesMap[r.user_id].push(r.role);
   }
 
-  const users = (profiles ?? []).map((p: { id: string; name: string; phone: string | null; status: string; created_at: string }) => ({
+  const emailMap: Record<string, string> = {};
+  const providersMap: Record<string, string[]> = {};
+  for (const u of authData?.users ?? []) {
+    if (u.email) emailMap[u.id] = u.email;
+    const providers = u.app_metadata?.providers as string[] | undefined;
+    if (providers) providersMap[u.id] = providers;
+  }
+
+  const users = (profiles ?? []).map((p: { id: string; name: string; phone: string | null; status: string; avatar_url: string | null; created_at: string }) => ({
     ...p,
+    email: emailMap[p.id] ?? null,
+    providers: providersMap[p.id] ?? [],
     roles: rolesMap[p.id] ?? [],
   }));
 

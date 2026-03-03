@@ -6,6 +6,8 @@ import { updateProfile } from "./actions";
 import Card from "@/app/components/ui/Card";
 import StatCard from "@/app/components/ui/StatCard";
 import Badge from "@/app/components/ui/Badge";
+import Avatar from "@/app/components/ui/Avatar";
+import AvatarPicker from "./AvatarPicker";
 
 type ReflectionSummary = {
   id: string;
@@ -26,17 +28,21 @@ function getMonthLabel(month: number): string {
 }
 
 export default function MyPageContent({
+  userId,
   name: initialName,
   status,
   phone: initialPhone,
+  avatarUrl: initialAvatarUrl,
   year,
   today,
   checkedDays,
   reflections,
 }: {
+  userId: string;
   name: string;
   status: string;
   phone: string | null;
+  avatarUrl: string | null;
   year: number;
   today: number;
   checkedDays: number[];
@@ -44,7 +50,9 @@ export default function MyPageContent({
 }) {
   const [name, setName] = useState(initialName);
   const [phone, setPhone] = useState(initialPhone ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [isEditing, setIsEditing] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [editName, setEditName] = useState(initialName);
   const [editPhone, setEditPhone] = useState(initialPhone ?? "");
   const [isPending, startTransition] = useTransition();
@@ -129,9 +137,20 @@ export default function MyPageContent({
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-lg font-bold text-neutral-800">{name}</p>
-              {phone && <p className="mt-0.5 text-xs text-neutral-400">{phone}</p>}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowAvatarPicker(true)}
+                className="group relative shrink-0"
+              >
+                <Avatar avatarUrl={avatarUrl} name={name} seed={userId} size="lg" />
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/30 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  변경
+                </span>
+              </button>
+              <div>
+                <p className="text-lg font-bold text-neutral-800">{name}</p>
+                {phone && <p className="mt-0.5 text-xs text-neutral-400">{phone}</p>}
+              </div>
             </div>
             <button
               onClick={() => setIsEditing(true)}
@@ -215,7 +234,7 @@ export default function MyPageContent({
                 <div className="flex items-center justify-between">
                   <Badge variant="accent">Day {r.day}</Badge>
                   <span className="text-xs text-neutral-400">
-                    {r.visibility === "private" ? "나만 보기" : r.visibility === "public" ? "공개" : "소그룹"}
+                    {r.visibility === "private" ? "나만 보기" : r.visibility === "public" ? "공개" : "함께읽기"}
                   </span>
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-700">
@@ -226,6 +245,16 @@ export default function MyPageContent({
           </div>
         )}
       </section>
+
+      {showAvatarPicker && (
+        <AvatarPicker
+          currentAvatarUrl={avatarUrl}
+          name={name}
+          seed={userId}
+          onClose={() => setShowAvatarPicker(false)}
+          onSave={(newUrl) => { setAvatarUrl(newUrl); setShowAvatarPicker(false); }}
+        />
+      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient, getSessionUser } from "@/lib/supabase/server";
-import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import GroupFeed from "./GroupFeed";
 import InviteManager from "./InviteManager";
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .eq("id", id)
     .maybeSingle();
 
-  return { title: group ? `${group.name} | 다애교회` : "소그룹 | 다애교회" };
+  return { title: group ? `${group.name} | 다애교회` : "함께읽기 | 다애교회" };
 }
 
 function getKoreaYear(): number {
@@ -32,14 +32,24 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     redirect(`/login?next=/groups/${groupId}`);
   }
 
-  // 그룹 정보 + 내 멤버십 + 프로필 + 역할 확인
-  const [groupResult, membershipResult, profileResult, roles, unreadCount] = await Promise.all([
+  // 역할 + 그룹 리더 여부 + 데이터를 병렬 조회
+  const [roles, groupLeader, groupResult, membershipResult, profileResult, unreadCount] = await Promise.all([
+    getUserRoles(supabase, user.id),
+    isGroupLeader(supabase, user.id),
     supabase.from("groups").select("id, name, type, description").eq("id", groupId).maybeSingle(),
     supabase.from("group_members").select("role").eq("group_id", groupId).eq("user_id", user.id).maybeSingle(),
     supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
-    getUserRoles(supabase, user.id),
     getUnreadCount(supabase, user.id),
   ]);
+
+  const isAdmin = isAdminRole(roles);
+  const canViewGroups = isAdmin || groupLeader;
+
+  // 기능 플래그: 접근 권한 없으면 차단
+  const featureGroups = process.env.NEXT_PUBLIC_FEATURE_GROUPS === "true";
+  if (!featureGroups && !canViewGroups) {
+    redirect("/365bible");
+  }
 
   if (!groupResult.data || !membershipResult.data) {
     notFound();
@@ -48,7 +58,6 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
   const group = groupResult.data;
   const year = getKoreaYear();
   const userName = profileResult.data?.name ?? "이름 없음";
-  const isAdmin = isAdminRole(roles);
   const isLeader = membershipResult.data.role === "leader" || membershipResult.data.role === "sub_leader";
 
   // 리더일 때 기존 초대 코드 조회 (1개만)
@@ -152,6 +161,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     created_at: r.created_at,
     authorName: r.profiles?.name ?? "이름 없음",
     authorId: r.user_id,
+    avatarUrl: r.profiles?.avatar_url ?? null,
     comments: commentsMap[r.id] ?? [],
     amenCount: amenCounts[r.id] ?? 0,
     myAmen: myAmens.has(r.id),
@@ -161,7 +171,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <Link href="/groups" className="text-xs text-neutral-400 hover:text-navy">&larr; 소그룹 목록</Link>
+          <Link href="/groups" className="text-xs text-neutral-400 hover:text-navy">&larr; 함께읽기 목록</Link>
           <h1 className="text-[32px] leading-[40px] font-bold text-navy">{group.name}</h1>
         </div>
         <div className="flex items-center gap-3">
@@ -190,7 +200,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         groupId={groupId}
       />
 
-      <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>
   );
 }

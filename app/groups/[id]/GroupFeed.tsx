@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { addComment, deleteComment, toggleAmen } from "./actions";
 import Badge from "@/app/components/ui/Badge";
+import Avatar from "@/app/components/ui/Avatar";
 
 type Comment = {
   id: string;
@@ -22,6 +23,7 @@ type FeedItem = {
   created_at: string;
   authorName: string;
   authorId: string;
+  avatarUrl: string | null;
   comments: Comment[];
   amenCount: number;
   myAmen: boolean;
@@ -70,9 +72,7 @@ function ReflectionCard({
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-navy text-xs font-bold text-white">
-            {item.authorName.charAt(0)}
-          </div>
+          <Avatar avatarUrl={item.avatarUrl} name={item.authorName} seed={item.authorId} size="sm" />
           <div>
             <p className="text-sm font-bold text-neutral-800">{item.authorName}</p>
             <p className="text-xs text-neutral-400">{timeAgo(item.created_at)}</p>
@@ -310,7 +310,7 @@ export default function GroupFeed({
       <div className="mt-12 text-center">
         <p className="text-neutral-500">아직 공유된 묵상이 없습니다</p>
         <p className="mt-1 text-sm text-neutral-400">
-          <Link href="/365bible" className="text-navy hover:underline">365 성경읽기</Link>에서 묵상을 작성하고 소그룹에 공유해보세요
+          <Link href="/365bible" className="text-navy hover:underline">365 성경읽기</Link>에서 묵상을 작성하고 함께읽기에 공유해보세요
         </p>
       </div>
     );

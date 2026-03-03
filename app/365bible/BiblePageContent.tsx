@@ -671,7 +671,7 @@ export default function BiblePageContent({
                 {reflection && !isEditing ? (
                   <>
                     <span className="text-xs text-neutral-400">
-                      {reflectionVisibility === "private" ? "나만 보기" : reflectionVisibility === "public" ? "공개" : "소그룹 공유"}
+                      {reflectionVisibility === "private" ? "나만 보기" : reflectionVisibility === "public" ? "공개" : "함께읽기 공유"}
                     </span>
                     <div className="flex gap-2">
                       <button
@@ -697,7 +697,7 @@ export default function BiblePageContent({
                       className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
                     >
                       <option value="private">나만 보기</option>
-                      <option value="group">소그룹 공유</option>
+                      <option value="group">함께읽기 공유</option>
                       <option value="public">공개</option>
                     </select>
                     <div className="flex gap-2">

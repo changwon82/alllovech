@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { updateUserStatus, addUserRole, removeUserRole } from "./actions";
+import Avatar from "@/app/components/ui/Avatar";
 
 const ALL_ROLES = [
   "ADMIN", "PASTOR", "STAFF", "EDU_MINISTER",
-  "DISTRICT_LEADER", "GROUP_LEADER", "DEACON", "TEACHER", "MEMBER",
+  "DISTRICT_LEADER", "DEACON", "TEACHER", "MEMBER",
 ];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -20,7 +21,6 @@ const ROLE_LABEL: Record<string, string> = {
   STAFF: "직원",
   EDU_MINISTER: "교육부 교역자",
   DISTRICT_LEADER: "교구장",
-  GROUP_LEADER: "소그룹장",
   DEACON: "집사",
   TEACHER: "교사",
   MEMBER: "성도",
@@ -29,8 +29,11 @@ const ROLE_LABEL: Record<string, string> = {
 type User = {
   id: string;
   name: string;
+  email: string | null;
+  providers: string[];
   phone: string | null;
   status: string;
+  avatar_url: string | null;
   created_at: string;
   roles: string[];
 };
@@ -54,9 +57,17 @@ function UserRow({
   return (
     <div className={`rounded-2xl p-4 shadow-sm ${user.status === "pending" ? "bg-accent-light" : "bg-white"}`}>
       <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-bold text-neutral-800">{user.name}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <Avatar avatarUrl={user.avatar_url} name={user.name} seed={user.id} size="sm" />
+          <div className="min-w-0">
+          <p className="font-bold text-neutral-800">
+            {user.name}
+            {user.email && <span className="ml-1 font-normal text-neutral-400">({user.email})</span>}
+            {user.providers.includes("email") && <span className="ml-1 inline-flex items-center rounded-full bg-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600">이메일</span>}
+            {user.providers.includes("kakao") && <span className="ml-1 inline-flex items-center rounded-full bg-yellow-300 px-1.5 py-0.5 text-[10px] font-medium text-yellow-900">카톡</span>}
+          </p>
           {user.phone && <p className="text-xs text-neutral-400">{user.phone}</p>}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <select

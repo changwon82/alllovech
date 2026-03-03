@@ -12,9 +12,19 @@ export async function getUserRoles(supabase: SupabaseClient, userId: string): Pr
   return new Set((roles ?? []).map((r: { role: string }) => r.role));
 }
 
-/** 관리자 역할 여부 */
+/** 관리자 역할 여부 (/admin 접근 권한) */
 export function isAdminRole(roles: Set<string>): boolean {
   return roles.has("ADMIN") || roles.has("PASTOR") || roles.has("STAFF");
+}
+
+/** 그룹 리더 여부 조회 (group_members에서 leader/sub_leader) */
+export async function isGroupLeader(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from("group_members")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .in("role", ["leader", "sub_leader"]);
+  return (count ?? 0) > 0;
 }
 
 /** 관리자 권한 확인. ADMIN이 아니면 홈으로 리다이렉트. admin = service role 클라이언트 */

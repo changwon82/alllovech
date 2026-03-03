@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
-import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import MyPageContent from "./MyPageContent";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
 import PageHeader from "@/app/components/ui/PageHeader";
 
-export const metadata = { title: "내 기록 | 다애교회" };
+export const metadata = { title: "마이페이지 | 다애교회" };
 
 function getKoreaYear(): number {
   const seoulDateStr = new Date().toLocaleDateString("en-CA", {
@@ -36,10 +36,10 @@ export default async function MyPage() {
   const year = getKoreaYear();
   const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  const [profileResult, checksResult, reflectionsResult, roles, unreadCount] = await Promise.all([
+  const [profileResult, checksResult, reflectionsResult, roles, unreadCount, groupLeader] = await Promise.all([
     supabase
       .from("profiles")
-      .select("name, status, phone")
+      .select("name, status, phone, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -55,6 +55,7 @@ export default async function MyPage() {
       .order("day", { ascending: false }),
     getUserRoles(supabase, user.id),
     getUnreadCount(supabase, user.id),
+    isGroupLeader(supabase, user.id),
   ]);
 
   const profile = profileResult.data;
@@ -63,25 +64,28 @@ export default async function MyPage() {
     id: string; day: number; content: string; visibility: string; created_at: string;
   }[];
   const isAdmin = isAdminRole(roles);
+  const canViewGroups = isAdmin || groupLeader;
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
-        title="내 기록"
+        title="마이페이지"
         action={<UserMenu name={profile?.name ?? "이름 없음"} />}
       />
 
       <MyPageContent
+        userId={user.id}
         name={profile?.name ?? "이름 없음"}
         status={profile?.status ?? "pending"}
         phone={profile?.phone ?? null}
+        avatarUrl={profile?.avatar_url ?? null}
         year={year}
         today={today}
         checkedDays={checkedDays}
         reflections={reflections}
       />
 
-      <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>
   );
 }

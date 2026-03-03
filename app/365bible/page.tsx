@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
@@ -364,12 +364,13 @@ export default async function BiblePage({
   let checkedDays: number[] = [];
   let userProfile: { name: string; status: string } | null = null;
   let isAdmin = false;
+  let canViewGroups = false;
   let unreadCount = 0;
 
   let existingReflection: { id: string; content: string; visibility: "private" | "group" | "public"; created_at: string; updated_at: string } | null = null;
 
   if (user) {
-    const [checksResult, profileResult, reflectionResult, roles, unread] = await Promise.all([
+    const [checksResult, profileResult, reflectionResult, roles, unread, groupLeader] = await Promise.all([
       supabase
         .from("bible_checks")
         .select("day")
@@ -389,11 +390,13 @@ export default async function BiblePage({
         .maybeSingle(),
       getUserRoles(supabase, user.id),
       getUnreadCount(supabase, user.id),
+      isGroupLeader(supabase, user.id),
     ]);
     checkedDays = (checksResult.data ?? []).map((d: { day: number }) => d.day);
     userProfile = profileResult.data;
     existingReflection = reflectionResult.data;
     isAdmin = isAdminRole(roles);
+    canViewGroups = isAdmin || groupLeader;
     unreadCount = unread;
   }
   const reading = allReadings[day - 1] ?? null;
@@ -556,7 +559,7 @@ export default async function BiblePage({
         existingReflection={existingReflection}
       />
 
-      {user && <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />}
+      {user && <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />}
     </div>
   );
 }

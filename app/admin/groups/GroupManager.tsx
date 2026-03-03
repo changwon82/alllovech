@@ -4,13 +4,13 @@ import { useState, useTransition } from "react";
 import { createGroup, updateGroup, addGroupMember, removeGroupMember } from "./actions";
 
 const TYPE_LABEL: Record<string, string> = {
-  small_group: "소그룹", district: "교구", department: "부서", edu_class: "반", one_on_one: "일대일",
+  small_group: "함께읽기", district: "교구", department: "부서", edu_class: "반", one_on_one: "일대일",
 };
 const MEMBER_ROLE_LABEL: Record<string, string> = {
   leader: "그룹장", sub_leader: "부그룹장", teacher: "교사", deacon: "집사", member: "멤버",
 };
 
-type GroupMember = { user_id: string; role: string; name: string };
+type GroupMember = { user_id: string; role: string; name: string; providers: string[] };
 type Group = {
   id: string; name: string; type: string; description: string | null;
   is_active: boolean; members: GroupMember[];
@@ -42,7 +42,7 @@ function GroupCard({
     const userName = allUsers.find((u) => u.id === addUserId)?.name ?? "이름 없음";
     setGroup((g) => ({
       ...g,
-      members: [...g.members, { user_id: addUserId, role: addRole, name: userName }],
+      members: [...g.members, { user_id: addUserId, role: addRole, name: userName, providers: [] }],
     }));
     const uid = addUserId;
     const role = addRole;
@@ -146,7 +146,11 @@ function GroupCard({
           <div className="space-y-1">
             {group.members.map((m) => (
               <div key={m.user_id} className="flex items-center justify-between rounded-xl bg-neutral-50 px-3 py-1.5">
-                <span className="text-sm text-neutral-700">{m.name}</span>
+                <span className="text-sm text-neutral-700">
+                  {m.name}
+                  {m.providers.includes("email") && <span className="ml-1 inline-flex items-center rounded-full bg-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600">이메일</span>}
+                  {m.providers.includes("kakao") && <span className="ml-1 inline-flex items-center rounded-full bg-yellow-300 px-1.5 py-0.5 text-[10px] font-medium text-yellow-900">카톡</span>}
+                </span>
                 <div className="flex items-center gap-2">
                   <select
                     value={m.role}

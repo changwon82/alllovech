@@ -36,8 +36,8 @@ export default function InviteManager({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${groupName} 소그룹 초대`,
-          text: `${groupName} 소그룹에 초대합니다. 아래 링크를 눌러 합류하세요!`,
+          title: `${groupName} 함께읽기 초대`,
+          text: `${groupName} 함께읽기에 초대합니다. 아래 링크를 눌러 합류하세요!`,
           url,
         });
         return;

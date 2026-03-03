@@ -35,13 +35,13 @@ export default function UserMenu({ name }: { name: string }) {
             href="/my"
             className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
           >
-            내 기록
+            마이페이지
           </a>
           <a
             href="/groups"
             className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
           >
-            소그룹
+            함께읽기
           </a>
           <hr className="my-1 border-neutral-100" />
           <button

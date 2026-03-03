@@ -1,17 +1,17 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/supabase/server";
-import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
 import PageHeader from "@/app/components/ui/PageHeader";
 import Badge from "@/app/components/ui/Badge";
 
-export const metadata = { title: "내 소그룹 | 다애교회" };
+export const metadata = { title: "함께읽기 | 다애교회" };
 
 const TYPE_LABEL: Record<string, string> = {
-  small_group: "소그룹",
+  small_group: "함께읽기",
   district: "교구",
   department: "부서",
   edu_class: "반",
@@ -25,10 +25,11 @@ export default async function GroupsPage() {
     redirect("/login?next=/groups");
   }
 
-  // 프로필 + 역할 + 내가 속한 그룹 목록
-  const [profileResult, roles, { data: memberships }, unreadCount] = await Promise.all([
-    supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
+  // 역할 + 그룹 리더 여부 + 데이터를 병렬 조회
+  const [roles, groupLeader, profileResult, { data: memberships }, unreadCount] = await Promise.all([
     getUserRoles(supabase, user.id),
+    isGroupLeader(supabase, user.id),
+    supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
     supabase
       .from("group_members")
       .select(`
@@ -45,8 +46,16 @@ export default async function GroupsPage() {
     getUnreadCount(supabase, user.id),
   ]);
 
-  const userName = profileResult.data?.name ?? "이름 없음";
   const isAdmin = isAdminRole(roles);
+  const canViewGroups = isAdmin || groupLeader;
+
+  // 기능 플래그: 접근 권한 없으면 차단
+  const featureGroups = process.env.NEXT_PUBLIC_FEATURE_GROUPS === "true";
+  if (!featureGroups && !canViewGroups) {
+    redirect("/365bible");
+  }
+
+  const userName = profileResult.data?.name ?? "이름 없음";
 
   type GroupRow = {
     id: string;
@@ -66,13 +75,13 @@ export default async function GroupsPage() {
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
-        title="내 소그룹"
+        title="함께읽기"
         action={<UserMenu name={userName} />}
       />
 
       {groups.length === 0 ? (
         <div className="mt-12 text-center">
-          <p className="text-neutral-500">속한 소그룹이 없습니다</p>
+          <p className="text-neutral-500">속한 함께읽기 그룹이 없습니다</p>
           <p className="mt-1 text-sm text-neutral-400">관리자가 그룹에 배정하면 여기에 표시됩니다</p>
         </div>
       ) : (
@@ -102,7 +111,7 @@ export default async function GroupsPage() {
         </div>
       )}
 
-      <BottomNav userId={user.id} isAdmin={isAdmin} unreadCount={unreadCount} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>
   );
 }

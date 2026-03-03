@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/supabase/server";
-import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import NotificationList from "./NotificationList";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
@@ -16,7 +16,7 @@ export default async function NotificationsPage() {
     redirect("/login?next=/notifications");
   }
 
-  const [profileResult, roles, { data: rawNotifications }] = await Promise.all([
+  const [profileResult, roles, { data: rawNotifications }, groupLeader] = await Promise.all([
     supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
     getUserRoles(supabase, user.id),
     supabase
@@ -25,10 +25,12 @@ export default async function NotificationsPage() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
+    isGroupLeader(supabase, user.id),
   ]);
 
   const userName = profileResult.data?.name ?? "이름 없음";
   const isAdmin = isAdminRole(roles);
+  const canViewGroups = isAdmin || groupLeader;
 
   // actor 이름과 reflection day 가져오기
   const notifications = rawNotifications ?? [];
@@ -74,7 +76,7 @@ export default async function NotificationsPage() {
 
       <NotificationList notifications={enrichedNotifications} />
 
-      <BottomNav userId={user.id} isAdmin={isAdmin} />
+      <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} />
     </div>
   );
 }

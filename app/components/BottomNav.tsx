@@ -6,11 +6,14 @@ import NotificationToast from "./NotificationToast";
 
 type NavItem = { href: string; label: string; iconActive: string; iconInactive: string };
 
-const NAV_ITEMS: NavItem[] = [
+const FEATURE_GROUPS = process.env.NEXT_PUBLIC_FEATURE_GROUPS === "true";
+
+const BASE_ITEMS: NavItem[] = [
   { href: "/365bible", label: "성경읽기", iconActive: "📖", iconInactive: "📖" },
-  { href: "/my", label: "내 기록", iconActive: "📊", iconInactive: "📊" },
-  { href: "/groups", label: "소그룹", iconActive: "👥", iconInactive: "👥" },
+  { href: "/my", label: "마이페이지", iconActive: "📊", iconInactive: "📊" },
 ];
+
+const GROUPS_ITEM: NavItem = { href: "/groups", label: "함께읽기", iconActive: "👥", iconInactive: "👥" };
 
 const ADMIN_ITEM: NavItem = {
   href: "/admin",
@@ -21,15 +24,22 @@ const ADMIN_ITEM: NavItem = {
 
 export default function BottomNav({
   isAdmin,
+  canViewGroups,
   unreadCount = 0,
   userId,
 }: {
   isAdmin?: boolean;
+  canViewGroups?: boolean;
   unreadCount?: number;
   userId?: string;
 }) {
   const pathname = usePathname();
-  const items = isAdmin ? [...NAV_ITEMS, ADMIN_ITEM] : NAV_ITEMS;
+  const showGroups = FEATURE_GROUPS || canViewGroups;
+  const items = [
+    ...BASE_ITEMS,
+    ...(showGroups ? [GROUPS_ITEM] : []),
+    ...(isAdmin ? [ADMIN_ITEM] : []),
+  ];
 
   return (
     <>

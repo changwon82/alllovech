@@ -5,7 +5,7 @@ import InviteClient from "./InviteClient";
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const invite = await getInviteByCode(code);
-  const groupName = (invite?.groups as unknown as { name: string })?.name ?? "소그룹";
+  const groupName = (invite?.groups as unknown as { name: string })?.name ?? "함께읽기";
   return { title: `${groupName} 초대 | 다애교회` };
 }
 
@@ -35,7 +35,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   const { user } = await getSessionUser();
 
   const typeLabels: Record<string, string> = {
-    small_group: "소그룹",
+    small_group: "함께읽기",
     district: "교구",
     department: "부서",
     edu_class: "반",
@@ -46,7 +46,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
     <div className="flex min-h-dvh items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="mb-1 text-center text-[32px] font-bold text-navy">
-          소그룹 초대
+          함께읽기 초대
         </h1>
         <div className="mx-auto mt-2 mb-8 h-1 w-12 rounded-full bg-accent" />
 
