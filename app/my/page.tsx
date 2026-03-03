@@ -85,6 +85,10 @@ export default async function MyPage() {
         action={<UserMenu name={profile?.name ?? "이름 없음"} canViewGroups={canViewGroups} />}
       />
 
+      <div className="mt-4">
+        <PushNotificationToggle />
+      </div>
+
       <MyPageContent
         userId={user.id}
         name={profile?.name ?? "이름 없음"}
@@ -97,10 +101,6 @@ export default async function MyPage() {
         reflections={reflections}
         dayToBooks={dayToBooks}
       />
-
-      <div className="mt-6">
-        <PushNotificationToggle />
-      </div>
 
       <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>

@@ -6,6 +6,7 @@ const navItems = [
   { href: "/admin/users", label: "사용자" },
   { href: "/admin/groups", label: "그룹" },
   { href: "/admin/readings", label: "읽기 현황" },
+  { href: "/admin/settings", label: "설정" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
