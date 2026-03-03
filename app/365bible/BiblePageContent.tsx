@@ -478,7 +478,7 @@ export default function BiblePageContent({
                 !user ? (
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-navy px-3 py-1 text-xs font-medium text-white">개역개정</span>
-                    <span className="text-xs text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</span>
+                    <span className="text-sm text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</span>
                   </div>
                 ) : (
                   <div className="flex flex-wrap items-center gap-1.5">
