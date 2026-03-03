@@ -37,6 +37,12 @@ export default function UserMenu({ name, canViewGroups = false }: { name: string
           >
             마이페이지
           </a>
+          <a
+            href="/notifications"
+            className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
+          >
+            알림
+          </a>
           {canViewGroups && (
             <a
               href="/groups"
