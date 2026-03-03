@@ -557,6 +557,7 @@ export default async function BiblePage({
         checkedDays={checkedDays}
         year={koreaYear}
         existingReflection={existingReflection}
+        canViewGroups={canViewGroups}
       />
 
       {user && <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />}

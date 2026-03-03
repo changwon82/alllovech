@@ -88,6 +88,7 @@ export default function BiblePageContent({
   checkedDays: initialCheckedDays,
   year,
   existingReflection,
+  canViewGroups = false,
 }: {
   day: number;
   dayDateIso: string;
@@ -104,6 +105,7 @@ export default function BiblePageContent({
   checkedDays: number[];
   year: number;
   existingReflection: Reflection | null;
+  canViewGroups?: boolean;
 }) {
   const router = useRouter();
   const [isNavigating, startNavigation] = useTransition();
@@ -441,7 +443,7 @@ export default function BiblePageContent({
       {!user && (
         <div className="mt-3 text-center">
           <LoginButton className="text-xs text-neutral-400 hover:text-navy">
-            읽기체크·묵상 등은 <span className="text-navy underline">로그인</span> 후 이용 가능
+            읽기체크·묵상기록 등은 <span className="text-navy underline">로그인</span> 후 이용 가능
           </LoginButton>
         </div>
       )}
@@ -701,15 +703,19 @@ export default function BiblePageContent({
                   </>
                 ) : (
                   <>
-                    <select
-                      value={reflectionVisibility}
-                      onChange={(e) => setReflectionVisibility(e.target.value as "private" | "group" | "public")}
-                      className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
-                    >
-                      <option value="private">나만 보기</option>
-                      <option value="group">함께읽기 공유</option>
-                      <option value="public">공개</option>
-                    </select>
+                    {canViewGroups ? (
+                      <select
+                        value={reflectionVisibility}
+                        onChange={(e) => setReflectionVisibility(e.target.value as "private" | "group" | "public")}
+                        className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
+                      >
+                        <option value="private">나만 보기</option>
+                        <option value="group">함께읽기 공유</option>
+                        <option value="public">공개</option>
+                      </select>
+                    ) : (
+                      <span className="text-xs text-neutral-400">나만 보기</span>
+                    )}
                     <div className="flex gap-2">
                       {(reflection || isEditing) && (
                         <button
