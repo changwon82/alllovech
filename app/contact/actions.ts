@@ -11,24 +11,31 @@ export async function submitContact(content: string) {
   const trimmed = content.trim();
   if (!trimmed) return { error: "내용을 입력해주세요." };
 
-  // 사용자 이름 조회
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("name")
-    .eq("id", user.id)
-    .maybeSingle();
-  const userName = profile?.name ?? "이름 없음";
-
-  // 관리자 목록 조회 (RLS 우회)
+  // 사용자 이름 + 관리자 목록 병렬 조회
   const admin = createAdminClient();
-  const { data: adminRoles } = await admin
-    .from("user_roles")
-    .select("user_id")
-    .in("role", ["ADMIN", "PASTOR", "STAFF"]);
+  const [{ data: profile }, { data: adminRoles }] = await Promise.all([
+    supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
+    admin.from("user_roles").select("user_id").in("role", ["ADMIN", "PASTOR", "STAFF"]),
+  ]);
 
+  const userName = profile?.name ?? "이름 없음";
   const adminIds = [...new Set((adminRoles ?? []).map((r) => r.user_id))];
 
-  // 앱 내 알림 전송
+  // 이메일은 fire-and-forget (실패해도 알림 전송에 영향 없음)
+  const resendKey = process.env.RESEND_API_KEY;
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (resendKey && adminEmail) {
+    const resend = new Resend(resendKey);
+    resend.emails.send({
+      from: "다애교회 <onboarding@resend.dev>",
+      to: adminEmail,
+      subject: `[다애교회] ${userName}님의 문의`,
+      text: `보낸 사람: ${userName}\n\n${trimmed}`,
+    }).catch(() => {});
+  }
+
+  // 앱 내 알림 전송 (이것만 await — 클라이언트 응답 속도 결정)
   if (adminIds.length > 0) {
     await admin.from("notifications").insert(
       adminIds.map((adminId) => ({
@@ -38,20 +45,6 @@ export async function submitContact(content: string) {
         message: trimmed,
       }))
     );
-  }
-
-  // 이메일 알림
-  const resendKey = process.env.RESEND_API_KEY;
-  const adminEmail = process.env.ADMIN_EMAIL;
-
-  if (resendKey && adminEmail) {
-    const resend = new Resend(resendKey);
-    await resend.emails.send({
-      from: "다애교회 <onboarding@resend.dev>",
-      to: adminEmail,
-      subject: `[다애교회] ${userName}님의 문의`,
-      text: `보낸 사람: ${userName}\n\n${trimmed}`,
-    });
   }
 
   return { success: true };

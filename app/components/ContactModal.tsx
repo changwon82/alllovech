@@ -16,6 +16,7 @@ export default function ContactModal({ open, onClose }: { open: boolean; onClose
       const result = await submitContact(content.trim());
       if ("success" in result) {
         setSent(true);
+        window.dispatchEvent(new Event("notification-change"));
         setTimeout(() => {
           setSent(false);
           setContent("");

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { markAllRead, markRead } from "./actions";
 
 type Notification = {
@@ -37,6 +38,25 @@ function getMessage(type: string, actorName: string | null): string {
 export default function NotificationList({ notifications: initial }: { notifications: Notification[] }) {
   const [notifications, setNotifications] = useState(initial);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  // 서버에서 새 데이터가 오면 동기화
+  useEffect(() => {
+    setNotifications(initial);
+  }, [initial]);
+
+  // 커스텀 이벤트 + 폴링으로 새 알림 감지 시 서버 데이터 새로고침
+  useEffect(() => {
+    function refresh() {
+      router.refresh();
+    }
+    window.addEventListener("notification-change", refresh);
+    const interval = setInterval(refresh, 30_000);
+    return () => {
+      window.removeEventListener("notification-change", refresh);
+      clearInterval(interval);
+    };
+  }, [router]);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
@@ -44,6 +64,7 @@ export default function NotificationList({ notifications: initial }: { notificat
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     startTransition(async () => {
       await markAllRead();
+      window.dispatchEvent(new Event("notification-change"));
     });
   }
 
@@ -54,6 +75,7 @@ export default function NotificationList({ notifications: initial }: { notificat
       );
       startTransition(async () => {
         await markRead(notification.id);
+        window.dispatchEvent(new Event("notification-change"));
       });
     }
   }

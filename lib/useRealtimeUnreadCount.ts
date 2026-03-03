@@ -27,7 +27,22 @@ export function useRealtimeUnreadCount(userId: string | undefined, initialCount:
   useEffect(() => {
     if (!userId) return;
 
-    // Realtime 구독 — 필터 없이 전체 이벤트 수신 (RLS가 자동 필터링)
+    // 탭 포커스 시 동기화
+    function handleVisibility() {
+      if (document.visibilityState === "visible") fetchCount();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // 커스텀 이벤트 (문의 전송 등 앱 내 알림 생성 시)
+    function handleNotificationChange() {
+      fetchCount();
+    }
+    window.addEventListener("notification-change", handleNotificationChange);
+
+    // 폴링 (30초마다)
+    const interval = setInterval(fetchCount, 30_000);
+
+    // Realtime 구독 (동작하면 bonus)
     const channel = supabase
       .channel(`unread-${userId}`)
       .on(
@@ -37,15 +52,11 @@ export function useRealtimeUnreadCount(userId: string | undefined, initialCount:
       )
       .subscribe();
 
-    // 탭 포커스 시 동기화
-    function handleVisibility() {
-      if (document.visibilityState === "visible") fetchCount();
-    }
-    document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
-      supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("notification-change", handleNotificationChange);
+      clearInterval(interval);
+      supabase.removeChannel(channel);
     };
   }, [userId, supabase, fetchCount]);
 
