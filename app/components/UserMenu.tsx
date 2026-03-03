@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function UserMenu({ name, canViewGroups = false }: { name: string; canViewGroups?: boolean }) {
+export default function UserMenu({ name, canViewGroups = false, unreadCount = 0 }: { name: string; canViewGroups?: boolean; unreadCount?: number }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -25,9 +25,12 @@ export default function UserMenu({ name, canViewGroups = false }: { name: string
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="text-xs text-neutral-500 hover:text-navy"
+        className="relative text-xs text-neutral-500 hover:text-navy"
       >
         {name} ▾
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-2 h-2 w-2 rounded-full bg-red-500" />
+        )}
       </button>
       {open && (
         <div className="absolute right-0 z-50 mt-1 min-w-[100px] rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
@@ -39,9 +42,14 @@ export default function UserMenu({ name, canViewGroups = false }: { name: string
           </a>
           <a
             href="/notifications"
-            className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
+            className="flex items-center gap-1.5 px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
           >
             알림
+            {unreadCount > 0 && (
+              <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </a>
           {canViewGroups && (
             <a
