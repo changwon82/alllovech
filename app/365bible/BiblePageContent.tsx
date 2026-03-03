@@ -471,15 +471,15 @@ export default function BiblePageContent({
 
       {/* 성경 본문 */}
       {sections.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-3">
+          {!user && (
+            <p className="mb-1 text-center text-sm text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</p>
+          )}
           <TextSizeControl
             headerLeft={
               versions.length > 0 ? (
                 !user ? (
-                  <div>
-                    <p className="mb-1.5 text-sm text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</p>
-                    <span className="rounded-full bg-navy px-3 py-1 text-xs font-medium text-white">개역개정</span>
-                  </div>
+                  <span className="rounded-full bg-navy px-3 py-1 text-xs font-medium text-white">개역개정</span>
                 ) : (
                   <div className="flex flex-wrap items-center gap-1.5">
                     {[...versions].sort((a, b) => {
