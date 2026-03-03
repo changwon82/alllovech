@@ -595,7 +595,7 @@ export default function BiblePageContent({
       {user && isActive && (
         <>
           {/* 플로팅 버튼 (묵상 모달 열리면 반투명) */}
-          <div className={`fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2 transition-opacity ${reflectionOpen ? "pointer-events-none opacity-40" : "opacity-100"}`}>
+          <div className={`fixed bottom-20 right-4 z-40 flex flex-row items-center gap-2 transition-opacity ${reflectionOpen ? "pointer-events-none opacity-40" : "opacity-100"}`}>
             <button
               onClick={handleToggleCheck}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg transition-all active:scale-95 ${
