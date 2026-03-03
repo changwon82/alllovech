@@ -73,7 +73,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
-      <PageHeader title="알림" action={<UserMenu name={userName} canViewGroups={canViewGroups} unreadCount={0} />} />
+      <PageHeader title="알림" action={<UserMenu name={userName} canViewGroups={canViewGroups} unreadCount={0} userId={user.id} />} />
 
       <NotificationList notifications={enrichedNotifications} />
 

@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRealtimeUnreadCount } from "@/lib/useRealtimeUnreadCount";
 
-export default function UserMenu({ name, canViewGroups = false, unreadCount = 0 }: { name: string; canViewGroups?: boolean; unreadCount?: number }) {
+export default function UserMenu({ name, canViewGroups = false, unreadCount = 0, userId }: { name: string; canViewGroups?: boolean; unreadCount?: number; userId?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const realtimeCount = useRealtimeUnreadCount(userId, unreadCount);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -28,7 +30,7 @@ export default function UserMenu({ name, canViewGroups = false, unreadCount = 0 
         className="relative text-xs text-neutral-500 hover:text-navy"
       >
         {name} ▾
-        {unreadCount > 0 && (
+        {realtimeCount > 0 && (
           <span className="absolute -top-1 -right-2 h-2 w-2 rounded-full bg-red-500" />
         )}
       </button>
@@ -45,9 +47,9 @@ export default function UserMenu({ name, canViewGroups = false, unreadCount = 0 
             className="flex items-center gap-1.5 px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
           >
             알림
-            {unreadCount > 0 && (
+            {realtimeCount > 0 && (
               <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
-                {unreadCount > 99 ? "99+" : unreadCount}
+                {realtimeCount > 99 ? "99+" : realtimeCount}
               </span>
             )}
           </a>
