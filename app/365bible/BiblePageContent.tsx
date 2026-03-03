@@ -227,6 +227,7 @@ export default function BiblePageContent({
 
   // 묵상 모달
   const [reflectionOpen, setReflectionOpen] = useState(false);
+  const [reflectionFocused, setReflectionFocused] = useState(false);
   const reflectionTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 절 클릭 → textarea에 약식 참조 삽입
@@ -617,9 +618,9 @@ export default function BiblePageContent({
           {/* 펼친 상태: 모달 */}
           {reflectionOpen && (
             <div
-              style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 56px)" }}
-              className={`fixed right-0 left-0 z-[60] flex max-h-[45vh] flex-col rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.12)] transition-all duration-200 md:bottom-4 md:left-1/2 md:right-auto md:w-[80%] md:max-w-2xl md:-translate-x-1/2 md:rounded-2xl ${
-                isEditing || !reflection
+              style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 60px)" }}
+              className={`fixed right-3 left-3 z-[60] flex max-h-[320px] flex-col rounded-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.12)] transition-all duration-200 md:right-auto md:left-1/2 md:w-[80%] md:max-w-2xl md:-translate-x-1/2 ${
+                isEditing || (!reflection && (reflectionFocused || reflectionText.trim()))
                   ? "bg-white"
                   : "bg-white/70 backdrop-blur-sm"
               }`}
@@ -645,14 +646,16 @@ export default function BiblePageContent({
               {/* 내용 */}
               <div className="min-h-0 flex-1 overflow-y-auto px-4">
                 {reflection && !isEditing ? (
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+                  <div className="max-h-[5.6rem] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
                     {renderReflectionContent(reflection.content)}
-                  </p>
+                  </div>
                 ) : (
                   <textarea
                     ref={reflectionTextareaRef}
                     value={reflectionText}
                     onChange={(e) => setReflectionText(e.target.value)}
+                    onFocus={() => setReflectionFocused(true)}
+                    onBlur={() => setReflectionFocused(false)}
                     placeholder="오늘 말씀을 통해 느낀 점을 기록해보세요..."
                     rows={4}
                     className="w-full resize-none bg-transparent text-sm leading-relaxed text-neutral-700 outline-none placeholder:text-neutral-400"
