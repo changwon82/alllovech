@@ -3,7 +3,7 @@
 import { useState, useTransition, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { updateProfile } from "./actions";
-import { saveReflection } from "@/app/365bible/actions";
+import { saveReflection, deleteReflection } from "@/app/365bible/actions";
 import { createClient } from "@/lib/supabase/client";
 import { BOOK_FULL_TO_CODE, BOOK_NAMES_ORDERED } from "@/app/365bible/plan";
 import Card from "@/app/components/ui/Card";
@@ -517,12 +517,24 @@ export default function MyPageContent({
                             </svg>
                           </button>
                         )}
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-1.5">
                           <button
                             onClick={() => { setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
                             className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs text-accent-dark opacity-0 transition-opacity hover:bg-accent/30 group-hover/row:opacity-100 group-active/row:opacity-100"
                           >
                             수정
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm("묵상을 삭제하시겠습니까?")) return;
+                              const result = await deleteReflection(r.day, year);
+                              if (!("error" in result)) {
+                                setLocalReflections(prev => prev.filter(x => x.id !== r.id));
+                              }
+                            }}
+                            className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs text-red-500 opacity-0 transition-opacity hover:bg-red-200 group-hover/row:opacity-100 group-active/row:opacity-100"
+                          >
+                            삭제
                           </button>
                         </div>
                       </>
