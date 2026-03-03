@@ -33,8 +33,9 @@ export async function subscribePush(): Promise<PushSubscription | null> {
   const registration = await navigator.serviceWorker.register("/sw.js");
   await navigator.serviceWorker.ready;
 
+  // 기존 구독이 있으면 제거 후 새로 생성 (키 포맷 변경 대응)
   const existing = await registration.pushManager.getSubscription();
-  if (existing) return existing;
+  if (existing) await existing.unsubscribe();
 
   return await registration.pushManager.subscribe({
     userVisibleOnly: true,

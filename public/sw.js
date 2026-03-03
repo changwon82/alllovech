@@ -1,6 +1,7 @@
 // 푸시 알림 서비스 워커
 
 self.addEventListener("push", (event) => {
+  console.log("[sw] push 수신:", event.data?.text());
   if (!event.data) return;
 
   const data = event.data.json();
