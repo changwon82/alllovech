@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname.startsWith("/365bible") ||
+    pathname === "/my" ||
     pathname.startsWith("/spend-report") ||
     pathname.startsWith("/invite") ||
     pathname.startsWith("/forgot-password") ||
