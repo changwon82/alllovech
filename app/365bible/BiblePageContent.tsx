@@ -442,7 +442,7 @@ export default function BiblePageContent({
 
       {!user && (
         <div className="mt-3 text-center">
-          <LoginButton className="text-xs text-neutral-400 hover:text-navy">
+          <LoginButton className="text-sm text-neutral-400 hover:text-navy">
             읽기체크·묵상기록 등은 <span className="text-navy underline">로그인</span> 후 이용 가능
           </LoginButton>
         </div>
