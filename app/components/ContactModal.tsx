@@ -59,7 +59,7 @@ export default function ContactModal({ open, onClose }: { open: boolean; onClose
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="문의 내용을 입력해주세요"
+              placeholder="365성경읽기를 하시면서 발견된 오류 및 문의 내용을 알려주세요. 빠른시일에 해결하도록 하겠습니다."
               rows={5}
               className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm leading-relaxed text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-navy focus:ring-1 focus:ring-navy"
             />
