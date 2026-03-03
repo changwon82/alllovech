@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import { extractBooksFromTitle } from "@/app/365bible/plan";
@@ -38,7 +39,8 @@ export default async function MyPage() {
   const year = getKoreaYear();
   const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  const [profileResult, checksResult, reflectionsResult, readingsResult, roles, unreadCount, groupLeader] = await Promise.all([
+  const admin = createAdminClient();
+  const [profileResult, checksResult, reflectionsResult, readingsResult, roles, unreadCount, groupLeader, pushSetting] = await Promise.all([
     supabase
       .from("profiles")
       .select("name, status, phone, avatar_url")
@@ -61,6 +63,7 @@ export default async function MyPage() {
     getUserRoles(supabase, user.id),
     getUnreadCount(supabase, user.id),
     isGroupLeader(supabase, user.id),
+    admin.from("admin_settings").select("value").eq("key", "push_notifications").maybeSingle(),
   ]);
 
   const profile = profileResult.data;
@@ -77,6 +80,7 @@ export default async function MyPage() {
 
   const isAdmin = isAdminRole(roles);
   const canViewGroups = isAdmin || groupLeader;
+  const showPushToggle = isAdmin || pushSetting.data?.value === "true";
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
@@ -85,9 +89,11 @@ export default async function MyPage() {
         action={<UserMenu name={profile?.name ?? "이름 없음"} canViewGroups={canViewGroups} />}
       />
 
-      <div className="mt-4">
-        <PushNotificationToggle />
-      </div>
+      {showPushToggle && (
+        <div className="mt-4">
+          <PushNotificationToggle />
+        </div>
+      )}
 
       <MyPageContent
         userId={user.id}
