@@ -456,26 +456,7 @@ export default function BiblePageContent({
             isToday ? "bg-accent-light" : "bg-white shadow-sm"
           }`}
         >
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-xl font-bold text-neutral-800">{displayTitle}</p>
-            {user && isActive && (
-              <button
-                onClick={handleToggleCheck}
-                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                  isChecked
-                    ? "border-accent bg-accent text-white"
-                    : "border-neutral-300 text-neutral-500 hover:border-accent hover:text-accent"
-                }`}
-              >
-                {isChecked ? "읽음 ✓" : "읽음 체크"}
-              </button>
-            )}
-            {user && !isActive && (
-              <p className="shrink-0 text-xs text-neutral-400">
-                관리자 승인 대기 중
-              </p>
-            )}
-          </div>
+          <p className="text-xl font-bold text-neutral-800">{displayTitle}</p>
           {reading?.youtube_id && (
             <div className="mt-4">
               <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
@@ -497,7 +478,7 @@ export default function BiblePageContent({
                 !user ? (
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-navy px-3 py-1 text-xs font-medium text-white">개역개정</span>
-                    <span className="text-[11px] text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</span>
+                    <span className="text-xs text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</span>
                   </div>
                 ) : (
                   <div className="flex flex-wrap items-center gap-1.5">
