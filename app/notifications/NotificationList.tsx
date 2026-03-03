@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { markAllRead, markRead } from "./actions";
+import { markAllRead, markRead, deleteNotification, deleteAllNotifications } from "./actions";
 
 type Notification = {
   id: string;
@@ -80,6 +80,25 @@ export default function NotificationList({ notifications: initial }: { notificat
     }
   }
 
+  function handleDelete(e: React.MouseEvent, id: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    startTransition(async () => {
+      await deleteNotification(id);
+      window.dispatchEvent(new Event("notification-change"));
+    });
+  }
+
+  function handleDeleteAll() {
+    if (!confirm("모든 알림을 삭제하시겠습니까?")) return;
+    setNotifications([]);
+    startTransition(async () => {
+      await deleteAllNotifications();
+      window.dispatchEvent(new Event("notification-change"));
+    });
+  }
+
   if (notifications.length === 0) {
     return (
       <div className="mt-12 text-center">
@@ -90,8 +109,8 @@ export default function NotificationList({ notifications: initial }: { notificat
 
   return (
     <div className="mt-4">
-      {unreadCount > 0 && (
-        <div className="mb-3 flex justify-end">
+      <div className="mb-3 flex justify-end gap-3">
+        {unreadCount > 0 && (
           <button
             onClick={handleMarkAllRead}
             disabled={isPending}
@@ -99,8 +118,15 @@ export default function NotificationList({ notifications: initial }: { notificat
           >
             모두 읽음 처리
           </button>
-        </div>
-      )}
+        )}
+        <button
+          onClick={handleDeleteAll}
+          disabled={isPending}
+          className="text-xs text-neutral-400 hover:text-red-500"
+        >
+          모두 삭제
+        </button>
+      </div>
       <div className="space-y-2">
         {notifications.map((n) => {
           const isContact = n.type === "contact";
@@ -120,7 +146,17 @@ export default function NotificationList({ notifications: initial }: { notificat
                 <p className={`text-sm ${n.is_read ? "text-neutral-500" : "font-medium text-neutral-800"}`}>
                   {getMessage(n.type, n.actor_name)}
                 </p>
-                <span className="text-xs text-neutral-400">{timeAgo(n.created_at)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-400">{timeAgo(n.created_at)}</span>
+                  <button
+                    onClick={(e) => handleDelete(e, n.id)}
+                    className="text-neutral-300 hover:text-red-400"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               {n.reflection_day && (
                 <p className="mt-1 text-xs font-medium text-accent">Day {n.reflection_day}</p>

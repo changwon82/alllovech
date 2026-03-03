@@ -27,3 +27,28 @@ export async function markRead(notificationId: string) {
 
   return { success: true };
 }
+
+export async function deleteNotification(notificationId: string) {
+  const { supabase, user } = await getSessionUser();
+  if (!user) return { error: "로그인 필요" };
+
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("id", notificationId)
+    .eq("user_id", user.id);
+
+  return { success: true };
+}
+
+export async function deleteAllNotifications() {
+  const { supabase, user } = await getSessionUser();
+  if (!user) return { error: "로그인 필요" };
+
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id);
+
+  return { success: true };
+}
