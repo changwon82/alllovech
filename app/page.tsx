@@ -55,9 +55,6 @@ export default async function Home() {
             {/* 로그인 — 출석체크·묵상·나눔 */}
             <div className="w-full rounded-2xl bg-white p-6 shadow-sm">
               <p className="mb-1 text-center text-sm font-bold text-navy">로그인</p>
-              <p className="mb-5 text-center text-xs text-neutral-400">
-                365 성경읽기에서 읽기체크·묵상·나눔 등은<br />로그인 후 이용할 수 있습니다
-              </p>
               <LoginForm />
               <p className="mt-5 text-center text-sm text-neutral-500">
                 아직 계정이 없으신가요?{" "}

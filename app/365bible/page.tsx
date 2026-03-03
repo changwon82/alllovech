@@ -524,7 +524,7 @@ export default async function BiblePage({
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <h1 className="text-2xl font-bold text-navy md:text-3xl">
-            365 성경읽기
+            <a href="/365bible">365 성경읽기</a>
           </h1>
           {allReadings.length > 0 && (
             <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} compareWithCode={compareVersion?.code} />

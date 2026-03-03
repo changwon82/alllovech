@@ -438,6 +438,14 @@ export default function BiblePageContent({
         )}
       </div>
 
+      {!user && (
+        <div className="mt-3 text-center">
+          <LoginButton className="text-xs text-neutral-400 hover:text-navy">
+            읽기체크·묵상 등은 <span className="text-navy underline">로그인</span> 후 이용 가능
+          </LoginButton>
+        </div>
+      )}
+
       {/* 읽기 정보 */}
       {reading ? (
         <section
@@ -464,11 +472,6 @@ export default function BiblePageContent({
               <p className="shrink-0 text-xs text-neutral-400">
                 관리자 승인 대기 중
               </p>
-            )}
-            {!user && (
-              <LoginButton className="shrink-0 text-xs text-neutral-400 hover:text-navy">
-                읽기체크·묵상·나눔 등은{"\n"}<span className="text-navy underline">로그인</span> 후 이용 가능
-              </LoginButton>
             )}
           </div>
           {reading?.youtube_id && (
