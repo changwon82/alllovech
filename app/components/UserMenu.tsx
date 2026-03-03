@@ -2,12 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRealtimeUnreadCount } from "@/lib/useRealtimeUnreadCount";
 
-export default function UserMenu({ name, canViewGroups = false, unreadCount = 0, userId }: { name: string; canViewGroups?: boolean; unreadCount?: number; userId?: string }) {
+export default function UserMenu({ name, canViewGroups = false }: { name: string; canViewGroups?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const realtimeCount = useRealtimeUnreadCount(userId, unreadCount);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -27,12 +25,9 @@ export default function UserMenu({ name, canViewGroups = false, unreadCount = 0,
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative text-xs text-neutral-500 hover:text-navy"
+        className="text-xs text-neutral-500 hover:text-navy"
       >
         {name} ▾
-        {realtimeCount > 0 && (
-          <span className="absolute -top-1 -right-2 h-2 w-2 rounded-full bg-red-500" />
-        )}
       </button>
       {open && (
         <div className="absolute right-0 z-50 mt-1 min-w-[100px] rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
@@ -41,17 +36,6 @@ export default function UserMenu({ name, canViewGroups = false, unreadCount = 0,
             className="block px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
           >
             마이페이지
-          </a>
-          <a
-            href="/notifications"
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
-          >
-            알림
-            {realtimeCount > 0 && (
-              <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
-                {realtimeCount > 99 ? "99+" : realtimeCount}
-              </span>
-            )}
           </a>
           {canViewGroups && (
             <a

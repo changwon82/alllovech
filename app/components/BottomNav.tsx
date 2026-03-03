@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NotificationToast from "./NotificationToast";
 import ContactModal from "./ContactModal";
+import { useRealtimeUnreadCount } from "@/lib/useRealtimeUnreadCount";
 
 type NavItem = { href: string; label: string; iconActive: string; iconInactive: string };
 
@@ -18,6 +19,8 @@ const BASE_ITEMS: NavItem[] = [
 const CONTACT_ITEM: NavItem = { href: "#contact", label: "문의", iconActive: "✉️", iconInactive: "✉️" };
 
 const GROUPS_ITEM: NavItem = { href: "/groups", label: "함께읽기", iconActive: "👥", iconInactive: "👥" };
+
+const NOTIFICATIONS_ITEM: NavItem = { href: "/notifications", label: "알림", iconActive: "🔔", iconInactive: "🔔" };
 
 const ADMIN_ITEM: NavItem = {
   href: "/admin",
@@ -39,12 +42,13 @@ export default function BottomNav({
 }) {
   const pathname = usePathname();
   const [contactOpen, setContactOpen] = useState(false);
+  const realtimeCount = useRealtimeUnreadCount(userId, unreadCount);
   const showGroups = FEATURE_GROUPS || canViewGroups;
   const items = [
     ...BASE_ITEMS,
     CONTACT_ITEM,
     ...(showGroups ? [GROUPS_ITEM] : []),
-    ...(isAdmin ? [ADMIN_ITEM] : []),
+    ...(isAdmin ? [NOTIFICATIONS_ITEM, ADMIN_ITEM] : []),
   ];
 
   return (
@@ -85,8 +89,10 @@ export default function BottomNav({
               >
                 <span className="text-base">{isActive ? item.iconActive : item.iconInactive}</span>
                 <span>{item.label}</span>
-                {item.href === "/groups" && unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1/2 -translate-x-[-10px] h-2 w-2 rounded-full bg-red-500" />
+                {item.href === "/notifications" && realtimeCount > 0 && (
+                  <span className="absolute top-1 right-1/2 -translate-x-[-10px] inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
+                    {realtimeCount > 99 ? "99+" : realtimeCount}
+                  </span>
                 )}
               </Link>
             );

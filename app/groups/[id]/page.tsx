@@ -176,7 +176,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-neutral-500">{memberCount}명</span>
-          <UserMenu name={userName} canViewGroups unreadCount={unreadCount} userId={user.id} />
+          <UserMenu name={userName} canViewGroups />
         </div>
       </div>
       <div className="mt-2 h-1 w-12 rounded-full bg-accent" />
