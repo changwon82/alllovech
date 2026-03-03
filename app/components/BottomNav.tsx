@@ -13,7 +13,7 @@ const FEATURE_GROUPS = process.env.NEXT_PUBLIC_FEATURE_GROUPS === "true";
 
 const BASE_ITEMS: NavItem[] = [
   { href: "/365bible", label: "성경읽기", iconActive: "📖", iconInactive: "📖" },
-  { href: "/my", label: "마이페이지", iconActive: "📊", iconInactive: "📊" },
+  { href: "/my", label: "나의기록", iconActive: "📊", iconInactive: "📊" },
 ];
 
 const CONTACT_ITEM: NavItem = { href: "#contact", label: "문의", iconActive: "✉️", iconInactive: "✉️" };

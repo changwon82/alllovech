@@ -10,7 +10,7 @@ import BottomNav from "@/app/components/BottomNav";
 import PushNotificationToggle from "@/app/components/PushNotificationToggle";
 import PageHeader from "@/app/components/ui/PageHeader";
 
-export const metadata = { title: "마이페이지 | 다애교회" };
+export const metadata = { title: "나의기록 | 다애교회" };
 
 function getKoreaYear(): number {
   const seoulDateStr = new Date().toLocaleDateString("en-CA", {
@@ -85,7 +85,7 @@ export default async function MyPage() {
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
-        title="마이페이지"
+        title="나의기록"
         action={<UserMenu name={profile?.name ?? "이름 없음"} canViewGroups={canViewGroups} />}
       />
 

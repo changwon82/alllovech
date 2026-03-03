@@ -342,10 +342,14 @@ export default function MyPageContent({
               </div>
             </div>
             <button
-              onClick={() => setIsEditing(true)}
-              className="text-xs text-neutral-400 hover:text-navy"
+              onClick={async () => {
+                const supabase = createClient();
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}
+              className="text-xs text-neutral-400 hover:text-red-500"
             >
-              수정
+              로그아웃
             </button>
           </div>
         )}
@@ -442,18 +446,6 @@ export default function MyPageContent({
                   </button>
                 )}
               </div>
-              {availableBooks.length > 0 && (
-                <select
-                  value={selectedBook}
-                  onChange={(e) => { setSelectedBook(e.target.value); setVisibleCount(10); }}
-                  className="shrink-0 rounded-lg bg-transparent px-2 py-1.5 text-xs text-neutral-600 outline-none"
-                >
-                  <option value="">전체</option>
-                  {availableBooks.map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
-              )}
             </div>
 
             {/* 검색/필터 결과 없음 */}

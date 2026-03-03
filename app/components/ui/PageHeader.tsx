@@ -8,7 +8,7 @@ export default function PageHeader({ title, subtitle, action }: PageHeaderProps)
   return (
     <div>
       <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-[32px] leading-[40px] font-bold text-navy">{title}</h1>
+        <h1 className="text-2xl font-bold text-navy md:text-3xl">{title}</h1>
         {action}
       </div>
       <div className="mt-2 h-1 w-12 rounded-full bg-accent" />
