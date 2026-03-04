@@ -67,6 +67,7 @@ export default function MyPageContent({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [localReflections, setLocalReflections] = useState(reflections);
@@ -460,6 +461,8 @@ export default function MyPageContent({
               const isEditing = editingId === r.id;
               return (
                 <div key={r.id} className="group/row flex items-start gap-3 px-4 py-1.5 transition-colors hover:bg-accent-light/50 active:bg-accent-light/50"
+                  onMouseEnter={() => setHoveredRowId(r.id)}
+                  onMouseLeave={() => { setHoveredRowId(null); setActiveRowId(null); }}
                   onTouchEnd={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).closest('p')) { setActiveRowId(prev => prev === r.id ? null : r.id); } }}>
                   <Link href={`/365bible?day=${r.day}`} onClick={(e) => e.stopPropagation()} className="shrink-0 mt-0.5 w-[4.5rem] text-right transition-opacity hover:opacity-70">
                     <Badge variant="accent">Day {r.day}</Badge>
@@ -511,7 +514,7 @@ export default function MyPageContent({
                           </p>
                           {!isOpen && (
                             <div className="pointer-events-none absolute right-0 bottom-0">
-                              <div className={`pointer-events-auto flex items-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200 px-1 py-0.5 gap-0.5 transition-opacity group-hover/row:opacity-100 ${activeRowId === r.id ? "opacity-100" : "opacity-0"}`}>
+                              <div className={`pointer-events-auto flex items-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200 px-1 py-0.5 gap-0.5 transition-opacity ${hoveredRowId === r.id || activeRowId === r.id ? "opacity-100" : "opacity-0"}`}>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setActiveRowId(null); setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
                                   className="px-2 py-0.5 text-xs text-accent-dark hover:text-accent"
@@ -548,7 +551,7 @@ export default function MyPageContent({
                           </button>
                         )}
                         {isOpen && (
-                          <div className={`flex justify-end gap-1.5 transition-opacity group-hover/row:opacity-100 ${activeRowId === r.id ? "opacity-100" : "opacity-0"}`} onClick={(e) => e.stopPropagation()}>
+                          <div className={`flex justify-end gap-1.5 transition-opacity ${hoveredRowId === r.id || activeRowId === r.id ? "opacity-100" : "opacity-0"}`} onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => { setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
                               className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs text-accent-dark hover:bg-accent/30"
