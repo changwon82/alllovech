@@ -512,8 +512,7 @@ export default function MyPageContent({
                           >
                             {renderContent(r.content)}
                           </p>
-                          {!isOpen && (
-                            <div className="pointer-events-none absolute right-0 bottom-0">
+                          <div className="pointer-events-none absolute right-0 bottom-0">
                               <div className={`pointer-events-auto flex items-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200 px-1 py-0.5 gap-0.5 transition-opacity ${hoveredRowId === r.id || activeRowId === r.id ? "opacity-100" : "opacity-0"}`}>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setActiveRowId(null); setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
@@ -537,8 +536,7 @@ export default function MyPageContent({
                                   삭제
                                 </button>
                               </div>
-                            </div>
-                          )}
+                          </div>
                         </div>
                         {(isOpen || overflowIds.has(r.id)) && (
                           <button
@@ -549,28 +547,6 @@ export default function MyPageContent({
                               <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>
                           </button>
-                        )}
-                        {isOpen && (
-                          <div className={`flex justify-end gap-1.5 transition-opacity ${hoveredRowId === r.id || activeRowId === r.id ? "opacity-100" : "opacity-0"}`} onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => { setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
-                              className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs text-accent-dark hover:bg-accent/30"
-                            >
-                              수정
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (!confirm("묵상을 삭제하시겠습니까?")) return;
-                                const result = await deleteReflection(r.day, year);
-                                if (!("error" in result)) {
-                                  setLocalReflections(prev => prev.filter(x => x.id !== r.id));
-                                }
-                              }}
-                              className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs text-red-500 hover:bg-red-200"
-                            >
-                              삭제
-                            </button>
-                          </div>
                         )}
                       </>
                     )}
