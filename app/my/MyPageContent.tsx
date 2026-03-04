@@ -66,6 +66,7 @@ export default function MyPageContent({
   const [visibleCount, setVisibleCount] = useState(10);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [activeRowId, setActiveRowId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [localReflections, setLocalReflections] = useState(reflections);
@@ -458,8 +459,9 @@ export default function MyPageContent({
               const isOpen = expandedIds.has(r.id);
               const isEditing = editingId === r.id;
               return (
-                <div key={r.id} className="group/row flex items-start gap-3 px-4 py-1.5 transition-colors hover:bg-accent-light/50 active:bg-accent-light/50">
-                  <Link href={`/365bible?day=${r.day}`} className="shrink-0 mt-0.5 transition-opacity hover:opacity-70">
+                <div key={r.id} className="group/row flex items-start gap-3 px-4 py-1.5 transition-colors hover:bg-accent-light/50 active:bg-accent-light/50"
+                  onClick={() => setActiveRowId(prev => prev === r.id ? null : r.id)}>
+                  <Link href={`/365bible?day=${r.day}`} onClick={(e) => e.stopPropagation()} className="shrink-0 mt-0.5 w-[4.5rem] text-right transition-opacity hover:opacity-70">
                     <Badge variant="accent">Day {r.day}</Badge>
                   </Link>
                   <div className="relative min-w-0 flex-1">
@@ -497,15 +499,44 @@ export default function MyPageContent({
                       </>
                     ) : (
                       <>
-                        <p
-                          ref={(el) => { if (el) contentRefs.current.set(r.id, el); else contentRefs.current.delete(r.id); }}
-                          onClick={() => { if (isOpen || overflowIds.has(r.id)) setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; }); }}
-                          className={`text-sm leading-relaxed text-neutral-700 pr-5 ${
-                            isOpen || searchQuery ? "whitespace-pre-line" : "line-clamp-2"
-                          } ${isOpen || overflowIds.has(r.id) ? "cursor-pointer" : ""}`}
-                        >
-                          {renderContent(r.content)}
-                        </p>
+                        <div className="relative">
+                          <p
+                            ref={(el) => { if (el) contentRefs.current.set(r.id, el); else contentRefs.current.delete(r.id); }}
+                            onClick={() => { if (isOpen || overflowIds.has(r.id)) setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; }); }}
+                            className={`text-sm leading-relaxed text-neutral-700 pr-5 ${
+                              isOpen || searchQuery ? "whitespace-pre-line" : "line-clamp-2"
+                            } ${isOpen || overflowIds.has(r.id) ? "cursor-pointer" : ""}`}
+                          >
+                            {renderContent(r.content)}
+                          </p>
+                          {!isOpen && (
+                            <div className="pointer-events-none absolute right-0 bottom-0">
+                              <div className={`pointer-events-auto flex items-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200 px-1 py-0.5 gap-0.5 transition-opacity group-hover/row:opacity-100 ${activeRowId === r.id ? "opacity-100" : "opacity-0"}`}>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setActiveRowId(null); setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
+                                  className="px-2 py-0.5 text-xs text-accent-dark hover:text-accent"
+                                >
+                                  수정
+                                </button>
+                                <span className="text-neutral-300 text-[10px]">|</span>
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    if (!confirm("묵상을 삭제하시겠습니까?")) return;
+                                    setActiveRowId(null);
+                                    const result = await deleteReflection(r.day, year);
+                                    if (!("error" in result)) {
+                                      setLocalReflections(prev => prev.filter(x => x.id !== r.id));
+                                    }
+                                  }}
+                                  className="px-2 py-0.5 text-xs text-red-400 hover:text-red-500"
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         {(isOpen || overflowIds.has(r.id)) && (
                           <button
                             onClick={() => setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; })}
@@ -516,26 +547,28 @@ export default function MyPageContent({
                             </svg>
                           </button>
                         )}
-                        <div className="flex justify-end gap-1.5">
-                          <button
-                            onClick={() => { setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
-                            className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs text-accent-dark opacity-0 transition-opacity hover:bg-accent/30 group-hover/row:opacity-100 group-active/row:opacity-100"
-                          >
-                            수정
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (!confirm("묵상을 삭제하시겠습니까?")) return;
-                              const result = await deleteReflection(r.day, year);
-                              if (!("error" in result)) {
-                                setLocalReflections(prev => prev.filter(x => x.id !== r.id));
-                              }
-                            }}
-                            className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs text-red-500 opacity-0 transition-opacity hover:bg-red-200 group-hover/row:opacity-100 group-active/row:opacity-100"
-                          >
-                            삭제
-                          </button>
-                        </div>
+                        {isOpen && (
+                          <div className="flex justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => { setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
+                              className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs text-accent-dark hover:bg-accent/30"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm("묵상을 삭제하시겠습니까?")) return;
+                                const result = await deleteReflection(r.day, year);
+                                if (!("error" in result)) {
+                                  setLocalReflections(prev => prev.filter(x => x.id !== r.id));
+                                }
+                              }}
+                              className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs text-red-500 hover:bg-red-200"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
