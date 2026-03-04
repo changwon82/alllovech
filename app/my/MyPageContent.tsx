@@ -548,7 +548,7 @@ export default function MyPageContent({
                           </button>
                         )}
                         {isOpen && (
-                          <div className="flex justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <div className={`flex justify-end gap-1.5 transition-opacity group-hover/row:opacity-100 ${activeRowId === r.id ? "opacity-100" : "opacity-0"}`} onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => { setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
                               className="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs text-accent-dark hover:bg-accent/30"
