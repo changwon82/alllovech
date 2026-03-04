@@ -505,7 +505,7 @@ export default function MyPageContent({
                         <div className="relative">
                           <p
                             ref={(el) => { if (el) contentRefs.current.set(r.id, el); else contentRefs.current.delete(r.id); }}
-                            onClick={() => { if (isOpen || overflowIds.has(r.id)) setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; }); }}
+                            onClick={() => { if (isOpen || overflowIds.has(r.id)) { setActiveRowId(null); setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; }); } }}
                             className={`text-sm leading-relaxed text-neutral-700 pr-5 ${
                               isOpen || searchQuery ? "whitespace-pre-line" : "line-clamp-2"
                             } ${isOpen || overflowIds.has(r.id) ? "cursor-pointer" : ""}`}
