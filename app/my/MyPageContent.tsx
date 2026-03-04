@@ -460,7 +460,7 @@ export default function MyPageContent({
               const isEditing = editingId === r.id;
               return (
                 <div key={r.id} className="group/row flex items-start gap-3 px-4 py-1.5 transition-colors hover:bg-accent-light/50 active:bg-accent-light/50"
-                  onClick={() => setActiveRowId(prev => prev === r.id ? null : r.id)}>
+                  onTouchEnd={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).closest('p')) { setActiveRowId(prev => prev === r.id ? null : r.id); } }}>
                   <Link href={`/365bible?day=${r.day}`} onClick={(e) => e.stopPropagation()} className="shrink-0 mt-0.5 w-[4.5rem] text-right transition-opacity hover:opacity-70">
                     <Badge variant="accent">Day {r.day}</Badge>
                   </Link>
