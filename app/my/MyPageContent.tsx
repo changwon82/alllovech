@@ -460,7 +460,7 @@ export default function MyPageContent({
               const isOpen = expandedIds.has(r.id);
               const isEditing = editingId === r.id;
               return (
-                <div key={r.id} className="group/row flex items-start gap-3 px-4 py-1.5 transition-colors hover:bg-accent-light/50 active:bg-accent-light/50"
+                <div key={r.id} className={`group/row flex items-start gap-3 px-4 py-1.5 transition-colors hover:bg-accent-light/50 ${activeRowId === r.id ? "bg-accent-light/50" : ""}`}
                   onMouseEnter={() => setHoveredRowId(r.id)}
                   onMouseLeave={() => { setHoveredRowId(null); setActiveRowId(null); }}
                   onTouchEnd={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).closest('p')) { setActiveRowId(prev => prev === r.id ? null : r.id); } }}>
