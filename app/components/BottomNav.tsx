@@ -18,7 +18,7 @@ const BASE_ITEMS: NavItem[] = [
 
 const CONTACT_ITEM: NavItem = { href: "#contact", label: "문의", iconActive: "✉️", iconInactive: "✉️" };
 
-const GROUPS_ITEM: NavItem = { href: "/groups", label: "함께읽기", iconActive: "👥", iconInactive: "👥" };
+const GROUPS_ITEM: NavItem = { href: "/365bible/groups", label: "함께읽기", iconActive: "👥", iconInactive: "👥" };
 
 const NOTIFICATIONS_ITEM: NavItem = { href: "/notifications", label: "알림", iconActive: "🔔", iconInactive: "🔔" };
 
@@ -43,11 +43,10 @@ export default function BottomNav({
   const pathname = usePathname();
   const [contactOpen, setContactOpen] = useState(false);
   const realtimeCount = useRealtimeUnreadCount(userId, unreadCount);
-  const showGroups = FEATURE_GROUPS || canViewGroups;
   const items = [
     ...BASE_ITEMS,
+    GROUPS_ITEM,
     CONTACT_ITEM,
-    ...(showGroups ? [GROUPS_ITEM] : []),
     ...(isAdmin ? [NOTIFICATIONS_ITEM, ADMIN_ITEM] : []),
   ];
 
@@ -61,10 +60,12 @@ export default function BottomNav({
             const isActive = isContact
               ? false
               : item.href === "/365bible"
-                ? pathname.startsWith("/365bible")
-                : item.href === "/admin"
-                  ? pathname.startsWith("/admin")
-                  : pathname === item.href;
+                ? pathname === "/365bible" || (pathname.startsWith("/365bible") && !pathname.startsWith("/365bible/groups") && !pathname.startsWith("/365bible/invite"))
+                : item.href === "/365bible/groups"
+                  ? pathname.startsWith("/365bible/groups")
+                  : item.href === "/admin"
+                    ? pathname.startsWith("/admin")
+                    : pathname === item.href;
 
             if (isContact) {
               return (

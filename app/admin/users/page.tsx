@@ -33,5 +33,13 @@ export default async function UsersPage() {
     roles: rolesMap[p.id] ?? [],
   }));
 
-  return <UserList users={users} />;
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-neutral-800">사용자 관리</h2>
+      <div className="mt-1 h-1 w-10 rounded-full bg-accent" />
+      <div className="mt-6">
+        <UserList users={users} />
+      </div>
+    </div>
+  );
 }

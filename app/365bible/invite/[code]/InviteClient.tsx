@@ -25,7 +25,7 @@ export default function InviteClient({
       startTransition(async () => {
         const result = await acceptInvite(code);
         if ("joined" in result || "alreadyMember" in result) {
-          router.push(`/groups/${groupId}`);
+          router.push(`/365bible/groups/${groupId}`);
         } else if ("error" in result) {
           setError(result.error as string);
         }
@@ -61,7 +61,7 @@ export default function InviteClient({
       </p>
 
       <a
-        href={`/login?next=${encodeURIComponent(`/invite/${code}/accept`)}`}
+        href={`/login?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`}
         className="flex w-full items-center justify-center rounded-xl bg-navy px-4 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
       >
         로그인하고 합류하기

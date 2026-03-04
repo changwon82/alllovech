@@ -29,7 +29,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
   const { supabase, user } = await getSessionUser();
 
   if (!user) {
-    redirect(`/login?next=/groups/${groupId}`);
+    redirect(`/login?next=/365bible/groups/${groupId}`);
   }
 
   // 역할 + 그룹 리더 여부 + 데이터를 병렬 조회
@@ -45,11 +45,6 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
   const isAdmin = isAdminRole(roles);
   const canViewGroups = isAdmin || groupLeader;
 
-  // 기능 플래그: 접근 권한 없으면 차단
-  const featureGroups = process.env.NEXT_PUBLIC_FEATURE_GROUPS === "true";
-  if (!featureGroups && !canViewGroups) {
-    redirect("/365bible");
-  }
 
   if (!groupResult.data || !membershipResult.data) {
     notFound();
@@ -58,7 +53,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
   const group = groupResult.data;
   const year = getKoreaYear();
   const userName = profileResult.data?.name ?? "이름 없음";
-  const isLeader = membershipResult.data.role === "leader" || membershipResult.data.role === "sub_leader";
+  const isLeader = membershipResult.data.role === "leader";
 
   // 리더일 때 기존 초대 코드 조회 (1개만)
   let inviteCode: string | null = null;
@@ -171,7 +166,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <Link href="/groups" className="text-xs text-neutral-400 hover:text-navy">&larr; 함께읽기 목록</Link>
+          <Link href="/365bible/groups" className="text-xs text-neutral-400 hover:text-navy">&larr; 함께읽기 목록</Link>
           <h1 className="text-[32px] leading-[40px] font-bold text-navy">{group.name}</h1>
         </div>
         <div className="flex items-center gap-3">

@@ -74,7 +74,7 @@ const getCachedUserMeta = unstable_cache(
     const [rolesResult, groupResult] = await Promise.all([
       admin.from("user_roles").select("role").eq("user_id", userId),
       admin.from("group_members").select("role", { count: "exact", head: true })
-        .eq("user_id", userId).in("role", ["leader", "sub_leader"]),
+        .eq("user_id", userId).eq("role", "leader"),
     ]);
     const roles = new Set((rolesResult.data ?? []).map((r: { role: string }) => r.role));
     const isLeader = (groupResult.count ?? 0) > 0;

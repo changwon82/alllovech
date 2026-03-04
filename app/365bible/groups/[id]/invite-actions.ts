@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateInviteCode } from "@/lib/invite";
 
-/** 초대 링크 생성 (leader/sub_leader만) */
+/** 초대 링크 생성 (leader만) */
 export async function createInviteLink(groupId: string) {
   const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
@@ -17,7 +17,7 @@ export async function createInviteLink(groupId: string) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!membership || !["leader", "sub_leader"].includes(membership.role)) {
+  if (!membership || membership.role !== "leader") {
     return { error: "그룹장만 초대 링크를 만들 수 있습니다." };
   }
 

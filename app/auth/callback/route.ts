@@ -16,7 +16,7 @@ export async function GET(request: Request) {
         const cookieStore = await cookies();
         const inviteCode = cookieStore.get("invite_code")?.value;
         if (inviteCode) {
-          next = `/invite/${inviteCode}/accept`;
+          next = `/365bible/invite/${inviteCode}/accept`;
         }
       }
 

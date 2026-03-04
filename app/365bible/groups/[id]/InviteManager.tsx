@@ -32,7 +32,7 @@ export default function InviteManager({
   }
 
   async function share(inviteCode: string) {
-    const url = `${window.location.origin}/invite/${inviteCode}`;
+    const url = `${window.location.origin}/365bible/invite/${inviteCode}`;
     if (navigator.share) {
       try {
         await navigator.share({

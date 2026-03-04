@@ -130,7 +130,7 @@ export default function NotificationList({ notifications: initial }: { notificat
       <div className="space-y-2">
         {notifications.map((n) => {
           const isContact = n.type === "contact";
-          const href = isContact ? "#" : n.reflection_day ? `/365bible?day=${n.reflection_day}` : "/groups";
+          const href = isContact ? "#" : n.reflection_day ? `/365bible?day=${n.reflection_day}` : "/365bible/groups";
           return (
             <a
               key={n.id}

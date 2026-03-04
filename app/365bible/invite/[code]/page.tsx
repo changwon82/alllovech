@@ -35,11 +35,8 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   const { user } = await getSessionUser();
 
   const typeLabels: Record<string, string> = {
-    small_group: "함께읽기",
-    district: "교구",
-    department: "부서",
-    edu_class: "반",
-    one_on_one: "일대일",
+    ministry: "사역",
+    group: "그룹",
   };
 
   return (

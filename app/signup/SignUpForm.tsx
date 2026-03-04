@@ -17,7 +17,7 @@ export default function SignUpForm({ inviteCode }: { inviteCode?: string }) {
     setLoading(true);
     setErrMsg("");
     const callbackUrl = inviteCode
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/invite/${inviteCode}/accept`)}`
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/365bible/invite/${inviteCode}/accept`)}`
       : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
@@ -66,7 +66,7 @@ export default function SignUpForm({ inviteCode }: { inviteCode?: string }) {
             : "관리자 승인 후 모든 기능을 이용할 수 있습니다."}
         </p>
         <a
-          href={inviteCode ? `/login?next=${encodeURIComponent(`/invite/${inviteCode}/accept`)}` : "/"}
+          href={inviteCode ? `/login?next=${encodeURIComponent(`/365bible/invite/${inviteCode}/accept`)}` : "/"}
           className="mt-4 inline-block rounded-lg bg-navy px-6 py-2 text-sm font-medium text-white hover:bg-navy/90"
         >
           로그인하기

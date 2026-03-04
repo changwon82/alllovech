@@ -15,10 +15,14 @@ export default async function AdminSettingsPage() {
   const settingsMap = Object.fromEntries((settings ?? []).map((s) => [s.key, s.value]));
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-bold text-neutral-800">알림 설정</h2>
-      <PushToggle initialEnabled={settingsMap.push_notifications === "true"} />
-      <EmailToggle initialEnabled={settingsMap.email_notifications === "true"} />
+    <div>
+      <h2 className="text-xl font-bold text-neutral-800">설정</h2>
+      <div className="mt-1 h-1 w-10 rounded-full bg-accent" />
+      <div className="mt-6 space-y-4">
+        <h3 className="text-base font-semibold text-neutral-700">알림 설정</h3>
+        <PushToggle initialEnabled={settingsMap.push_notifications === "true"} />
+        <EmailToggle initialEnabled={settingsMap.email_notifications === "true"} />
+      </div>
     </div>
   );
 }

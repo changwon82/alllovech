@@ -14,7 +14,7 @@ async function checkAdmin() {
     .eq("user_id", user.id);
 
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
-  if (!roleSet.has("ADMIN") && !roleSet.has("PASTOR") && !roleSet.has("STAFF")) {
+  if (!roleSet.has("ADMIN")) {
     return { error: "권한 없음" };
   }
 

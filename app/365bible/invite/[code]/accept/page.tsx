@@ -12,12 +12,12 @@ export default async function InviteAcceptPage({
   const { user } = await getSessionUser();
 
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent(`/invite/${code}/accept`)}`);
+    redirect(`/login?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`);
   }
 
   const invite = await getInviteByCode(code);
   if (!invite) {
-    redirect("/groups");
+    redirect("/365bible/groups");
   }
 
   const admin = createAdminClient();
@@ -45,5 +45,5 @@ export default async function InviteAcceptPage({
       { onConflict: "group_id,user_id" }
     );
 
-  redirect(`/groups/${invite.group_id}`);
+  redirect(`/365bible/groups/${invite.group_id}`);
 }

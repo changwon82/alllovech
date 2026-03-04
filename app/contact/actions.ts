@@ -17,7 +17,7 @@ export async function submitContact(content: string) {
   const admin = createAdminClient();
   const [{ data: profile }, { data: adminRoles }, { data: emailSetting }] = await Promise.all([
     supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
-    admin.from("user_roles").select("user_id").in("role", ["ADMIN", "PASTOR", "STAFF"]),
+    admin.from("user_roles").select("user_id").eq("role", "ADMIN"),
     admin.from("admin_settings").select("value").eq("key", "email_notifications").maybeSingle(),
   ]);
 
