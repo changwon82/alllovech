@@ -6,7 +6,14 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const { code } = await params;
   const invite = await getInviteByCode(code);
   const groupName = (invite?.groups as unknown as { name: string })?.name ?? "함께읽기";
-  return { title: `${groupName} 초대 | 다애교회` };
+  return {
+    title: `${groupName} 초대 | 다애교회`,
+    openGraph: {
+      title: `${groupName} 함께읽기 초대`,
+      description: "365 성경읽기에 초대합니다! 함께 말씀을 읽고 묵상을 나눠요.",
+      images: ["/og-invite.jpg"],
+    },
+  };
 }
 
 export default async function InvitePage({ params }: { params: Promise<{ code: string }> }) {
