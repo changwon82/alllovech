@@ -88,6 +88,8 @@ export default function BiblePageContent({
   checkedDays: initialCheckedDays,
   year,
   existingReflection,
+  userGroups = [],
+  existingSharedGroupIds = [],
   canViewGroups = false,
 }: {
   day: number;
@@ -105,6 +107,8 @@ export default function BiblePageContent({
   checkedDays: number[];
   year: number;
   existingReflection: Reflection | null;
+  userGroups?: { id: string; name: string }[];
+  existingSharedGroupIds?: string[];
   canViewGroups?: boolean;
 }) {
   const router = useRouter();
@@ -129,6 +133,21 @@ export default function BiblePageContent({
       localStorage.setItem("bible-compare-with", compareVersionCode);
     }
   }, [compareMode, compareVersionCode]);
+
+  // 그룹에 상태 변경 broadcast (출석/묵상)
+  function broadcastGroupUpdate() {
+    if (!userGroups.length) return;
+    const supabase = createClient();
+    for (const g of userGroups) {
+      const ch = supabase.channel(`group-status-${g.id}`);
+      ch.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          ch.send({ type: "broadcast", event: "member_update", payload: {} });
+          setTimeout(() => supabase.removeChannel(ch), 1000);
+        }
+      });
+    }
+  }
 
   // 체크 기능
   const [checkedDays, setCheckedDays] = useState<Set<number>>(new Set(initialCheckedDays));
@@ -175,6 +194,7 @@ export default function BiblePageContent({
           .eq("year", year);
         if (error) throw error;
       }
+      broadcastGroupUpdate();
     } catch (err: unknown) {
       const e = err as { message?: string; code?: string; details?: string };
       console.error("체크 실패:", e.message, e.code, e.details);
@@ -191,14 +211,14 @@ export default function BiblePageContent({
   // 묵상 기능
   const [reflection, setReflection] = useState<Reflection | null>(existingReflection);
   const [reflectionText, setReflectionText] = useState(existingReflection?.content ?? "");
-  const [reflectionVisibility, setReflectionVisibility] = useState<"private" | "group" | "public">(existingReflection?.visibility ?? "private");
+  const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(new Set(existingSharedGroupIds));
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, startSaving] = useTransition();
 
   useEffect(() => {
     setReflection(existingReflection);
     setReflectionText(existingReflection?.content ?? "");
-    setReflectionVisibility(existingReflection?.visibility ?? "private");
+    setSelectedGroupIds(new Set(existingSharedGroupIds));
     setIsEditing(false);
     setReflectionOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -207,10 +227,11 @@ export default function BiblePageContent({
   function handleSaveReflection() {
     if (!reflectionText.trim()) return;
     startSaving(async () => {
-      const result = await saveReflection(day, year, reflectionText.trim(), reflectionVisibility);
+      const result = await saveReflection(day, year, reflectionText.trim(), [...selectedGroupIds]);
       if ("reflection" in result && result.reflection) {
         setReflection(result.reflection);
         setIsEditing(false);
+        broadcastGroupUpdate();
       }
     });
   }
@@ -638,7 +659,7 @@ export default function BiblePageContent({
                     setReflectionOpen(false);
                     setIsEditing(false);
                     setReflectionText(reflection?.content ?? "");
-                    setReflectionVisibility(reflection?.visibility ?? "private");
+                    setSelectedGroupIds(new Set(existingSharedGroupIds));
                   }}
                   className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
                 >
@@ -669,66 +690,92 @@ export default function BiblePageContent({
               </div>
 
               {/* 하단 고정: 액션 버튼 */}
-              <div className="flex items-center justify-between border-t border-neutral-100 px-4 py-2.5">
-                {reflection && !isEditing ? (
-                  <>
-                    <span className="text-xs text-neutral-400">
-                      {reflectionVisibility === "private" ? "나만 보기" : reflectionVisibility === "public" ? "공개" : "함께읽기 공유"}
-                    </span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="text-xs text-neutral-500 hover:text-navy"
-                      >
-                        수정
-                      </button>
-                      <button
-                        onClick={handleDeleteReflection}
-                        disabled={isSaving}
-                        className="text-xs text-neutral-400 hover:text-red-500"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {canViewGroups ? (
-                      <select
-                        value={reflectionVisibility}
-                        onChange={(e) => setReflectionVisibility(e.target.value as "private" | "group" | "public")}
-                        className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-600 outline-none"
-                      >
-                        <option value="private">나만 보기</option>
-                        <option value="group">함께읽기 공유</option>
-                        <option value="public">공개</option>
-                      </select>
-                    ) : (
-                      <span className="text-xs text-neutral-400">나만 보기</span>
-                    )}
-                    <div className="flex gap-2">
-                      {(reflection || isEditing) && (
+              <div className="border-t border-neutral-100 px-4 py-2.5">
+                <div className="flex items-center justify-between">
+                  {reflection && !isEditing ? (
+                    <>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs text-neutral-400">
+                          {selectedGroupIds.size === 0
+                            ? "나만 보기"
+                            : `${[...selectedGroupIds].map(id => userGroups.find(g => g.id === id)?.name).filter(Boolean).join(", ")} 공유`}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => {
-                            setIsEditing(false);
-                            setReflectionText(reflection?.content ?? "");
-                            setReflectionVisibility(reflection?.visibility ?? "private");
-                          }}
-                          className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+                          onClick={() => setIsEditing(true)}
+                          className="text-xs text-neutral-500 hover:text-navy"
                         >
-                          취소
+                          수정
                         </button>
-                      )}
-                      <button
-                        onClick={handleSaveReflection}
-                        disabled={isSaving || !reflectionText.trim()}
-                        className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
-                      >
-                        {isSaving ? "저장 중..." : reflection ? "수정" : "저장"}
-                      </button>
-                    </div>
-                  </>
-                )}
+                        <button
+                          onClick={handleDeleteReflection}
+                          disabled={isSaving}
+                          className="text-xs text-neutral-400 hover:text-red-500"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs text-neutral-400">나만 보기</span>
+                        {userGroups.length > 0 && userGroups.map((g) => (
+                          <label
+                            key={g.id}
+                            className={`flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs transition-all ${
+                              selectedGroupIds.has(g.id)
+                                ? "bg-accent-light font-medium text-accent"
+                                : "bg-neutral-100 text-neutral-400"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedGroupIds.has(g.id)}
+                              onChange={() => {
+                                setSelectedGroupIds(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(g.id)) next.delete(g.id);
+                                  else next.add(g.id);
+                                  return next;
+                                });
+                              }}
+                              className="sr-only"
+                            />
+                            {selectedGroupIds.has(g.id) && (
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 6L9 17l-5-5" />
+                              </svg>
+                            )}
+                            {g.name}
+                          </label>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        {(reflection || isEditing) && (
+                          <button
+                            onClick={() => {
+                              setIsEditing(false);
+                              setReflectionText(reflection?.content ?? "");
+                              setSelectedGroupIds(new Set(existingSharedGroupIds));
+                            }}
+                            className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+                          >
+                            취소
+                          </button>
+                        )}
+                        <button
+                          onClick={handleSaveReflection}
+                          disabled={isSaving || !reflectionText.trim()}
+                          className="rounded-lg bg-navy px-4 py-1.5 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+                        >
+                          {isSaving ? "저장 중..." : reflection ? "수정" : "저장"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           )}

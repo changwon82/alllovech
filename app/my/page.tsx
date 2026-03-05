@@ -3,7 +3,6 @@ import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-// createAdminClient는 getCachedPushSetting 내부에서 사용
 import { isAdminRole } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import { extractBooksFromTitle } from "@/app/365bible/plan";
@@ -52,21 +51,6 @@ const getCachedAllReadings = unstable_cache(
   { revalidate: 3600 }
 );
 
-// push 설정 캐시 — 1시간
-const getCachedPushSetting = unstable_cache(
-  async () => {
-    const admin = createAdminClient();
-    const { data } = await admin
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "push_notifications")
-      .maybeSingle();
-    return data?.value === "true";
-  },
-  ["push-setting"],
-  { revalidate: 3600 }
-);
-
 // 사용자 역할 캐시 — 10분 (user별 캐시 키)
 const getCachedUserMeta = unstable_cache(
   async (userId: string) => {
@@ -94,7 +78,7 @@ export default async function MyPage() {
   const year = getKoreaYear();
   const today = Math.max(1, Math.min(365, getKoreaDayOfYear()));
 
-  const [profileResult, checksResult, reflectionsResult, allReadings, userMeta, unreadCount, showPushToggleValue] = await Promise.all([
+  const [profileResult, checksResult, reflectionsResult, allReadings, userMeta, unreadCount] = await Promise.all([
     supabase
       .from("profiles")
       .select("name, status, phone, avatar_url")
@@ -114,7 +98,6 @@ export default async function MyPage() {
     getCachedAllReadings(),
     getCachedUserMeta(user.id),
     getUnreadCount(supabase, user.id),
-    getCachedPushSetting(),
   ]);
 
   const profile = profileResult.data;
@@ -132,8 +115,6 @@ export default async function MyPage() {
   const roles = new Set(userMeta.roles);
   const isAdmin = isAdminRole(roles);
   const canViewGroups = isAdmin || userMeta.isLeader;
-  const showPushToggle = isAdmin || showPushToggleValue;
-
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
@@ -141,11 +122,9 @@ export default async function MyPage() {
         action={<UserMenu name={profile?.name ?? "이름 없음"} canViewGroups={canViewGroups} />}
       />
 
-      {showPushToggle && (
-        <div className="mt-4">
-          <PushNotificationToggle />
-        </div>
-      )}
+      <div className="mt-4">
+        <PushNotificationToggle />
+      </div>
 
       <MyPageContent
         userId={user.id}

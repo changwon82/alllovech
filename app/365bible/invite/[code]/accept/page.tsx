@@ -45,5 +45,5 @@ export default async function InviteAcceptPage({
       { onConflict: "group_id,user_id" }
     );
 
-  redirect(`/365bible/groups/${invite.group_id}`);
+  redirect("/365bible/groups");
 }

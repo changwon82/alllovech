@@ -367,10 +367,12 @@ export default async function BiblePage({
   let canViewGroups = false;
   let unreadCount = 0;
 
-  let existingReflection: { id: string; content: string; visibility: "private" | "group" | "public"; created_at: string; updated_at: string } | null = null;
+  let existingReflection: { id: string; content: string; visibility: "private" | "group"; created_at: string; updated_at: string } | null = null;
+  let userGroups: { id: string; name: string }[] = [];
+  let existingSharedGroupIds: string[] = [];
 
   if (user) {
-    const [checksResult, profileResult, reflectionResult, roles, unread, groupLeader] = await Promise.all([
+    const [checksResult, profileResult, reflectionResult, roles, unread, groupLeader, myGroupsResult] = await Promise.all([
       supabase
         .from("bible_checks")
         .select("day")
@@ -391,13 +393,28 @@ export default async function BiblePage({
       getUserRoles(supabase, user.id),
       getUnreadCount(supabase, user.id),
       isGroupLeader(supabase, user.id),
+      supabase
+        .from("group_members")
+        .select("group_id, groups!inner(id, name)")
+        .eq("user_id", user.id),
     ]);
     checkedDays = (checksResult.data ?? []).map((d: { day: number }) => d.day);
     userProfile = profileResult.data;
     existingReflection = reflectionResult.data;
     isAdmin = isAdminRole(roles);
-    canViewGroups = isAdmin || groupLeader;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    userGroups = (myGroupsResult.data ?? []).map((r: any) => Array.isArray(r.groups) ? r.groups[0] : r.groups).filter(Boolean);
+    canViewGroups = isAdmin || groupLeader || userGroups.length > 0;
     unreadCount = unread;
+
+    // 기존 묵상의 공유 그룹 ID 조회
+    if (existingReflection) {
+      const { data: shares } = await supabase
+        .from("reflection_group_shares")
+        .select("group_id")
+        .eq("reflection_id", existingReflection.id);
+      existingSharedGroupIds = (shares ?? []).map((s: { group_id: string }) => s.group_id);
+    }
   }
   const reading = allReadings[day - 1] ?? null;
 
@@ -557,6 +574,8 @@ export default async function BiblePage({
         checkedDays={checkedDays}
         year={koreaYear}
         existingReflection={existingReflection}
+        userGroups={userGroups}
+        existingSharedGroupIds={existingSharedGroupIds}
         canViewGroups={canViewGroups}
       />
 

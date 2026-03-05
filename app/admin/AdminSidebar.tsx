@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type NavItem = { href: string; label: string; icon: string };
@@ -16,6 +16,17 @@ const topItems: NavItem[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed") === "true";
+    if (saved) setCollapsed(true);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) localStorage.setItem("sidebar-collapsed", String(collapsed));
+  }, [collapsed, mounted]);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -25,7 +36,7 @@ export default function AdminSidebar() {
 
   return (
     <aside
-      className={`flex h-screen shrink-0 flex-col bg-navy transition-all duration-200 ${
+      className={`flex h-screen shrink-0 flex-col bg-navy ${mounted ? "transition-all duration-200" : ""} ${
         collapsed ? "w-14" : "w-56"
       }`}
     >
@@ -80,10 +91,24 @@ export default function AdminSidebar() {
 
         <div className="my-3 border-t border-white/10" />
 
+        {/* 교인명단 */}
+        <Link
+          href="/admin/members"
+          className={`flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+            pathname.startsWith("/admin/members")
+              ? "bg-white/15 font-medium text-white"
+              : "text-white/60 hover:bg-white/10 hover:text-white/90"
+          }`}
+          title={collapsed ? "교인명단" : undefined}
+        >
+          <span className="shrink-0 text-base">📋</span>
+          {!collapsed && <span>교인명단</span>}
+        </Link>
+
         {/* 다코방사역 */}
         <Link
           href="/admin/dakobang"
-          className={`flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+          className={`mt-0.5 flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
             pathname.startsWith("/admin/dakobang")
               ? "bg-white/15 font-medium text-white"
               : "text-white/60 hover:bg-white/10 hover:text-white/90"

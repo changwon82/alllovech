@@ -24,6 +24,7 @@ export async function toggleCheck(day: number, year: number) {
       .eq("day", day)
       .eq("year", year);
     if (error) return { error: error.message };
+
     return { checked: false };
   } else {
     // 체크
@@ -31,6 +32,7 @@ export async function toggleCheck(day: number, year: number) {
       .from("bible_checks")
       .insert({ user_id: user.id, day, year });
     if (error) return { error: error.message };
+
     return { checked: true };
   }
 }
@@ -53,7 +55,7 @@ export async function getCheckedDays(year: number): Promise<number[]> {
 export type Reflection = {
   id: string;
   content: string;
-  visibility: "private" | "group" | "public";
+  visibility: "private" | "group";
   created_at: string;
   updated_at: string;
 };
@@ -77,44 +79,53 @@ export async function saveReflection(
   day: number,
   year: number,
   content: string,
-  visibility: "private" | "group" | "public"
+  groupIds: string[] | null // null = 기존 공유 유지 (내용만 수정), [] = 나만보기, ["id",...] = 선택 그룹 공유
 ) {
   const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
+  const visibility = groupIds === null ? undefined : groupIds.length > 0 ? "group" : "private";
+
+  const upsertData: Record<string, unknown> = {
+    user_id: user.id, day, year, content, updated_at: new Date().toISOString(),
+  };
+  if (visibility !== undefined) upsertData.visibility = visibility;
+
   const { data, error } = await supabase
     .from("reflections")
-    .upsert(
-      { user_id: user.id, day, year, content, visibility, updated_at: new Date().toISOString() },
-      { onConflict: "user_id,day,year" }
-    )
+    .upsert(upsertData, { onConflict: "user_id,day,year" })
     .select("id, content, visibility, created_at, updated_at")
     .single();
 
   if (error) return { error: error.message };
 
-  // visibility가 group이면 내 소그룹에 자동 공유
-  if (visibility === "group" && data) {
-    const { data: myGroups } = await supabase
-      .from("group_members")
-      .select("group_id")
-      .eq("user_id", user.id);
-
-    if (myGroups && myGroups.length > 0) {
-      const shares = myGroups.map((g: { group_id: string }) => ({
-        reflection_id: data.id,
-        group_id: g.group_id,
-      }));
-      await supabase
-        .from("reflection_group_shares")
-        .upsert(shares, { onConflict: "reflection_id,group_id", ignoreDuplicates: true });
-    }
-  } else if (visibility === "private" && data) {
-    // private으로 변경하면 공유 해제
+  // groupIds가 null이면 공유 변경 없음 (내용만 수정)
+  if (groupIds !== null && data) {
+    // 기존 공유 삭제
     await supabase
       .from("reflection_group_shares")
       .delete()
       .eq("reflection_id", data.id);
+
+    // 선택된 그룹만 공유
+    if (groupIds.length > 0) {
+      // 보안: 실제 멤버인 그룹만 필터
+      const { data: validGroups } = await supabase
+        .from("group_members")
+        .select("group_id")
+        .eq("user_id", user.id)
+        .in("group_id", groupIds);
+
+      const validGroupIds = (validGroups ?? []).map((g: { group_id: string }) => g.group_id);
+      if (validGroupIds.length > 0) {
+        await supabase
+          .from("reflection_group_shares")
+          .insert(validGroupIds.map((gid: string) => ({
+            reflection_id: data.id,
+            group_id: gid,
+          })));
+      }
+    }
   }
 
   return { reflection: data as Reflection };

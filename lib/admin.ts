@@ -27,6 +27,15 @@ export async function isGroupLeader(supabase: SupabaseClient, userId: string): P
   return (count ?? 0) > 0;
 }
 
+/** 그룹 멤버 여부 조회 (리더 포함) */
+export async function isGroupMember(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from("group_members")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+  return (count ?? 0) > 0;
+}
+
 /** 관리자 권한 확인. ADMIN이 아니면 홈으로 리다이렉트. admin = service role 클라이언트 */
 export async function requireAdmin() {
   const supabase = await createClient();

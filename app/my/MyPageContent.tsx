@@ -487,7 +487,7 @@ export default function MyPageContent({
                             disabled={editSaving || !editContent.trim()}
                             onClick={async () => {
                               setEditSaving(true);
-                              const result = await saveReflection(r.day, year, editContent.trim(), r.visibility as "private" | "group" | "public");
+                              const result = await saveReflection(r.day, year, editContent.trim(), null);
                               if ("reflection" in result) {
                                 setLocalReflections(prev => prev.map(x => x.id === r.id ? { ...x, content: editContent.trim() } : x));
                                 setEditingId(null);

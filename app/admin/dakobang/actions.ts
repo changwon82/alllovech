@@ -109,53 +109,6 @@ export async function deleteAllDakobangGroups() {
   return { success: true };
 }
 
-// ── 성도명단 ──
-
-export async function bulkCreateChurchMembers(names: string[]) {
-  const { error } = await checkAdmin();
-  if (error) return { error };
-
-  const admin = createAdminClient();
-  const rows = names.map((name) => ({ name: name.trim() })).filter((r) => r.name);
-  if (!rows.length) return { error: "이름이 없습니다" };
-
-  const { data, error: insertError } = await admin
-    .from("church_members")
-    .insert(rows)
-    .select();
-
-  if (insertError) return { error: insertError.message };
-  return { data };
-}
-
-export async function deleteChurchMember(id: string) {
-  const { error } = await checkAdmin();
-  if (error) return { error };
-
-  const admin = createAdminClient();
-  const { error: deleteError } = await admin
-    .from("church_members")
-    .delete()
-    .eq("id", id);
-
-  if (deleteError) return { error: deleteError.message };
-  return { success: true };
-}
-
-export async function deleteAllChurchMembers() {
-  const { error } = await checkAdmin();
-  if (error) return { error };
-
-  const admin = createAdminClient();
-  const { error: deleteError } = await admin
-    .from("church_members")
-    .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
-
-  if (deleteError) return { error: deleteError.message };
-  return { success: true };
-}
-
 export async function deleteDakobangGroup(id: string) {
   const { error } = await checkAdmin();
   if (error) return { error };

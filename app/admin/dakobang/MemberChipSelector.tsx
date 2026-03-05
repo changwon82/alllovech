@@ -13,8 +13,10 @@ interface Props {
   onAdd: (member: MemberOption) => void;
   onRemove: (memberId: string) => void;
   editing?: boolean;
+  nowrap?: boolean;
   placeholder?: string;
   highlightQuery?: string;
+  chipColorClass?: string;
   // 드래그 앤 드롭
   dragGroupId?: string;
   dragRole?: string;
@@ -46,8 +48,10 @@ export default function MemberChipSelector({
   onAdd,
   onRemove,
   editing = false,
+  nowrap = false,
   placeholder = "",
   highlightQuery,
+  chipColorClass,
   dragGroupId,
   dragRole,
   onMemberDrop,
@@ -124,108 +128,116 @@ export default function MemberChipSelector({
     setDropIndex(e.clientX < midX ? idx : idx + 1);
   }
 
-  const chipClass = "inline-flex items-center gap-0.5 rounded-full bg-neutral-100 px-2 py-0.5 text-sm text-neutral-700";
-  const indicatorClass = "w-0.5 self-stretch rounded-full bg-accent shrink-0";
+  const [focused, setFocused] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
 
-  // 읽기 모드: 칩만 표시
-  if (!editing) {
-    if (selected.length === 0) {
-      return <span className="px-1.5 text-sm text-neutral-300">-</span>;
+  function calcDropdownPos() {
+    if (wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 2, left: rect.left });
     }
-    return (
-      <div className="flex flex-wrap gap-1 px-1 py-0.5">
-        {selected.map((m) => (
-          <span key={m.id} className={chipClass}>{highlightText(m.name, highlightQuery)}</span>
-        ))}
-      </div>
-    );
   }
 
-  // 수정 모드: 같은 레이아웃 + 인라인 input
+  const chipClass = `inline-flex shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${chipColorClass ?? "bg-neutral-100 text-neutral-700"}`;
+  const indicatorClass = "w-0.5 self-stretch rounded-full bg-accent shrink-0";
+
+  // 공통 구조 — 읽기/수정 모드 DOM 동일하게 유지하여 높이 변동 방지
   return (
     <div
       ref={wrapperRef}
-      className={`relative rounded transition-colors ${dragOver ? "bg-accent-light/60" : ""}`}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        setDragOver(true);
-        // 빈 영역에 드롭하면 맨 뒤에 삽입
-        if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === "INPUT") {
-          setDropIndex(selected.length);
-        }
-      }}
-      onDragLeave={(e) => {
-        if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
-          setDragOver(false);
-          setDropIndex(null);
-        }
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragOver(false);
-        const idx = dropIndex ?? selected.length;
-        setDropIndex(null);
-        try {
-          const data = JSON.parse(e.dataTransfer.getData("application/json"));
-          if (data.fromGroupId && data.fromRole && onMemberDrop) {
-            onMemberDrop({ id: data.memberId, name: data.memberName }, data.fromGroupId, data.fromRole, idx);
+      className={`relative rounded transition-colors ${editing && dragOver ? "bg-accent-light/60" : ""}`}
+      {...(editing ? {
+        onDragOver: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          setDragOver(true);
+          if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === "INPUT") {
+            setDropIndex(selected.length);
           }
-        } catch { /* ignore */ }
-      }}
+        },
+        onDragLeave: (e: React.DragEvent) => {
+          if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
+            setDragOver(false);
+            setDropIndex(null);
+          }
+        },
+        onDrop: (e: React.DragEvent) => {
+          e.preventDefault();
+          setDragOver(false);
+          const idx = dropIndex ?? selected.length;
+          setDropIndex(null);
+          try {
+            const data = JSON.parse(e.dataTransfer.getData("application/json"));
+            if (data.fromGroupId && data.fromRole && onMemberDrop) {
+              onMemberDrop({ id: data.memberId, name: data.memberName }, data.fromGroupId, data.fromRole, idx);
+            }
+          } catch { /* ignore */ }
+        },
+      } : {})}
     >
       <div
-        className="flex flex-wrap items-center gap-1 px-1 py-0.5 cursor-text"
-        onClick={() => inputRef.current?.focus()}
+        className={`flex items-center gap-1 px-1 py-0.5${editing ? " cursor-text" : ""}${nowrap ? " flex-nowrap overflow-hidden" : " flex-wrap"}`}
+        onClick={editing ? () => inputRef.current?.focus() : undefined}
       >
+        {selected.length === 0 && !editing && (
+          <span className="px-0.5 text-sm text-neutral-300">-</span>
+        )}
         {selected.map((m, idx) => (
           <span key={m.id} className="contents">
-            {dropIndex === idx && <div className={indicatorClass} />}
+            {editing && dropIndex === idx && <div className={indicatorClass} />}
             <span
-              className={`${chipClass} cursor-grab active:cursor-grabbing`}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("application/json", JSON.stringify({
-                  memberId: m.id,
-                  memberName: m.name,
-                  fromGroupId: dragGroupId,
-                  fromRole: dragRole,
-                }));
-                e.dataTransfer.effectAllowed = "move";
-              }}
-              onDragOver={(e) => handleChipDragOver(e, idx)}
+              className={`${chipClass}${editing ? " group/chip cursor-grab active:cursor-grabbing" : ""}`}
+              {...(editing ? {
+                draggable: true,
+                onDragStart: (e: React.DragEvent) => {
+                  e.dataTransfer.setData("application/json", JSON.stringify({
+                    memberId: m.id,
+                    memberName: m.name,
+                    fromGroupId: dragGroupId,
+                    fromRole: dragRole,
+                  }));
+                  e.dataTransfer.effectAllowed = "move";
+                },
+                onDragOver: (e: React.DragEvent) => handleChipDragOver(e, idx),
+              } : {})}
             >
-              {m.name}
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onRemove(m.id); }}
-                className="ml-0.5 text-neutral-400 hover:text-red-400"
-                aria-label={`${m.name} 제거`}
-              >
-                ×
-              </button>
+              {editing ? m.name : highlightText(m.name, highlightQuery)}
+              {editing && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onRemove(m.id); }}
+                  className="ml-0.5 opacity-0 text-neutral-400 transition-opacity hover:text-red-400 group-hover/chip:opacity-100"
+                  aria-label={`${m.name} 제거`}
+                >
+                  ×
+                </button>
+              )}
             </span>
           </span>
         ))}
-        {dropIndex === selected.length && <div className={indicatorClass} />}
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setOpen(true);
-            setActiveIdx(0);
-          }}
-          onFocus={() => query && setOpen(true)}
-          onKeyDown={handleKeyDown}
-          className="w-0 min-w-0 flex-1 bg-transparent text-sm outline-none"
-          autoComplete="off"
-        />
+        {editing && dropIndex === selected.length && <div className={indicatorClass} />}
+        {editing && (
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+              setActiveIdx(0);
+              calcDropdownPos();
+            }}
+            onFocus={() => { setFocused(true); if (query) { setOpen(true); calcDropdownPos(); } }}
+            onBlur={() => setFocused(false)}
+            onKeyDown={handleKeyDown}
+            className={`min-w-0 bg-transparent py-0 text-sm outline-none ${focused ? "w-16 flex-1" : "w-0 h-0 overflow-hidden"}`}
+            autoComplete="off"
+          />
+        )}
       </div>
 
-      {open && suggestions.length > 0 && (
-        <ul className="absolute left-0 top-full z-50 mt-0.5 max-h-40 w-48 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-0.5 shadow-lg">
+      {editing && open && suggestions.length > 0 && dropdownPos && (
+        <ul style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left }} className="z-[9999] max-h-40 w-48 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-0.5 shadow-lg">
           {suggestions.map((m, i) => (
             <li
               key={m.id}

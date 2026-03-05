@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import {
   createGroup,
   updateGroup,
-  toggleGroupActive,
+  deleteGroup,
   addMember,
   updateMemberRole,
   removeMember,
@@ -16,15 +16,15 @@ type Group = {
   name: string;
   type: string;
   description: string;
-  isActive: boolean;
   parentId: string | null;
   members: Member[];
 };
 type UserOption = { id: string; name: string; status: string };
 
 const TYPE_LABEL: Record<string, string> = {
-  ministry: "사역",
-  group: "그룹",
+  dakobang: "다코방",
+  family: "가족",
+  free: "자유",
 };
 
 // --------------- 그룹 생성/수정 폼 ---------------
@@ -34,11 +34,11 @@ function GroupForm({
   onCancel,
 }: {
   initial?: { name: string; type: string; description: string; parentId: string | null };
-  onSave: (name: string, type: "ministry" | "group", description: string, parentId: string | null) => void;
+  onSave: (name: string, type: "dakobang" | "family" | "free", description: string, parentId: string | null) => void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
-  const [type, setType] = useState<"ministry" | "group">((initial?.type as "ministry" | "group") ?? "group");
+  const [type, setType] = useState<"dakobang" | "family" | "free">((initial?.type as "dakobang" | "family" | "free") ?? "dakobang");
   const [description, setDescription] = useState(initial?.description ?? "");
 
   return (
@@ -52,11 +52,12 @@ function GroupForm({
         />
         <select
           value={type}
-          onChange={(e) => setType(e.target.value as "ministry" | "group")}
+          onChange={(e) => setType(e.target.value as "dakobang" | "family" | "free")}
           className="rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none"
         >
-          <option value="ministry">사역</option>
-          <option value="group">그룹</option>
+          <option value="dakobang">다코방</option>
+          <option value="family">가족</option>
+          <option value="free">자유</option>
         </select>
       </div>
       <input
@@ -150,7 +151,7 @@ export default function GroupManager({
   const selected = groups.find((g) => g.id === selectedId);
 
   // 그룹 생성
-  function handleCreate(name: string, type: "ministry" | "group", description: string, parentId: string | null) {
+  function handleCreate(name: string, type: "dakobang" | "family" | "free", description: string, parentId: string | null) {
     startTransition(async () => {
       const result = await createGroup(name, type, description, parentId);
       if ("id" in result) {
@@ -159,7 +160,6 @@ export default function GroupManager({
           name,
           type,
           description,
-          isActive: true,
           parentId,
           members: [],
         };
@@ -171,7 +171,7 @@ export default function GroupManager({
   }
 
   // 그룹 수정
-  function handleUpdate(groupId: string, name: string, type: "ministry" | "group", description: string) {
+  function handleUpdate(groupId: string, name: string, type: "dakobang" | "family" | "free", description: string) {
     setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, name, type, description } : g)));
     setEditingId(null);
     startTransition(async () => {
@@ -182,11 +182,13 @@ export default function GroupManager({
     });
   }
 
-  // 활성/비활성
-  function handleToggleActive(groupId: string, isActive: boolean) {
-    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, isActive } : g)));
+  // 그룹 삭제
+  function handleDelete(groupId: string) {
+    if (!confirm("정말 삭제하시겠습니까? 모든 멤버와 데이터가 삭제됩니다.")) return;
+    setGroups((prev) => prev.filter((g) => g.id !== groupId));
+    setSelectedId(null);
     startTransition(async () => {
-      await toggleGroupActive(groupId, isActive);
+      await deleteGroup(groupId);
     });
   }
 
@@ -259,7 +261,7 @@ export default function GroupManager({
               }`}
             >
               <div className="min-w-0">
-                <span className={`font-medium ${!g.isActive ? "line-through opacity-50" : ""}`}>{g.name}</span>
+                <span className="font-medium">{g.name}</span>
                 <span className={`ml-1.5 text-[10px] ${selectedId === g.id ? "text-white/60" : "text-neutral-400"}`}>
                   {TYPE_LABEL[g.type] ?? g.type}
                 </span>
@@ -304,11 +306,6 @@ export default function GroupManager({
                       <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-500">
                         {TYPE_LABEL[selected.type] ?? selected.type}
                       </span>
-                      {!selected.isActive && (
-                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-400">
-                          비활성
-                        </span>
-                      )}
                     </div>
                     {selected.description && (
                       <p className="mt-1 text-sm text-neutral-500">{selected.description}</p>
@@ -322,14 +319,10 @@ export default function GroupManager({
                       수정
                     </button>
                     <button
-                      onClick={() => handleToggleActive(selected.id, !selected.isActive)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                        selected.isActive
-                          ? "border border-red-200 text-red-400 hover:bg-red-50"
-                          : "bg-green-50 text-green-600 hover:bg-green-100"
-                      }`}
+                      onClick={() => handleDelete(selected.id)}
+                      className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-red-600 active:scale-95"
                     >
-                      {selected.isActive ? "비활성화" : "활성화"}
+                      삭제
                     </button>
                   </div>
                 </div>

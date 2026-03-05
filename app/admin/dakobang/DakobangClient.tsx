@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import DakobangTable from "./DakobangTable";
-import MemberList from "./MemberList";
 import type { MemberOption } from "./MemberChipSelector";
 
 interface Props {
@@ -13,22 +12,19 @@ interface Props {
 export default function DakobangClient({ initialGroups, initialMembers }: Props) {
   const [allMembers, setAllMembers] = useState(initialMembers);
 
-  return (
-    <>
-      <div className="mt-6">
-        <DakobangTable initialGroups={initialGroups} allMembers={allMembers} />
-      </div>
+  function handleMembersAdd(added: MemberOption[]) {
+    setAllMembers((prev) =>
+      [...prev, ...added].sort((a, b) => a.name.localeCompare(b.name, "ko"))
+    );
+  }
 
-      <div className="mt-10">
-        <h3 className="text-lg font-bold text-neutral-800">성도명단</h3>
-        <div className="mt-1 h-1 w-8 rounded-full bg-accent" />
-        <div className="mt-4">
-          <MemberList
-            initialMembers={initialMembers}
-            onMembersChange={setAllMembers}
-          />
-        </div>
-      </div>
-    </>
+  return (
+    <div className="mt-6">
+      <DakobangTable
+        initialGroups={initialGroups}
+        allMembers={allMembers}
+        onMembersAdd={handleMembersAdd}
+      />
+    </div>
   );
 }

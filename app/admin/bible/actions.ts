@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -20,7 +21,7 @@ async function checkAdmin() {
 }
 
 // 그룹 생성
-export async function createGroup(name: string, type: "ministry" | "group", description: string, parentId: string | null) {
+export async function createGroup(name: string, type: "dakobang" | "family" | "free", description: string, parentId: string | null) {
   const { error } = await checkAdmin();
   if (error) return { error };
 
@@ -36,7 +37,7 @@ export async function createGroup(name: string, type: "ministry" | "group", desc
 }
 
 // 그룹 수정
-export async function updateGroup(groupId: string, name: string, type: "ministry" | "group", description: string) {
+export async function updateGroup(groupId: string, name: string, type: "dakobang" | "family" | "free", description: string) {
   const { error } = await checkAdmin();
   if (error) return { error };
 
@@ -50,18 +51,19 @@ export async function updateGroup(groupId: string, name: string, type: "ministry
   return { success: true };
 }
 
-// 그룹 활성/비활성
-export async function toggleGroupActive(groupId: string, isActive: boolean) {
+// 그룹 삭제
+export async function deleteGroup(groupId: string) {
   const { error } = await checkAdmin();
   if (error) return { error };
 
   const admin = createAdminClient();
-  const { error: updateError } = await admin
+  const { error: deleteError } = await admin
     .from("groups")
-    .update({ is_active: isActive })
+    .delete()
     .eq("id", groupId);
 
-  if (updateError) return { error: updateError.message };
+  if (deleteError) return { error: deleteError.message };
+  revalidatePath("/admin/bible");
   return { success: true };
 }
 
@@ -111,31 +113,34 @@ export async function removeMember(groupId: string, userId: string) {
   return { success: true };
 }
 
-// ── 다코방 프리셋 ──
+// ── 함께읽기 승인 ──
 
-export async function addPreset(dakobangGroupId: string) {
+export async function approveGroup(groupId: string) {
   const { error } = await checkAdmin();
   if (error) return { error };
 
   const admin = createAdminClient();
-  const { error: insertError } = await admin
-    .from("bible_group_presets")
-    .insert({ dakobang_group_id: dakobangGroupId });
+  const { error: updateError } = await admin
+    .from("groups")
+    .update({ status: "approved" })
+    .eq("id", groupId);
 
-  if (insertError) return { error: insertError.message };
+  if (updateError) return { error: updateError.message };
+  revalidatePath("/admin/bible");
   return { success: true };
 }
 
-export async function removePreset(presetId: string) {
+export async function rejectGroup(groupId: string) {
   const { error } = await checkAdmin();
   if (error) return { error };
 
   const admin = createAdminClient();
-  const { error: deleteError } = await admin
-    .from("bible_group_presets")
-    .delete()
-    .eq("id", presetId);
+  const { error: updateError } = await admin
+    .from("groups")
+    .update({ status: "rejected", is_active: false })
+    .eq("id", groupId);
 
-  if (deleteError) return { error: deleteError.message };
+  if (updateError) return { error: updateError.message };
+  revalidatePath("/admin/bible");
   return { success: true };
 }

@@ -25,7 +25,7 @@ export default function InviteClient({
       startTransition(async () => {
         const result = await acceptInvite(code);
         if ("joined" in result || "alreadyMember" in result) {
-          router.push(`/365bible/groups/${groupId}`);
+          router.push("/365bible/groups");
         } else if ("error" in result) {
           setError(result.error as string);
         }
