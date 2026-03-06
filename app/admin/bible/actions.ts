@@ -18,7 +18,7 @@ async function checkAdmin() {
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("ADMIN")) return { error: "권한 없음" };
 
-  return { error: null };
+  return { error: null, userId: user.id };
 }
 
 // 그룹 생성
@@ -219,7 +219,7 @@ export async function approveGroup(groupId: string) {
 
 // 초대 링크 생성 (기존 활성 초대가 있으면 재사용)
 export async function createGroupInvite(groupId: string) {
-  const { error } = await checkAdmin();
+  const { error, userId } = await checkAdmin();
   if (error) return { error };
 
   const admin = createAdminClient();
@@ -238,7 +238,7 @@ export async function createGroupInvite(groupId: string) {
   const code = generateInviteCode();
   const { error: insertError } = await admin
     .from("group_invites")
-    .insert({ group_id: groupId, code, is_active: true });
+    .insert({ group_id: groupId, code, is_active: true, created_by: userId });
 
   if (insertError) return { error: insertError.message };
   return { code };
