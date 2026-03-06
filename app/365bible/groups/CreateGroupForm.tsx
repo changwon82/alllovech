@@ -9,6 +9,7 @@ interface DakobangGroup {
   name: string;
   leaders: string[];
   used: boolean;
+  usedStatus: "active" | "archived" | null;
 }
 
 type GroupType = "dakobang" | "family" | "free";
@@ -220,8 +221,12 @@ export default function CreateGroupForm({ dakobangGroups }: { dakobangGroups: Da
                             )}
                           </div>
                           {dg.used ? (
-                            <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-400">
-                              생성됨
+                            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                              dg.usedStatus === "archived"
+                                ? "bg-neutral-100 text-neutral-400"
+                                : "bg-green-50 text-green-500"
+                            }`}>
+                              {dg.usedStatus === "archived" ? "보관됨" : "활성 중"}
                             </span>
                           ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-neutral-300">

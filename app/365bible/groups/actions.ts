@@ -44,15 +44,18 @@ export async function createDakobangGroup(
     return { error: "이미 올해 함께읽기가 생성되었습니다" };
   }
 
-  // 방장 전화번호 검증
+  // 방장 전화번호 + 이름 검증
   const { data: leaderMembers } = await admin
     .from("dakobang_group_members")
-    .select("church_members(phone)")
+    .select("church_members(name, phone)")
     .eq("group_id", dakobangGroupId)
     .eq("role", "leader");
 
-  const phones = (leaderMembers ?? [])
-    .map((m) => (m.church_members as unknown as { phone: string | null })?.phone)
+  const leaderInfos = (leaderMembers ?? [])
+    .map((m) => m.church_members as unknown as { name: string; phone: string | null })
+    .filter(Boolean);
+  const phones = leaderInfos
+    .map((l) => l.phone)
     .filter(Boolean) as string[];
 
   const matched = phones.some((p) => p.replace(/\D/g, "").slice(-4) === phoneLast4);
@@ -68,6 +71,7 @@ export async function createDakobangGroup(
       start_date: startDate,
       end_date: endDate,
       dakobang_group_id: dakobangGroupId,
+      dakobang_leaders: leaderInfos.map((l) => l.name),
       status: "approved",
       created_by: user.id,
     })
@@ -246,12 +250,12 @@ export async function getGroupMemberStatus(groupId: string, viewDay?: number) {
 
   const [{ data: checks }, { data: reflections }, { data: latestChecks }] = await Promise.all([
     supabase.from("bible_checks").select("user_id").in("user_id", userIds).eq("day", queryDay).eq("year", year),
-    supabase.from("reflections").select("user_id").in("user_id", userIds).eq("day", queryDay).eq("year", year),
+    supabase.from("reflection_group_shares").select("reflection:reflections!inner(user_id)").eq("group_id", groupId).eq("reflection.day", queryDay).eq("reflection.year", year),
     supabase.from("bible_checks").select("user_id, day").in("user_id", userIds).eq("year", year).order("day", { ascending: false }),
   ]);
 
   const checkedSet = new Set((checks ?? []).map((c: { user_id: string }) => c.user_id));
-  const reflectionSet = new Set((reflections ?? []).map((r: { user_id: string }) => r.user_id));
+  const reflectionSet = new Set((reflections ?? []).map((r: { reflection: { user_id: string } }) => r.reflection.user_id));
 
   // 각 유저의 최근 체크 day + 총 체크 수
   const latestCheckMap = new Map<string, number>();

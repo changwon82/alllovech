@@ -7,6 +7,7 @@ import BottomNav from "@/app/components/BottomNav";
 import PageHeader from "@/app/components/ui/PageHeader";
 import CreateGroupForm from "./CreateGroupForm";
 import GroupCard from "./GroupCard";
+import RefreshOnFocus from "./RefreshOnFocus";
 
 export const metadata = { title: "함께읽기 | 다애교회" };
 
@@ -42,7 +43,8 @@ export default async function GroupsPage() {
           content_type,
           start_date,
           end_date,
-          status
+          status,
+          is_active
         )
       `)
       .eq("user_id", user.id),
@@ -53,7 +55,7 @@ export default async function GroupsPage() {
       .order("sort_order"),
     supabase
       .from("groups")
-      .select("dakobang_group_id")
+      .select("dakobang_group_id, is_active")
       .not("dakobang_group_id", "is", null)
       .neq("status", "rejected")
       .gte("start_date", `${year}-01-01`)
@@ -70,15 +72,20 @@ export default async function GroupsPage() {
     name: string;
     dakobang_group_members: { role: string; church_members: { name: string } | null }[];
   };
-  const usedDakobangIds = new Set(
-    (existingDakobang ?? []).map((g) => g.dakobang_group_id as string),
-  );
+  // dakobang_group_id → "active" | "archived"
+  const usedDakobangMap = new Map<string, "active" | "archived">();
+  for (const g of (existingDakobang ?? []) as { dakobang_group_id: string; is_active: boolean }[]) {
+    // 활성이 보관보다 우선 (같은 다코방으로 여러 개 있을 경우)
+    if (!usedDakobangMap.has(g.dakobang_group_id) || g.is_active) {
+      usedDakobangMap.set(g.dakobang_group_id, g.is_active ? "active" : "archived");
+    }
+  }
   const dakobangGroups = (dakobangRows ?? []).map((dg) => {
     const row = dg as unknown as DgRow;
     const leaders = row.dakobang_group_members
       .filter((m) => m.role === "leader" && m.church_members?.name)
       .map((m) => m.church_members!.name);
-    return { id: row.id, name: row.name, leaders, used: usedDakobangIds.has(row.id) };
+    return { id: row.id, name: row.name, leaders, used: usedDakobangMap.has(row.id), usedStatus: usedDakobangMap.get(row.id) ?? null };
   });
 
   type GroupRow = {
@@ -90,13 +97,16 @@ export default async function GroupsPage() {
     start_date: string | null;
     end_date: string | null;
     status: string;
+    is_active: boolean;
   };
 
+  // is_active 필드 추가를 위해 group select에 포함 필요
   const groups = (memberships ?? [])
     .filter((m) => {
       const g = m.group as unknown as GroupRow;
       if (!g) return false;
       if (g.status === "rejected") return false;
+      if (g.is_active === false) return false;
       return true;
     })
     .map((m) => ({
@@ -194,6 +204,7 @@ export default async function GroupsPage() {
         </div>
       )}
 
+      <RefreshOnFocus />
       <BottomNav userId={user.id} isAdmin={isAdmin} canViewGroups={canViewGroups} unreadCount={unreadCount} />
     </div>
   );

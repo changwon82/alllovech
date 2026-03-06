@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { acceptInvite } from "../actions";
 
 export default function InviteClient({
@@ -52,27 +53,64 @@ export default function InviteClient({
     );
   }
 
-  // 비로그인 사용자: 로그인/회원가입 안내
+  // 비로그인 사용자: 카카오 원클릭 합류
+  const handleKakaoLogin = async () => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "kakao",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`,
+      },
+    });
+  };
+
   return (
-    <div className="mt-6 space-y-3">
+    <div className="mt-6 space-y-5">
       <p className="text-center text-sm text-neutral-500">
         <strong className="text-navy">{groupName}</strong>에 초대되었습니다.<br />
-        로그인 또는 회원가입 후 자동으로 합류됩니다.
+        아래 버튼을 눌러 바로 합류하세요.
       </p>
 
-      <a
-        href={`/login?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`}
-        className="flex w-full items-center justify-center rounded-xl bg-navy px-4 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
+      <button
+        onClick={handleKakaoLogin}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-4 py-3.5 text-[15px] font-medium text-[#191919] transition-all hover:brightness-95 active:scale-95"
       >
-        로그인하고 합류하기
-      </a>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M9 0.6C4.029 0.6 0 3.713 0 7.551c0 2.468 1.641 4.634 4.11 5.862l-1.047 3.882c-.093.344.302.614.596.407L7.88 14.87c.367.034.74.053 1.12.053 4.971 0 9-3.113 9-6.951S13.971 0.6 9 0.6Z"
+            fill="#191919"
+          />
+        </svg>
+        카카오로 합류하기
+      </button>
 
-      <a
-        href={`/signup?invite=${code}`}
-        className="flex w-full items-center justify-center rounded-xl border border-navy px-4 py-3 text-sm font-medium text-navy transition-all hover:bg-navy/5 active:scale-95"
-      >
-        회원가입하고 합류하기
-      </a>
+      <div className="flex items-center gap-3 text-neutral-300">
+        <div className="h-px flex-1 bg-neutral-200" />
+        <span className="text-xs">또는</span>
+        <div className="h-px flex-1 bg-neutral-200" />
+      </div>
+
+      <div className="space-y-1.5 text-center text-sm text-neutral-500">
+        <p>
+          이미 이메일 계정이 있으신가요?{" "}
+          <a
+            href={`/login?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`}
+            className="font-semibold text-navy hover:underline"
+          >
+            로그인
+          </a>
+        </p>
+        <p>
+          <a
+            href={`/signup?invite=${code}`}
+            className="text-neutral-400 hover:text-neutral-600 hover:underline"
+          >
+            이메일로 가입하기
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

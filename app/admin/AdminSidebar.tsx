@@ -91,6 +91,27 @@ export default function AdminSidebar() {
 
         <div className="my-3 border-t border-white/10" />
 
+        {/* 카카오 공유 디버거 */}
+        <a
+          href="https://developers.kakao.com/tool/debugger/sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white/90"
+          title={collapsed ? "공유 디버거" : undefined}
+        >
+          <span className="shrink-0 text-base">🔗</span>
+          {!collapsed && (
+            <span className="flex items-center gap-1">
+              카카오톡 디버거
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 text-white/30">
+                <path fillRule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z" clipRule="evenodd" />
+              </svg>
+            </span>
+          )}
+        </a>
+
+        <div className="my-3 border-t border-white/10" />
+
         {/* 교인명단 */}
         <Link
           href="/admin/members"

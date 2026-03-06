@@ -1,6 +1,5 @@
 import { requireAdmin } from "@/lib/admin";
 import GroupManager from "./GroupManager";
-import GroupRequests from "./GroupRequests";
 
 export const metadata = { title: "365 성경읽기 | 관리자 | 다애교회" };
 
@@ -11,15 +10,13 @@ export default async function AdminBiblePage() {
     { data: groups },
     { data: allMembers },
     { data: profiles },
-    { data: pendingGroups },
   ] = await Promise.all([
-    admin.from("groups").select("id, name, type, description, parent_id, created_at, status").order("created_at"),
+    admin
+      .from("groups")
+      .select("id, name, type, description, parent_id, created_at, status, is_active, start_date, end_date, created_by, dakobang_leaders, content_type")
+      .order("created_at"),
     admin.from("group_members").select("group_id, user_id, role"),
     admin.from("profiles").select("id, name, status").order("name"),
-    admin.from("groups")
-      .select("id, name, type, description, status, start_date, end_date, created_by, created_at")
-      .in("status", ["pending", "approved", "rejected"])
-      .order("created_at"),
   ]);
 
   // 프로필 맵
@@ -40,16 +37,39 @@ export default async function AdminBiblePage() {
     });
   }
 
-  const groupData = (groups ?? [])
-    .filter((g) => (g.status as string) !== "pending")
-    .map((g) => ({
-      id: g.id as string,
-      name: g.name as string,
-      type: g.type as string,
-      description: (g.description as string) ?? "",
-      parentId: (g.parent_id as string) ?? null,
-      members: membersMap[g.id as string] ?? [],
-    }));
+  type GroupRow = {
+    id: string;
+    name: string;
+    type: string;
+    description: string | null;
+    parent_id: string | null;
+    status: string;
+    is_active: boolean;
+    start_date: string | null;
+    end_date: string | null;
+    created_by: string | null;
+    dakobang_leaders: string[] | null;
+    content_type: string | null;
+  };
+
+  const groupData = (groups ?? []).map((g) => {
+    const row = g as unknown as GroupRow;
+    return {
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      description: row.description ?? "",
+      parentId: row.parent_id ?? null,
+      isActive: row.is_active !== false,
+      status: (row.status ?? "approved") as "pending" | "approved" | "rejected",
+      createdBy: row.created_by ? (profileMap[row.created_by] ?? "이름 없음") : null,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      members: membersMap[row.id] ?? [],
+      dakobangLeaders: row.dakobang_leaders ?? [],
+      contentType: row.content_type ?? "365bible",
+    };
+  });
 
   const allUsers = (profiles ?? []).map((p) => ({
     id: p.id as string,
@@ -57,41 +77,10 @@ export default async function AdminBiblePage() {
     status: p.status as string,
   }));
 
-  // 승인 대기 그룹 데이터
-  type RequestRow = {
-    id: string;
-    name: string;
-    type: string;
-    description: string | null;
-    status: string;
-    start_date: string | null;
-    end_date: string | null;
-    created_by: string | null;
-    created_at: string;
-  };
-  const requestData = (pendingGroups ?? []).map((g) => {
-    const row = g as unknown as RequestRow;
-    return {
-      id: row.id,
-      name: row.name,
-      type: row.type,
-      description: row.description,
-      status: row.status as "pending" | "approved" | "rejected",
-      startDate: row.start_date,
-      endDate: row.end_date,
-      createdBy: row.created_by ? (profileMap[row.created_by] ?? "이름 없음") : null,
-      createdAt: row.created_at,
-    };
-  });
-
   return (
     <div>
       <h2 className="text-xl font-bold text-neutral-800">365 성경읽기</h2>
       <div className="mt-1 h-1 w-10 rounded-full bg-accent" />
-
-      <div className="mt-6">
-        <GroupRequests groups={requestData} />
-      </div>
 
       <div className="mt-6">
         <GroupManager groups={groupData} allUsers={allUsers} />

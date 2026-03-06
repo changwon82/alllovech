@@ -84,22 +84,15 @@ function ReactionButton({
         onClick={() => setOpen(!open)}
         className={`inline-flex items-center gap-0.5 rounded-full transition-colors ${myReaction ? "bg-accent-light px-1.5 py-0.5 font-bold text-accent" : "hover:text-accent"}`}
       >
-        {myReaction ? (
+        {total > 0 ? (
           <>
-            <span className="text-xs">{REACTION_EMOJI[myReaction]}</span>
-            {sorted.filter(([type]) => type !== myReaction).map(([type]) => (
-              <span key={type} className="text-xs">{REACTION_EMOJI[type]}</span>
+            {sorted.map(([type, count]) => (
+              <span key={type} className="text-xs">{REACTION_EMOJI[type]}{count > 1 ? ` ${count}` : ""}</span>
             ))}
-            <span className="ml-0.5">{total}</span>
+            {!myReaction && <span> · 공감</span>}
           </>
         ) : (
-          <>
-            {total > 0 && sorted.map(([type]) => (
-              <span key={type} className="text-xs">{REACTION_EMOJI[type]}</span>
-            ))}
-            {total > 0 && <span className="ml-0.5">{total}</span>}
-            <span>{total > 0 ? " · " : ""}공감</span>
-          </>
+          <span>공감</span>
         )}
       </button>
       {open && (

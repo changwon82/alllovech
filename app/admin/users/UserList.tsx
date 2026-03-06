@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { updateUserStatus, addUserRole, removeUserRole } from "./actions";
+import { updateUserStatus, addUserRole, removeUserRole, getUserStats, deleteUser } from "./actions";
 import Avatar from "@/app/components/ui/Avatar";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -112,6 +112,7 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   function toggleSort(key: SortKey) {
@@ -195,6 +196,50 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
     }
   }
 
+  async function handleDelete(user: User) {
+    setDeleting(user.id);
+    try {
+      const stats = await getUserStats(user.id);
+      if ("error" in stats) {
+        alert(`오류: ${stats.error}`);
+        return;
+      }
+
+      const lines = [
+        `⚠️ "${user.name}" 사용자를 완전히 삭제합니다.`,
+        ``,
+        `삭제될 데이터:`,
+        `  • 성경체크: ${stats.checks}건`,
+        `  • 묵상: ${stats.reflections}건`,
+        `  • 댓글: ${stats.comments}건`,
+        `  • 반응: ${stats.reactions}건`,
+        `  • 그룹: ${stats.groups.length}개${stats.groups.length > 0 ? ` (${stats.groups.join(", ")})` : ""}`,
+        ``,
+        `이 작업은 되돌릴 수 없습니다.`,
+      ];
+
+      if (!confirm(lines.join("\n"))) return;
+
+      const result = await deleteUser(user.id);
+      if ("error" in result) {
+        alert(`삭제 실패: ${result.error}`);
+        return;
+      }
+
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+
+      // 삭제 완료 리포트
+      const reportLines = [
+        `✅ "${user.name}" 삭제 완료`,
+        ``,
+        ...("report" in result ? result.report.map((r: string) => `  • ${r}`) : []),
+      ];
+      alert(reportLines.join("\n"));
+    } finally {
+      setDeleting(null);
+    }
+  }
+
   function formatDate(iso: string) {
     const d = new Date(iso);
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
@@ -254,6 +299,7 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
               <th className="px-4 py-3 cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
                 가입일<SortIcon active={sortKey === "created_at"} dir={sortDir} />
               </th>
+              <th className="px-4 py-3">관리</th>
             </tr>
           </thead>
           <tbody>
@@ -313,6 +359,17 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
                   {/* 가입일 */}
                   <td className="px-4 py-3 text-neutral-400">
                     {formatDate(u.created_at)}
+                  </td>
+
+                  {/* 관리 */}
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleDelete(u)}
+                      disabled={deleting === u.id}
+                      className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+                    >
+                      {deleting === u.id ? "삭제중…" : "삭제"}
+                    </button>
                   </td>
                 </tr>
               );

@@ -44,6 +44,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   const typeLabels: Record<string, string> = {
     ministry: "사역",
     group: "그룹",
+    family: "가족",
   };
 
   return (

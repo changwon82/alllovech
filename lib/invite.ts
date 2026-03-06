@@ -17,7 +17,7 @@ export async function getInviteByCode(code: string) {
   const admin = createAdminClient();
   const { data } = await admin
     .from("group_invites")
-    .select("id, group_id, expires_at, is_active, groups(id, name, type, description)")
+    .select("id, group_id, expires_at, is_active, groups(id, name, type, description, is_active)")
     .eq("code", code)
     .eq("is_active", true)
     .maybeSingle();
@@ -26,6 +26,12 @@ export async function getInviteByCode(code: string) {
 
   // 만료 확인
   if (data.expires_at && new Date(data.expires_at) < new Date()) {
+    return null;
+  }
+
+  // 보관/삭제된 그룹 차단
+  const group = data.groups as unknown as { is_active: boolean } | null;
+  if (!group || group.is_active === false) {
     return null;
   }
 
