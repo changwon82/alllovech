@@ -649,7 +649,7 @@ function GroupTableRow({
           <td colSpan={7} className="border-b border-neutral-100 bg-neutral-50/50 px-4 py-4">
             <div className="flex gap-6">
               {/* 왼쪽: 수정 폼 + 초대 링크 */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <GroupForm
                   initial={{ name: g.name, type: g.type, description: g.description, parentId: g.parentId }}
                   onSave={(name, type, desc) => onUpdate(name, type, desc)}
@@ -658,7 +658,7 @@ function GroupTableRow({
                 {ds === "active" && <InviteLinkSection groupId={g.id} />}
               </div>
               {/* 오른쪽: 참여자 관리 */}
-              <div className="w-80 shrink-0">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-neutral-500">참여자 ({g.members.length}명)</span>
                   {ds !== "archived" && (
