@@ -474,8 +474,8 @@ export default function GroupManager({
                   isSelected={isSelected}
                   isEditing={isEditing}
                   allUsers={allUsers}
-                  onSelect={() => setSelectedId(isSelected ? null : g.id)}
-                  onEdit={() => { setEditingId(g.id); setSelectedId(g.id); }}
+                  onSelect={() => { setSelectedId(isSelected ? null : g.id); if (isSelected) setEditingId(null); }}
+                  onEdit={() => { setEditingId(isEditing ? null : g.id); setSelectedId(g.id); }}
                   onCancelEdit={() => setEditingId(null)}
                   onUpdate={(name, type, desc) => handleUpdate(g.id, name, type, desc)}
                   onApprove={() => handleApprove(g.id)}
