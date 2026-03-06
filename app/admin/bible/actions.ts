@@ -224,15 +224,16 @@ export async function createGroupInvite(groupId: string) {
 
   const admin = createAdminClient();
 
-  // 기존 활성 초대 확인
-  const { data: existing } = await admin
+  // 기존 활성 초대 확인 (여러 개 있을 수 있으므로 limit(1))
+  const { data: existingList } = await admin
     .from("group_invites")
     .select("code")
     .eq("group_id", groupId)
     .eq("is_active", true)
-    .maybeSingle();
+    .order("created_at", { ascending: false })
+    .limit(1);
 
-  if (existing) return { code: existing.code };
+  if (existingList && existingList.length > 0) return { code: existingList[0].code };
 
   // 새 초대 코드 생성
   const code = generateInviteCode();
