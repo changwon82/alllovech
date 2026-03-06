@@ -10,6 +10,7 @@ type Notification = {
   actor_name: string | null;
   reference_id: string | null;
   message: string | null;
+  group_name: string | null;
   is_read: boolean;
   created_at: string;
   reflection_day: number | null;
@@ -27,13 +28,9 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
 }
 
-function getMessage(type: string, actorName: string | null): string {
-  const name = actorName ?? "누군가";
-  if (type === "comment") return `${name}님이 댓글을 남겼습니다`;
-  if (type === "amen") return `${name}님이 아멘했습니다`;
-  if (type === "contact") return `${name}님이 문의를 보냈습니다`;
-  return `${name}님의 활동이 있습니다`;
-}
+const REACTION_EMOJI: Record<string, string> = {
+  heart: "❤️", like: "👍", pray: "🙏", fire: "🔥", cry: "😢",
+};
 
 export default function NotificationList({ notifications: initial }: { notifications: Notification[] }) {
   const [notifications, setNotifications] = useState(initial);
@@ -129,24 +126,42 @@ export default function NotificationList({ notifications: initial }: { notificat
       <div className="space-y-2">
         {notifications.map((n) => {
           const isContact = n.type === "contact";
-          const href = isContact ? "#" : n.reflection_day ? `/365bible?day=${n.reflection_day}` : "/365bible/groups";
+          const isCommentOrAmen = n.type === "comment" || n.type === "amen";
+          const href = isContact
+            ? "#"
+            : isCommentOrAmen && n.reference_id
+              ? `/365bible/groups?ref=${n.reference_id}`
+              : n.reflection_day
+                ? `/365bible?day=${n.reflection_day}`
+                : "/365bible/groups";
           return (
             <a
               key={n.id}
               href={href}
               onClick={(e) => { if (isContact) e.preventDefault(); handleClick(n); }}
-              className={`block rounded-2xl p-4 transition-shadow hover:shadow-md ${
+              className={`block rounded-xl px-4 py-2.5 transition-shadow hover:shadow-md ${
                 n.is_read
                   ? "bg-white shadow-sm"
                   : "bg-accent-light shadow-sm"
               }`}
             >
-              <div className="flex items-center justify-between">
-                <p className={`text-sm ${n.is_read ? "text-neutral-500" : "font-medium text-neutral-800"}`}>
-                  {n.reflection_day && (
+              <div className="flex items-center justify-between gap-2">
+                <p className={`min-w-0 flex-1 truncate text-sm ${n.is_read ? "text-neutral-500" : "font-medium text-neutral-800"}`}>
+                  {n.group_name && (
+                    <span className="mr-1 text-[11px] text-neutral-400">{n.group_name}</span>
+                  )}
+                  {n.reflection_day != null && (
                     <span className="mr-1 font-medium text-accent">Day {n.reflection_day}</span>
                   )}
-                  {getMessage(n.type, n.actor_name)}
+                  {n.type === "amen" && (
+                    <span>{n.actor_name ?? "누군가"}님이 {n.message ? REACTION_EMOJI[n.message] ?? "🙏" : "🙏"} 공감했습니다</span>
+                  )}
+                  {n.type === "comment" && (
+                    <><span className="mr-1 rounded bg-neutral-200 px-1 py-0.5 text-[10px] text-neutral-500">댓글</span>{n.actor_name ?? "누군가"} <span className="text-neutral-400">{n.message ?? ""}</span></>
+                  )}
+                  {isContact && (
+                    <span>{n.actor_name ?? "누군가"}님이 문의를 보냈습니다</span>
+                  )}
                 </p>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-xs text-neutral-400">{timeAgo(n.created_at)}</span>
@@ -160,9 +175,6 @@ export default function NotificationList({ notifications: initial }: { notificat
                   </button>
                 </div>
               </div>
-              {isContact && n.message && (
-                <p className="mt-1.5 line-clamp-3 text-sm text-neutral-600">{n.message}</p>
-              )}
             </a>
           );
         })}

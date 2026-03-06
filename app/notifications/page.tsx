@@ -22,7 +22,7 @@ export default async function NotificationsPage() {
     getUserRoles(supabase, user.id),
     supabase
       .from("notifications")
-      .select("id, type, actor_id, reference_id, message, is_read, created_at")
+      .select("id, type, actor_id, reference_id, group_id, message, is_read, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -34,33 +34,24 @@ export default async function NotificationsPage() {
   const isAdmin = isAdminRole(roles);
   const canViewGroups = isAdmin || groupLeader;
 
-  // actor 이름과 reflection day 가져오기
+  // actor 이름, reflection day, group 이름 가져오기
   const notifications = rawNotifications ?? [];
   const actorIds = [...new Set(notifications.map((n) => n.actor_id).filter(Boolean))] as string[];
   const reflectionIds = [...new Set(notifications.map((n) => n.reference_id).filter(Boolean))] as string[];
+  const groupIds = [...new Set(notifications.map((n) => n.group_id).filter(Boolean))] as string[];
 
-  let actorNames: Record<string, string> = {};
-  let reflectionDays: Record<string, number> = {};
+  const actorNames: Record<string, string> = {};
+  const reflectionDays: Record<string, number> = {};
+  const groupNames: Record<string, string> = {};
 
-  if (actorIds.length > 0) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, name")
-      .in("id", actorIds);
-    for (const p of data ?? []) {
-      actorNames[p.id] = p.name;
-    }
-  }
-
-  if (reflectionIds.length > 0) {
-    const { data } = await supabase
-      .from("reflections")
-      .select("id, day")
-      .in("id", reflectionIds);
-    for (const r of data ?? []) {
-      reflectionDays[r.id] = r.day;
-    }
-  }
+  const fetches = await Promise.all([
+    actorIds.length > 0 ? supabase.from("profiles").select("id, name").in("id", actorIds) : null,
+    reflectionIds.length > 0 ? supabase.from("reflections").select("id, day").in("id", reflectionIds) : null,
+    groupIds.length > 0 ? supabase.from("groups").select("id, name").in("id", groupIds) : null,
+  ]);
+  for (const p of fetches[0]?.data ?? []) actorNames[p.id] = p.name;
+  for (const r of fetches[1]?.data ?? []) reflectionDays[r.id] = r.day;
+  for (const g of fetches[2]?.data ?? []) groupNames[g.id] = g.name;
 
   const enrichedNotifications = notifications.map((n) => ({
     id: n.id,
@@ -68,6 +59,7 @@ export default async function NotificationsPage() {
     actor_name: n.actor_id ? (actorNames[n.actor_id] ?? null) : null,
     reference_id: n.reference_id,
     message: (n as { message?: string | null }).message ?? null,
+    group_name: n.group_id ? (groupNames[n.group_id] ?? null) : null,
     is_read: n.is_read,
     created_at: n.created_at,
     reflection_day: n.reference_id ? (reflectionDays[n.reference_id] ?? null) : null,

@@ -184,9 +184,9 @@ export async function getGroupFeedData(groupId: string) {
 
   if (reflectionIds.length > 0) {
     const [commentsResult, reactionsResult, myReactionsResult] = await Promise.all([
-      supabase.from("reflection_comments").select("id, reflection_id, content, created_at, user_id, parent_id, profiles:user_id (name)").in("reflection_id", reflectionIds).order("created_at"),
-      supabase.from("reflection_reactions").select("reflection_id, type").in("reflection_id", reflectionIds),
-      supabase.from("reflection_reactions").select("reflection_id, type").in("reflection_id", reflectionIds).eq("user_id", user.id),
+      supabase.from("reflection_comments").select("id, reflection_id, content, created_at, user_id, parent_id, profiles:user_id (name)").in("reflection_id", reflectionIds).eq("group_id", groupId).order("created_at"),
+      supabase.from("reflection_reactions").select("reflection_id, type").in("reflection_id", reflectionIds).eq("group_id", groupId),
+      supabase.from("reflection_reactions").select("reflection_id, type").in("reflection_id", reflectionIds).eq("group_id", groupId).eq("user_id", user.id),
     ]);
 
     for (const c of (commentsResult.data ?? []) as unknown as { id: string; reflection_id: string; content: string; created_at: string; user_id: string; parent_id: string | null; profiles: { name: string } }[]) {

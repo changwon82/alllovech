@@ -68,19 +68,11 @@ export async function deleteGroup(groupId: string) {
 
   if (group?.is_active) return { error: "활성 그룹은 삭제할 수 없습니다. 먼저 보관하세요." };
 
-  // 그룹에 공유된 묵상 ID 조회 → 댓글/리액션 정리
-  const { data: shares } = await admin
-    .from("reflection_group_shares")
-    .select("reflection_id")
-    .eq("group_id", groupId);
-
-  const reflectionIds = (shares ?? []).map((s) => s.reflection_id as string);
-  if (reflectionIds.length > 0) {
-    await Promise.all([
-      admin.from("reflection_comments").delete().in("reflection_id", reflectionIds),
-      admin.from("reflection_reactions").delete().in("reflection_id", reflectionIds),
-    ]);
-  }
+  // 그룹별 댓글/리액션 정리
+  await Promise.all([
+    admin.from("reflection_comments").delete().eq("group_id", groupId),
+    admin.from("reflection_reactions").delete().eq("group_id", groupId),
+  ]);
 
   const { error: deleteError } = await admin
     .from("groups")
@@ -132,26 +124,14 @@ export async function getGroupStats(groupId: string) {
   if (error) return { error };
 
   const admin = createAdminClient();
-  const [{ count: memberCount }, { data: shares }] = await Promise.all([
+  const [{ count: memberCount }, { count: shareCount }, { count: commentCount }, { count: reactionCount }] = await Promise.all([
     admin.from("group_members").select("*", { count: "exact", head: true }).eq("group_id", groupId),
-    admin.from("reflection_group_shares").select("reflection_id").eq("group_id", groupId),
+    admin.from("reflection_group_shares").select("*", { count: "exact", head: true }).eq("group_id", groupId),
+    admin.from("reflection_comments").select("*", { count: "exact", head: true }).eq("group_id", groupId),
+    admin.from("reflection_reactions").select("*", { count: "exact", head: true }).eq("group_id", groupId),
   ]);
 
-  const shareCount = shares?.length ?? 0;
-  let commentCount = 0;
-  let reactionCount = 0;
-
-  const reflectionIds = (shares ?? []).map((s) => s.reflection_id as string);
-  if (reflectionIds.length > 0) {
-    const [{ count: cc }, { count: rc }] = await Promise.all([
-      admin.from("reflection_comments").select("*", { count: "exact", head: true }).in("reflection_id", reflectionIds),
-      admin.from("reflection_reactions").select("*", { count: "exact", head: true }).in("reflection_id", reflectionIds),
-    ]);
-    commentCount = cc ?? 0;
-    reactionCount = rc ?? 0;
-  }
-
-  return { memberCount: memberCount ?? 0, shareCount, commentCount, reactionCount };
+  return { memberCount: memberCount ?? 0, shareCount: shareCount ?? 0, commentCount: commentCount ?? 0, reactionCount: reactionCount ?? 0 };
 }
 
 // 멤버 추가

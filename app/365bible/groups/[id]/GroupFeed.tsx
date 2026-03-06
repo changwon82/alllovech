@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { addComment, deleteComment, toggleReaction } from "./actions";
+import { addComment, deleteComment, toggleReaction, unshareFromGroup, editReflection } from "./actions";
 import Avatar from "@/app/components/ui/Avatar";
 
 type Comment = {
@@ -87,7 +87,7 @@ function ReactionButton({
         {total > 0 ? (
           <>
             {sorted.map(([type, count]) => (
-              <span key={type} className="text-xs">{REACTION_EMOJI[type]}{count > 1 ? ` ${count}` : ""}</span>
+              <span key={type} className="text-xs">{REACTION_EMOJI[type]} {count}</span>
             ))}
             {!myReaction && <span> · 공감</span>}
           </>
@@ -239,25 +239,77 @@ function CommentThread({
 function ReflectionCard({
   item,
   currentUserId,
+  scrollTarget,
   onToggleReaction,
   onAddComment,
   onAddReply,
   onDeleteComment,
+  onEdit,
+  onUnshare,
 }: {
   item: FeedItem;
   currentUserId: string;
+  scrollTarget?: boolean;
   onToggleReaction: (type: string) => void;
   onAddComment: (text: string) => void;
   onAddReply: (parentId: string, text: string) => void;
   onDeleteComment: (commentId: string) => void;
+  onEdit: (newContent: string) => void;
+  onUnshare: () => void;
 }) {
   const [showComments, setShowComments] = useState(item.comments.length > 0);
   const [showInput, setShowInput] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(item.content);
+  const editRef = useRef<HTMLTextAreaElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const prevCommentCount = useRef(item.comments.length);
+  const isOwner = item.authorId === currentUserId;
+
+  // 댓글이 새로 추가되면 자동 펼침
+  useEffect(() => {
+    if (item.comments.length > prevCommentCount.current) {
+      setShowComments(true);
+    }
+    prevCommentCount.current = item.comments.length;
+  }, [item.comments.length]);
+
+  useEffect(() => {
+    if (scrollTarget && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [scrollTarget]);
+
+  useEffect(() => {
+    if (isEditing && editRef.current) {
+      editRef.current.focus();
+      editRef.current.style.height = "auto";
+      editRef.current.style.height = editRef.current.scrollHeight + "px";
+    }
+  }, [isEditing]);
 
   function handleAddComment(text: string) {
     onAddComment(text);
     setShowInput(false);
     setShowComments(true);
+  }
+
+  function handleEdit() {
+    if (!editText.trim() || editText.trim() === item.content) {
+      setIsEditing(false);
+      setEditText(item.content);
+      return;
+    }
+    onEdit(editText.trim());
+    setIsEditing(false);
+  }
+
+  function handleUnshare() {
+    const hasEngagement = item.comments.length > 0 || Object.values(item.reactions).reduce((s, n) => s + n, 0) > 0;
+    const msg = hasEngagement
+      ? `이 그룹에서 공유를 해제하면 댓글 ${item.comments.length}개와 리액션이 함께 삭제됩니다.\n\n계속하시겠습니까?`
+      : "이 그룹에서 공유를 해제하시겠습니까?";
+    if (confirm(msg)) onUnshare();
   }
 
   // 원댓글과 대댓글 분리
@@ -272,14 +324,33 @@ function ReflectionCard({
   }
 
   return (
-    <div className="flex gap-2.5">
+    <div ref={cardRef} className="flex gap-2.5 rounded-xl p-1">
       <Avatar avatarUrl={item.avatarUrl} name={item.authorName} seed={item.authorId} size="sm" className="mt-0.5 shrink-0" />
       <div className="min-w-0 flex-1">
         <div className="rounded-lg bg-green-50 px-3 py-2">
-          <p className="text-sm leading-snug text-neutral-800">
-            <span className="font-bold">{item.authorName}</span>{" "}
-            <span className="text-neutral-600">{item.content}</span>
-          </p>
+          {isEditing ? (
+            <div>
+              <textarea
+                ref={editRef}
+                value={editText}
+                onChange={(e) => {
+                  setEditText(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = e.target.scrollHeight + "px";
+                }}
+                className="w-full resize-none bg-transparent text-sm leading-snug text-neutral-800 outline-none"
+              />
+              <div className="mt-1 flex justify-end gap-2">
+                <button onClick={() => { setIsEditing(false); setEditText(item.content); }} className="text-[11px] text-neutral-400 hover:text-neutral-600">취소</button>
+                <button onClick={handleEdit} className="text-[11px] font-medium text-navy hover:brightness-110">저장</button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm leading-snug text-neutral-800">
+              <span className="font-bold">{item.authorName}</span>{" "}
+              <span className="text-neutral-600">{item.content}</span>
+            </p>
+          )}
         </div>
         <div className="mt-1 flex items-center gap-3 text-[11px] text-neutral-400">
           <span>{timeAgo(item.created_at)}</span>
@@ -298,6 +369,12 @@ function ReflectionCard({
           >
             {item.comments.length === 0 ? "댓글" : "쓰기"}
           </button>
+          {isOwner && !isEditing && (
+            <>
+              <button onClick={() => setIsEditing(true)} className="hover:text-navy">수정</button>
+              <button onClick={handleUnshare} className="hover:text-red-500">공유 해제</button>
+            </>
+          )}
         </div>
 
         {showComments && topLevel.length > 0 && (
@@ -329,11 +406,13 @@ export default function GroupFeed({
   currentUserId,
   currentUserName,
   groupId,
+  highlightRef,
 }: {
   feed: FeedItem[];
   currentUserId: string;
   currentUserName: string;
   groupId: string;
+  highlightRef?: string | null;
 }) {
   const [items, setItems] = useState(feed);
   const supabase = useMemo(() => createClient(), []);
@@ -442,7 +521,7 @@ export default function GroupFeed({
       })
     );
 
-    toggleReaction(reflectionId, type).then((result) => {
+    toggleReaction(reflectionId, type, groupId).then((result) => {
       if ("error" in result) {
         setItems((prev) =>
           prev.map((i) => {
@@ -475,7 +554,7 @@ export default function GroupFeed({
 
   function handleAddComment(reflectionId: string, text: string, parentId?: string) {
     const item = items.find((i) => i.id === reflectionId);
-    addComment(reflectionId, text, parentId).then((result) => {
+    addComment(reflectionId, text, parentId, groupId).then((result) => {
       if ("comment" in result && result.comment) {
         const comment = result.comment as unknown as Comment;
         setItems((prev) =>
@@ -512,6 +591,28 @@ export default function GroupFeed({
     });
   }
 
+  function handleEditReflection(reflectionId: string, newContent: string) {
+    setItems((prev) => prev.map((i) => i.id === reflectionId ? { ...i, content: newContent } : i));
+    editReflection(reflectionId, newContent).then((result) => {
+      if ("error" in result) {
+        // 실패 시 원복
+        const original = feed.find((i) => i.id === reflectionId);
+        if (original) setItems((prev) => prev.map((i) => i.id === reflectionId ? { ...i, content: original.content } : i));
+      }
+    });
+  }
+
+  function handleUnshare(reflectionId: string) {
+    setItems((prev) => prev.filter((i) => i.id !== reflectionId));
+    unshareFromGroup(reflectionId, groupId).then((result) => {
+      if ("error" in result) {
+        window.location.reload();
+      } else {
+        broadcast("unshare", { reflectionId });
+      }
+    });
+  }
+
   if (items.length === 0) {
     return (
       <div className="mt-12 text-center">
@@ -530,10 +631,13 @@ export default function GroupFeed({
           key={item.id}
           item={item}
           currentUserId={currentUserId}
+          scrollTarget={highlightRef === item.id}
           onToggleReaction={(type) => handleToggleReaction(item.id, type)}
           onAddComment={(text) => handleAddComment(item.id, text)}
           onAddReply={(parentId, text) => handleAddComment(item.id, text, parentId)}
           onDeleteComment={(commentId) => handleDeleteComment(item.id, commentId)}
+          onEdit={(newContent) => handleEditReflection(item.id, newContent)}
+          onUnshare={() => handleUnshare(item.id)}
         />
       ))}
     </div>

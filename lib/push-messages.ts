@@ -1,18 +1,30 @@
 // 푸시 알림 메시지 빌더
 
-export function commentPushPayload(actorName: string, day?: number) {
+const REACTION_LABEL: Record<string, string> = {
+  heart: "❤️", like: "👍", pray: "🙏", fire: "🔥", cry: "😢",
+};
+
+export function commentPushPayload(actorName: string, day?: number, commentSnippet?: string, groupName?: string) {
+  const prefix = groupName ? `${groupName} · ` : "";
+  const dayStr = day ? `Day ${day} ` : "";
+  const snippet = commentSnippet
+    ? (commentSnippet.length > 30 ? commentSnippet.slice(0, 30) + "…" : commentSnippet)
+    : "";
   return {
-    title: "새 댓글",
-    body: `${actorName}님이 댓글을 남겼습니다`,
+    title: `${prefix}${dayStr}댓글`,
+    body: `${actorName} ${snippet}`,
     url: day ? `/365bible?day=${day}` : "/notifications",
     tag: "comment",
   };
 }
 
-export function amenPushPayload(actorName: string, day?: number) {
+export function amenPushPayload(actorName: string, day?: number, reactionType?: string, groupName?: string) {
+  const prefix = groupName ? `${groupName} · ` : "";
+  const dayStr = day ? `Day ${day} ` : "";
+  const emoji = reactionType ? REACTION_LABEL[reactionType] ?? reactionType : "🙏";
   return {
-    title: "아멘",
-    body: `${actorName}님이 아멘했습니다`,
+    title: `${prefix}${dayStr}공감`,
+    body: `${actorName}님이 ${emoji} 공감했습니다`,
     url: day ? `/365bible?day=${day}` : "/notifications",
     tag: "amen",
   };

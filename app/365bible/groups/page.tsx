@@ -12,7 +12,13 @@ import RefreshOnFocus from "./RefreshOnFocus";
 export const metadata = { title: "함께읽기 | 다애교회" };
 
 
-export default async function GroupsPage() {
+export default async function GroupsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const params = await searchParams;
+  const highlightRef = params.ref ?? null;
   const { supabase, user } = await getSessionUser();
 
   if (!user) {
@@ -199,6 +205,7 @@ export default async function GroupsPage() {
                 members: membersMap[g.id] ?? [],
               }}
               todayDay={todayDay}
+              highlightRef={highlightRef}
             />
           ))}
         </div>

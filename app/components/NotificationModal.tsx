@@ -22,13 +22,9 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
 }
 
-function getMessage(type: string, actorName: string | null): string {
-  const name = actorName ?? "누군가";
-  if (type === "comment") return `${name}님이 댓글을 남겼습니다`;
-  if (type === "amen") return `${name}님이 아멘했습니다`;
-  if (type === "contact") return `${name}님이 문의를 보냈습니다`;
-  return `${name}님의 활동이 있습니다`;
-}
+const REACTION_EMOJI: Record<string, string> = {
+  heart: "❤️", like: "👍", pray: "🙏", fire: "🔥", cry: "😢",
+};
 
 export default function NotificationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [notifications, setNotifications] = useState<EnrichedNotification[]>([]);
@@ -84,9 +80,12 @@ export default function NotificationModal({ open, onClose }: { open: boolean; on
     // 페이지 이동
     const isContact = notification.type === "contact";
     if (!isContact) {
-      const href = notification.reflection_day
-        ? `/365bible?day=${notification.reflection_day}`
-        : "/365bible/groups";
+      const isCommentOrAmen = notification.type === "comment" || notification.type === "amen";
+      const href = isCommentOrAmen && notification.reference_id
+        ? `/365bible/groups?ref=${notification.reference_id}`
+        : notification.reflection_day
+          ? `/365bible?day=${notification.reflection_day}`
+          : "/365bible/groups";
       onClose();
       window.location.href = href;
     }
@@ -116,7 +115,7 @@ export default function NotificationModal({ open, onClose }: { open: boolean; on
       onClick={onClose}
     >
       <div
-        className="flex max-h-[70vh] w-full max-w-sm flex-col rounded-2xl bg-white shadow-lg"
+        className="flex max-h-[70vh] w-full max-w-md flex-col rounded-2xl bg-white shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
@@ -169,16 +168,30 @@ export default function NotificationModal({ open, onClose }: { open: boolean; on
                 <button
                   key={n.id}
                   onClick={() => handleClick(n)}
-                  className={`block w-full rounded-2xl p-4 text-left transition-shadow hover:shadow-md ${
+                  className={`block w-full rounded-xl px-4 py-2.5 text-left transition-shadow hover:shadow-md ${
                     n.is_read ? "bg-neutral-50" : "bg-accent-light"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className={`text-sm ${n.is_read ? "text-neutral-500" : "font-medium text-neutral-800"}`}>
-                      {n.reflection_day && (
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={`min-w-0 flex-1 truncate text-sm ${n.is_read ? "text-neutral-500" : "font-medium text-neutral-800"}`}>
+                      {n.group_name && (
+                        <span className="mr-1 text-[11px] text-neutral-400">{n.group_name}</span>
+                      )}
+                      {n.reflection_day != null && (
                         <span className="mr-1 font-medium text-accent">Day {n.reflection_day}</span>
                       )}
-                      {getMessage(n.type, n.actor_name)}
+                      {n.type === "amen" && (
+                        <span>{n.actor_name ?? "누군가"}님이 {n.message ? REACTION_EMOJI[n.message] ?? "🙏" : "🙏"} 공감했습니다</span>
+                      )}
+                      {n.type === "comment" && (
+                        <><span className="mr-1 rounded bg-neutral-200 px-1 py-0.5 text-[10px] text-neutral-500">댓글</span>{n.actor_name ?? "누군가"} <span className="text-neutral-400">{n.message ?? ""}</span></>
+                      )}
+                      {n.type === "contact" && (
+                        <span>{n.actor_name ?? "누군가"}님이 문의를 보냈습니다</span>
+                      )}
+                      {n.type !== "amen" && n.type !== "comment" && n.type !== "contact" && (
+                        <span>{n.actor_name ?? "누군가"}님의 활동</span>
+                      )}
                     </p>
                     <div className="flex shrink-0 items-center gap-2">
                       <span className="text-xs text-neutral-400">{timeAgo(n.created_at)}</span>
@@ -193,9 +206,6 @@ export default function NotificationModal({ open, onClose }: { open: boolean; on
                       </span>
                     </div>
                   </div>
-                  {n.type === "contact" && n.message && (
-                    <p className="mt-1.5 line-clamp-3 text-sm text-neutral-600">{n.message}</p>
-                  )}
                 </button>
               ))}
             </div>

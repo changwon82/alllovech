@@ -100,7 +100,7 @@ function InviteButton({ groupId, groupName }: { groupId: string; groupName: stri
   );
 }
 
-export default function GroupCard({ group: g, todayDay: initialTodayDay }: { group: GroupData; todayDay: number }) {
+export default function GroupCard({ group: g, todayDay: initialTodayDay, highlightRef }: { group: GroupData; todayDay: number; highlightRef?: string | null }) {
   const [feedData, setFeedData] = useState<FeedData | null>(null);
   const [, startTransition] = useTransition();
   const [showFeed, setShowFeed] = useState(false);
@@ -139,6 +139,29 @@ export default function GroupCard({ group: g, todayDay: initialTodayDay }: { gro
   const [members, setMembers] = useState(g.members);
   const [todayDay, setTodayDay] = useState(initialTodayDay);
   const [viewDay, setViewDay] = useState(initialTodayDay);
+  const highlightHandled = useRef(false);
+
+  // highlightRef가 있으면 해당 묵상의 Day로 이동 + 피드 자동 펼침
+  useEffect(() => {
+    if (!highlightRef || !feedData || highlightHandled.current) return;
+    const match = feedData.feed.find((f) => f.id === highlightRef);
+    if (match) {
+      highlightHandled.current = true;
+      setViewDay(match.day);
+      viewDayRef.current = match.day;
+      setShowFeed(true);
+      // 멤버 상태도 해당 Day로 갱신
+      startTransition(async () => {
+        const result = await getGroupMemberStatus(g.id, match.day);
+        if ("members" in result && result.members) {
+          setMembers(result.members as Member[]);
+        }
+      });
+      requestAnimationFrame(() => {
+        feedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [highlightRef, feedData, g.id]);
   const viewDayRef = useRef(initialTodayDay);
   const [navLoading, startNav] = useTransition();
 
@@ -440,6 +463,7 @@ export default function GroupCard({ group: g, todayDay: initialTodayDay }: { gro
                     currentUserId={feedData.currentUserId}
                     currentUserName={feedData.currentUserName}
                     groupId={g.id}
+                    highlightRef={highlightRef}
                   />;
             })()}
           </div>

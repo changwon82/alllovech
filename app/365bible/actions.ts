@@ -101,6 +101,23 @@ export async function saveReflection(
 
   // groupIds가 null이면 공유 변경 없음 (내용만 수정)
   if (groupIds !== null && data) {
+    // 기존 공유 그룹 조회
+    const { data: oldShares } = await supabase
+      .from("reflection_group_shares")
+      .select("group_id")
+      .eq("reflection_id", data.id);
+
+    const oldGroupIds = (oldShares ?? []).map((s) => s.group_id as string);
+    const removedGroupIds = oldGroupIds.filter((gid) => !groupIds.includes(gid));
+
+    // 공유 해제된 그룹의 댓글/리액션 삭제
+    if (removedGroupIds.length > 0) {
+      await Promise.all([
+        supabase.from("reflection_comments").delete().eq("reflection_id", data.id).in("group_id", removedGroupIds),
+        supabase.from("reflection_reactions").delete().eq("reflection_id", data.id).in("group_id", removedGroupIds),
+      ]);
+    }
+
     // 기존 공유 삭제
     await supabase
       .from("reflection_group_shares")
@@ -129,6 +146,33 @@ export async function saveReflection(
   }
 
   return { reflection: data as Reflection };
+}
+
+// 공유 해제 시 댓글/리액션 존재 여부 확인
+export async function getUnshareCounts(reflectionId: string, groupIds: string[]) {
+  const { supabase, user } = await getSessionUser();
+  if (!user || groupIds.length === 0) return { total: 0, groups: [] };
+
+  const [{ data: comments }, { data: reactions }] = await Promise.all([
+    supabase.from("reflection_comments").select("group_id").eq("reflection_id", reflectionId).in("group_id", groupIds),
+    supabase.from("reflection_reactions").select("group_id").eq("reflection_id", reflectionId).in("group_id", groupIds),
+  ]);
+
+  const countMap = new Map<string, { comments: number; reactions: number }>();
+  for (const c of comments ?? []) {
+    const entry = countMap.get(c.group_id) ?? { comments: 0, reactions: 0 };
+    entry.comments++;
+    countMap.set(c.group_id, entry);
+  }
+  for (const r of reactions ?? []) {
+    const entry = countMap.get(r.group_id) ?? { comments: 0, reactions: 0 };
+    entry.reactions++;
+    countMap.set(r.group_id, entry);
+  }
+
+  const groups = [...countMap.entries()].map(([groupId, counts]) => ({ groupId, ...counts }));
+  const total = groups.reduce((s, g) => s + g.comments + g.reactions, 0);
+  return { total, groups };
 }
 
 export async function deleteReflection(day: number, year: number) {

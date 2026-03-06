@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, useTransition } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import TextSizeControl from "./TextSizeControl";
-import { saveReflection, deleteReflection, type Reflection } from "./actions";
+import { saveReflection, deleteReflection, getUnshareCounts, type Reflection } from "./actions";
 import { BOOK_FULL_TO_CODE } from "./plan";
 import { createClient } from "@/lib/supabase/client";
 import LoginButton from "./LoginButton";
@@ -227,7 +227,24 @@ export default function BiblePageContent({
   function handleSaveReflection() {
     if (!reflectionText.trim()) return;
     startSaving(async () => {
-      const result = await saveReflection(day, year, reflectionText.trim(), [...selectedGroupIds]);
+      const newGroupIds = [...selectedGroupIds];
+
+      // 공유 해제되는 그룹 확인
+      if (reflection) {
+        const removedGroupIds = existingSharedGroupIds.filter((gid) => !newGroupIds.includes(gid));
+        if (removedGroupIds.length > 0) {
+          const counts = await getUnshareCounts(reflection.id, removedGroupIds);
+          if (counts.total > 0) {
+            const groupNames = removedGroupIds
+              .map((gid) => userGroups.find((g) => g.id === gid)?.name)
+              .filter(Boolean);
+            const msg = `${groupNames.join(", ")}에서 공유를 해제하면 해당 그룹의 댓글 ${counts.groups.reduce((s, g) => s + g.comments, 0)}개, 리액션 ${counts.groups.reduce((s, g) => s + g.reactions, 0)}개가 삭제됩니다.\n\n계속하시겠습니까?`;
+            if (!confirm(msg)) return;
+          }
+        }
+      }
+
+      const result = await saveReflection(day, year, reflectionText.trim(), newGroupIds);
       if ("reflection" in result && result.reflection) {
         setReflection(result.reflection);
         setIsEditing(false);
