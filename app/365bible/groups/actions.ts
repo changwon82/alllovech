@@ -255,7 +255,7 @@ export async function getGroupMemberStatus(groupId: string, viewDay?: number) {
   ]);
 
   const checkedSet = new Set((checks ?? []).map((c: { user_id: string }) => c.user_id));
-  const reflectionSet = new Set((reflections ?? []).map((r: { reflection: { user_id: string } }) => r.reflection.user_id));
+  const reflectionSet = new Set((reflections ?? []).map((r) => ((r as unknown as { reflection: { user_id: string } }).reflection.user_id)));
 
   // 각 유저의 최근 체크 day + 총 체크 수
   const latestCheckMap = new Map<string, number>();
