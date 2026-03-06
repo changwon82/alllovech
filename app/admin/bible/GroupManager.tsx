@@ -189,12 +189,33 @@ function InviteLinkSection({ groupId }: { groupId: string }) {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleCreate() {
     setLoading(true);
+    setError("");
     const result = await createGroupInvite(groupId);
     if ("code" in result) {
       setInviteCode(result.code as string);
+    } else if ("error" in result) {
+      setError(result.error as string);
+    }
+    setLoading(false);
+  }
+
+  async function handleCreateAndCopy() {
+    setLoading(true);
+    setError("");
+    const result = await createGroupInvite(groupId);
+    if ("code" in result) {
+      const code = result.code as string;
+      setInviteCode(code);
+      const url = `${window.location.origin}/365bible/invite/${code}`;
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } else if ("error" in result) {
+      setError(result.error as string);
     }
     setLoading(false);
   }
@@ -210,9 +231,10 @@ function InviteLinkSection({ groupId }: { groupId: string }) {
   return (
     <div className="mt-3 border-t border-neutral-100 pt-3">
       <span className="text-xs font-semibold text-neutral-500">초대 링크</span>
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       {!inviteCode ? (
         <button
-          onClick={handleCreate}
+          onClick={handleCreateAndCopy}
           disabled={loading}
           className="ml-2 rounded-lg bg-navy px-2.5 py-1 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
         >
@@ -231,7 +253,7 @@ function InviteLinkSection({ groupId }: { groupId: string }) {
                 : "bg-navy text-white hover:brightness-110"
             }`}
           >
-            {copied ? "복사됨" : "복사"}
+            {copied ? "복사 완료!" : "복사"}
           </button>
         </div>
       )}
