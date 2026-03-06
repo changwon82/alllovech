@@ -474,8 +474,8 @@ export default function GroupManager({
                   isSelected={isSelected}
                   isEditing={isEditing}
                   allUsers={allUsers}
-                  onSelect={() => { setSelectedId(isSelected ? null : g.id); if (isSelected) setEditingId(null); }}
-                  onEdit={() => { setEditingId(isEditing ? null : g.id); setSelectedId(g.id); }}
+                  onSelect={() => {}}
+                  onEdit={() => { setEditingId(isEditing ? null : g.id); setSelectedId(isEditing ? null : g.id); }}
                   onCancelEdit={() => setEditingId(null)}
                   onUpdate={(name, type, desc) => handleUpdate(g.id, name, type, desc)}
                   onApprove={() => handleApprove(g.id)}
@@ -548,9 +548,8 @@ function GroupTableRow({
   return (
     <>
       <tr
-        onClick={onSelect}
-        className={`border-b border-neutral-50 last:border-b-0 cursor-pointer transition-colors ${
-          isSelected ? "bg-navy/5" : dimmed ? "bg-neutral-50/50 hover:bg-neutral-100/50" : "hover:bg-neutral-50"
+        className={`border-b border-neutral-50 last:border-b-0 transition-colors ${
+          isEditing ? "bg-navy/5" : dimmed ? "bg-neutral-50/50" : ""
         }`}
       >
         <td className={`px-4 py-2.5 font-medium ${dimmed ? "text-neutral-400" : "text-neutral-700"}`}>
@@ -644,74 +643,76 @@ function GroupTableRow({
         </td>
       </tr>
 
-      {/* 펼침: 수정 폼 + 참여자 관리 */}
-      {isSelected && ds !== "rejected" && (
+      {/* 펼침: 수정 버튼 클릭 시에만 */}
+      {isEditing && (
         <tr>
           <td colSpan={7} className="border-b border-neutral-100 bg-neutral-50/50 px-4 py-4">
-            {isEditing && (
-              <div className="mb-3">
+            <div className="flex gap-6">
+              {/* 왼쪽: 수정 폼 + 초대 링크 */}
+              <div className="flex-1">
                 <GroupForm
                   initial={{ name: g.name, type: g.type, description: g.description, parentId: g.parentId }}
                   onSave={(name, type, desc) => onUpdate(name, type, desc)}
                   onCancel={onCancelEdit}
                 />
+                {ds === "active" && <InviteLinkSection groupId={g.id} />}
               </div>
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-neutral-500">참여자 ({g.members.length}명)</span>
-                {ds !== "archived" && (
-                  <div className="w-48">
-                    <AddMemberSearch
-                      users={allUsers}
-                      existingIds={new Set(g.members.map((m) => m.userId))}
-                      onAdd={onAddMember}
-                    />
+              {/* 오른쪽: 참여자 관리 */}
+              <div className="w-80 shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-neutral-500">참여자 ({g.members.length}명)</span>
+                  {ds !== "archived" && (
+                    <div className="w-48">
+                      <AddMemberSearch
+                        users={allUsers}
+                        existingIds={new Set(g.members.map((m) => m.userId))}
+                        onAdd={onAddMember}
+                      />
+                    </div>
+                  )}
+                </div>
+                {g.members.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {g.members
+                      .sort((a, b) => (a.role === "leader" ? -1 : 1) - (b.role === "leader" ? -1 : 1) || a.name.localeCompare(b.name, "ko"))
+                      .map((m) => (
+                        <div
+                          key={m.userId}
+                          className={`flex items-center gap-1.5 rounded-full py-1 pl-3 pr-1.5 text-xs ${
+                            m.role === "leader"
+                              ? "bg-accent-light text-accent"
+                              : "bg-white text-neutral-600"
+                          }`}
+                        >
+                          <span className="font-medium">{m.name}</span>
+                          {ds !== "archived" ? (
+                            <>
+                              <select
+                                value={m.role}
+                                onChange={(e) => onRoleChange(m.userId, e.target.value as "leader" | "member")}
+                                className="rounded bg-transparent py-0.5 text-[10px] outline-none"
+                              >
+                                <option value="member">방원</option>
+                                <option value="leader">방장</option>
+                              </select>
+                              <button
+                                onClick={() => onRemoveMember(m.userId)}
+                                className="ml-0.5 rounded-full p-0.5 text-neutral-300 hover:bg-red-50 hover:text-red-400"
+                              >
+                                ✕
+                              </button>
+                            </>
+                          ) : (
+                            <span className="text-[10px] text-neutral-400">
+                              {m.role === "leader" ? "방장" : "방원"}
+                            </span>
+                          )}
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>
-              {g.members.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {g.members
-                    .sort((a, b) => (a.role === "leader" ? -1 : 1) - (b.role === "leader" ? -1 : 1) || a.name.localeCompare(b.name, "ko"))
-                    .map((m) => (
-                      <div
-                        key={m.userId}
-                        className={`flex items-center gap-1.5 rounded-full py-1 pl-3 pr-1.5 text-xs ${
-                          m.role === "leader"
-                            ? "bg-accent-light text-accent"
-                            : "bg-white text-neutral-600"
-                        }`}
-                      >
-                        <span className="font-medium">{m.name}</span>
-                        {ds !== "archived" ? (
-                          <>
-                            <select
-                              value={m.role}
-                              onChange={(e) => onRoleChange(m.userId, e.target.value as "leader" | "member")}
-                              className="rounded bg-transparent py-0.5 text-[10px] outline-none"
-                            >
-                              <option value="member">방원</option>
-                              <option value="leader">방장</option>
-                            </select>
-                            <button
-                              onClick={() => onRemoveMember(m.userId)}
-                              className="ml-0.5 rounded-full p-0.5 text-neutral-300 hover:bg-red-50 hover:text-red-400"
-                            >
-                              ✕
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-neutral-400">
-                            {m.role === "leader" ? "방장" : "방원"}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              )}
             </div>
-            {ds === "active" && <InviteLinkSection groupId={g.id} />}
           </td>
         </tr>
       )}
