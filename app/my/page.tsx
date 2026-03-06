@@ -119,7 +119,7 @@ export default async function MyPage() {
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
         title="나의기록"
-        action={<UserMenu name={profile?.name ?? "이름 없음"} canViewGroups={canViewGroups} />}
+        action={<UserMenu name={profile?.name ?? "이름 없음"} canViewGroups={canViewGroups} userId={user.id} unreadCount={unreadCount} />}
       />
 
       <div className="mt-4">

@@ -91,7 +91,6 @@ export default function NotificationList({ notifications: initial }: { notificat
   }
 
   function handleDeleteAll() {
-    if (!confirm("모든 알림을 삭제하시겠습니까?")) return;
     setNotifications([]);
     startTransition(async () => {
       await deleteAllNotifications();
@@ -144,9 +143,12 @@ export default function NotificationList({ notifications: initial }: { notificat
             >
               <div className="flex items-center justify-between">
                 <p className={`text-sm ${n.is_read ? "text-neutral-500" : "font-medium text-neutral-800"}`}>
+                  {n.reflection_day && (
+                    <span className="mr-1 font-medium text-accent">Day {n.reflection_day}</span>
+                  )}
                   {getMessage(n.type, n.actor_name)}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   <span className="text-xs text-neutral-400">{timeAgo(n.created_at)}</span>
                   <button
                     onClick={(e) => handleDelete(e, n.id)}
@@ -158,9 +160,6 @@ export default function NotificationList({ notifications: initial }: { notificat
                   </button>
                 </div>
               </div>
-              {n.reflection_day && (
-                <p className="mt-1 text-xs font-medium text-accent">Day {n.reflection_day}</p>
-              )}
               {isContact && n.message && (
                 <p className="mt-1.5 line-clamp-3 text-sm text-neutral-600">{n.message}</p>
               )}
