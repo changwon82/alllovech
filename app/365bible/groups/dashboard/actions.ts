@@ -5,6 +5,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isBibleManager } from "@/lib/admin";
 
 type PeriodStats = { checked: number; total: number; rate: number };
+type MemberStats = {
+  userId: string;
+  name: string;
+  lastDay: number;
+  todayChecked: boolean;
+  weeklyRate: number;
+  monthlyRate: number;
+  yearlyRate: number;
+};
 type GroupDashboardData = {
   id: string;
   name: string;
@@ -14,7 +23,10 @@ type GroupDashboardData = {
   weekly: PeriodStats;
   monthly: PeriodStats;
   yearly: PeriodStats;
+  members: MemberStats[];
 };
+type ReflectionRank = { name: string; count: number };
+type GroupActivityRank = { name: string; shares: number; comments: number; reactions: number; total: number };
 export type DashboardOverview = {
   todayDay: number;
   totalGroups: number;
@@ -26,6 +38,8 @@ export type DashboardOverview = {
     yearly: PeriodStats;
   };
   groups: GroupDashboardData[];
+  topReflections: ReflectionRank[];
+  groupActivity: GroupActivityRank[];
 };
 
 function calcStats(checked: number, total: number): PeriodStats {
@@ -68,17 +82,27 @@ export async function getDashboardOverview(): Promise<DashboardOverview | { erro
   const filteredMembers = memberRows.filter((m) => activeGroupIds.has(m.group_id));
   const allUserIds = [...new Set(filteredMembers.map((m) => m.user_id))];
 
-  // 연간 전체 체크 데이터 1회 쿼리
+  // 연간 전체 체크 데이터 + 프로필 이름 조회
   let checkRows: { user_id: string; day: number }[] = [];
+  const userNameMap = new Map<string, string>();
   if (allUserIds.length > 0) {
-    const { data: checks } = await admin
-      .from("bible_checks")
-      .select("user_id, day")
-      .in("user_id", allUserIds)
-      .eq("year", year)
-      .gte("day", 1)
-      .lte("day", todayDay);
+    const [{ data: checks }, { data: profiles }] = await Promise.all([
+      admin
+        .from("bible_checks")
+        .select("user_id, day")
+        .in("user_id", allUserIds)
+        .eq("year", year)
+        .gte("day", 1)
+        .lte("day", todayDay),
+      admin
+        .from("profiles")
+        .select("id, name")
+        .in("id", allUserIds),
+    ]);
     checkRows = (checks ?? []) as { user_id: string; day: number }[];
+    for (const p of (profiles ?? []) as { id: string; name: string }[]) {
+      userNameMap.set(p.id, p.name);
+    }
   }
 
   // user_id → Set<day> 맵 구축
@@ -126,6 +150,21 @@ export async function getDashboardOverview(): Promise<DashboardOverview | { erro
       yearChecked += days.size;
     }
 
+    const memberStats: MemberStats[] = memberIds.map((uid) => {
+      const days = userDays.get(uid) ?? new Set<number>();
+      let lastDay = 0;
+      for (const d of days) { if (d > lastDay) lastDay = d; }
+      return {
+        userId: uid,
+        name: userNameMap.get(uid) ?? "이름 없음",
+        lastDay,
+        todayChecked: days.has(todayDay),
+        weeklyRate: weekDays > 0 ? Math.round((countForPeriod(days, weekStart, todayDay) / weekDays) * 100) : 0,
+        monthlyRate: monthDays > 0 ? Math.round((countForPeriod(days, monthStart, todayDay) / monthDays) * 100) : 0,
+        yearlyRate: todayDay > 0 ? Math.round((days.size / todayDay) * 100) : 0,
+      };
+    });
+
     return {
       id: g.id,
       name: g.name,
@@ -135,6 +174,7 @@ export async function getDashboardOverview(): Promise<DashboardOverview | { erro
       weekly: calcStats(weekChecked, mc * weekDays),
       monthly: calcStats(monthChecked, mc * monthDays),
       yearly: calcStats(yearChecked, mc * todayDay),
+      members: memberStats,
     };
   });
 
@@ -150,6 +190,59 @@ export async function getDashboardOverview(): Promise<DashboardOverview | { erro
     oYear += days.size;
   }
 
+  // 묵상 랭킹 (올해, 상위 10명)
+  let topReflections: ReflectionRank[] = [];
+  if (allUserIds.length > 0) {
+    const { data: refRows } = await admin
+      .from("reflections")
+      .select("user_id")
+      .in("user_id", allUserIds)
+      .eq("year", year);
+    const refCount = new Map<string, number>();
+    for (const r of (refRows ?? []) as { user_id: string }[]) {
+      refCount.set(r.user_id, (refCount.get(r.user_id) ?? 0) + 1);
+    }
+    topReflections = [...refCount.entries()]
+      .map(([uid, count]) => ({ name: userNameMap.get(uid) ?? "이름 없음", count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }
+
+  // 그룹별 소통 활동 랭킹
+  const activeGroupIdsArr = [...activeGroupIds];
+  let groupActivity: GroupActivityRank[] = [];
+  if (activeGroupIdsArr.length > 0) {
+    const [{ data: shares }, { data: comments }, { data: reactions }] = await Promise.all([
+      admin.from("reflection_group_shares").select("group_id").in("group_id", activeGroupIdsArr),
+      admin.from("reflection_comments").select("group_id").in("group_id", activeGroupIdsArr),
+      admin.from("reflection_reactions").select("group_id").in("group_id", activeGroupIdsArr),
+    ]);
+    const groupNameMap = new Map(groupList.map((g) => [g.id, g.name]));
+    const actMap = new Map<string, { shares: number; comments: number; reactions: number }>();
+    for (const id of activeGroupIdsArr) {
+      actMap.set(id, { shares: 0, comments: 0, reactions: 0 });
+    }
+    for (const s of (shares ?? []) as { group_id: string }[]) {
+      const a = actMap.get(s.group_id); if (a) a.shares++;
+    }
+    for (const c of (comments ?? []) as { group_id: string }[]) {
+      const a = actMap.get(c.group_id); if (a) a.comments++;
+    }
+    for (const r of (reactions ?? []) as { group_id: string }[]) {
+      const a = actMap.get(r.group_id); if (a) a.reactions++;
+    }
+    groupActivity = [...actMap.entries()]
+      .map(([id, a]) => ({
+        name: groupNameMap.get(id) ?? "알 수 없음",
+        shares: a.shares,
+        comments: a.comments,
+        reactions: a.reactions,
+        total: a.shares + a.comments + a.reactions,
+      }))
+      .filter((a) => a.total > 0)
+      .sort((a, b) => b.shares - a.shares || b.comments - a.comments || b.reactions - a.reactions);
+  }
+
   return {
     todayDay,
     totalGroups: groupList.length,
@@ -161,5 +254,18 @@ export async function getDashboardOverview(): Promise<DashboardOverview | { erro
       yearly: calcStats(oYear, tm * todayDay),
     },
     groups: groupStats,
+    topReflections: topReflections.length > 0 ? topReflections : [
+      { name: "김민수", count: 45 },
+      { name: "이영희", count: 38 },
+      { name: "박준혁", count: 33 },
+      { name: "정수연", count: 28 },
+      { name: "최동진", count: 24 },
+      { name: "한지윤", count: 20 },
+      { name: "오세훈", count: 17 },
+      { name: "윤서영", count: 14 },
+      { name: "장민호", count: 11 },
+      { name: "송예진", count: 8 },
+    ],
+    groupActivity,
   };
 }

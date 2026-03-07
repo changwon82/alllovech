@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type NavItem = { href: string; label: string; icon: string };
@@ -17,12 +17,27 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [contactCount, setContactCount] = useState(0);
+
+  const fetchContactCount = useCallback(async () => {
+    const supabase = createClient();
+    const { count } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("type", "contact");
+    setContactCount(count ?? 0);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed") === "true";
     if (saved) setCollapsed(true);
     setMounted(true);
-  }, []);
+    fetchContactCount();
+
+    function handleChange() { fetchContactCount(); }
+    window.addEventListener("contact-change", handleChange);
+    return () => window.removeEventListener("contact-change", handleChange);
+  }, [fetchContactCount]);
 
   useEffect(() => {
     if (mounted) localStorage.setItem("sidebar-collapsed", String(collapsed));
@@ -138,6 +153,32 @@ export default function AdminSidebar() {
         >
           <span className="shrink-0 text-base">👥</span>
           {!collapsed && <span>다코방사역</span>}
+        </Link>
+
+        {/* 문의 관리 */}
+        <Link
+          href="/admin/contacts"
+          className={`mt-0.5 flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+            pathname.startsWith("/admin/contacts")
+              ? "bg-white/15 font-medium text-white"
+              : "text-white/60 hover:bg-white/10 hover:text-white/90"
+          }`}
+          title={collapsed ? "문의 관리" : undefined}
+        >
+          <span className="relative shrink-0 text-base">
+            💬
+            {collapsed && contactCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">{contactCount}</span>
+            )}
+          </span>
+          {!collapsed && (
+            <span className="flex items-center gap-2">
+              문의 관리
+              {contactCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{contactCount}</span>
+              )}
+            </span>
+          )}
         </Link>
 
         {/* 365 성경읽기 */}

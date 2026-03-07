@@ -7,6 +7,14 @@ import GroupFeed from "./[id]/GroupFeed";
 import { getGroupFeedData, getGroupMemberStatus } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 
+function dayToDateStr(day: number): string {
+  const seoulDateStr = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
+  const year = Number(seoulDateStr.split("-")[0]);
+  const date = new Date(year, 0, day);
+  const weekday = date.toLocaleDateString("ko-KR", { weekday: "short" });
+  return `${date.getMonth() + 1}월 ${date.getDate()}일(${weekday})`;
+}
+
 const TYPE_LABEL: Record<string, string> = {
   dakobang: "다코방",
   family: "가족",
@@ -323,7 +331,7 @@ export default function GroupCard({ group: g, todayDay: initialTodayDay, highlig
                 </svg>
               </button>
               <div className="flex flex-1 items-center justify-center gap-3 py-1.5 text-white">
-                <span className="text-sm font-extrabold">Day {viewDay}</span>
+                <span className="text-sm font-extrabold">Day {viewDay} <span className="font-medium text-white/70">{dayToDateStr(viewDay)}</span></span>
                 <span className="text-xs text-white/50">|</span>
                 <div className="flex items-baseline gap-0.5">
                   <span className="text-lg font-black leading-none">{members.filter(m => m.checkedToday).length}</span>
@@ -337,7 +345,7 @@ export default function GroupCard({ group: g, todayDay: initialTodayDay, highlig
                       disabled={navLoading}
                       className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white transition-all hover:bg-green-400 active:scale-95"
                     >
-                      오늘
+                      오늘로
                     </button>
                   </>
                 )}

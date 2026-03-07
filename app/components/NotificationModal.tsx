@@ -78,10 +78,11 @@ export default function NotificationModal({ open, onClose }: { open: boolean; on
       });
     }
     // 페이지 이동
-    const isContact = notification.type === "contact";
-    if (!isContact) {
+    let href: string;
+    if (notification.type === "contact") {
+      href = "/admin/contacts";
+    } else {
       const isCommentOrAmen = notification.type === "comment" || notification.type === "amen";
-      let href: string;
       if (isCommentOrAmen && notification.reference_id) {
         const params = new URLSearchParams({ ref: notification.reference_id });
         if (notification.group_id) params.set("group", notification.group_id);
@@ -97,9 +98,9 @@ export default function NotificationModal({ open, onClose }: { open: boolean; on
           ? `/365bible?day=${notification.reflection_day}`
           : "/365bible/groups";
       }
-      onClose();
-      window.location.href = href;
     }
+    onClose();
+    window.location.href = href;
   }
 
   function handleDelete(e: React.MouseEvent, id: string) {

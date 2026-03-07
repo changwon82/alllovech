@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Badge from "@/app/components/ui/Badge";
 import type { DashboardOverview } from "./actions";
 
@@ -24,19 +25,14 @@ function rateColor(rate: number) {
   return "text-neutral-400";
 }
 
-function barColor(rate: number) {
-  if (rate >= 80) return "bg-green-500";
-  if (rate >= 50) return "bg-amber-400";
-  return "bg-neutral-300";
-}
-
 export default function ManagerDashboard({ initialData }: { initialData: DashboardOverview }) {
-  const { overall, todayDay, totalGroups, totalMembers, groups } = initialData;
+  const { overall, todayDay, totalGroups, totalMembers, groups, topReflections, groupActivity } = initialData;
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   return (
     <div className="mt-4 space-y-4">
-      {/* 상단 2x2 기간 요약 카드 */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* 상단 기간 요약 카드 */}
+      <div className="grid grid-cols-4 gap-2">
         {PERIODS.map(({ key, label }) => {
           const stats = overall[key];
           const isToday = key === "today";
@@ -46,12 +42,14 @@ export default function ManagerDashboard({ initialData }: { initialData: Dashboa
               className={`rounded-2xl p-4 shadow-sm ${isToday ? "bg-accent-light" : "bg-white"}`}
             >
               <p className="text-xs font-medium text-neutral-500">{label}</p>
-              <p className={`mt-1 text-3xl font-black ${isToday ? "text-accent" : "text-navy"}`}>
-                {stats.rate}%
-              </p>
-              <p className="mt-0.5 text-xs text-neutral-400">
-                {stats.checked}/{stats.total}
-              </p>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className={`text-2xl font-black ${isToday ? "text-accent" : "text-navy"}`}>
+                  {stats.rate}%
+                </span>
+                <span className="text-[10px] text-neutral-400">
+                  {stats.checked}/{stats.total}
+                </span>
+              </div>
             </div>
           );
         })}
@@ -64,43 +62,140 @@ export default function ManagerDashboard({ initialData }: { initialData: Dashboa
 
       {/* 그룹별 리스트 */}
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-        {groups.map((g, i) => (
-          <div
-            key={g.id}
-            className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-neutral-100" : ""}`}
-          >
-            {/* 그룹 정보 */}
-            <div className="min-w-0 shrink-0 w-28">
-              <div className="flex items-center gap-1.5">
-                <Badge variant="default">{TYPE_LABEL[g.type] ?? g.type}</Badge>
-                <span className="truncate text-sm font-bold text-neutral-800">{g.name}</span>
-              </div>
-              <p className="mt-0.5 text-xs text-neutral-400">{g.memberCount}명</p>
-            </div>
+        {groups.map((g, i) => {
+          const isExpanded = expandedGroup === g.id;
+          return (
+            <div key={g.id} className={i > 0 ? "border-t border-neutral-100" : ""}>
+              <button
+                onClick={() => setExpandedGroup(isExpanded ? null : g.id)}
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-neutral-50"
+              >
+                {/* 그룹 정보 */}
+                <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
+                  <Badge variant="default">{TYPE_LABEL[g.type] ?? g.type}</Badge>
+                  <span className="text-xs font-bold text-neutral-800">{g.name}</span>
+                  <span className="text-[10px] text-neutral-400">{g.memberCount}명</span>
+                </div>
 
-            {/* 4기간 통계 — 한 줄 */}
-            <div className="grid flex-1 grid-cols-4 gap-2">
-              {PERIODS.map(({ key, label }) => {
-                const stats: PeriodStats = g[key];
-                return (
-                  <div key={key} className="text-center">
-                    <p className="text-[11px] text-neutral-400">{label}</p>
-                    <p className={`text-sm font-bold ${rateColor(stats.rate)}`}>
-                      {stats.rate}%
-                    </p>
-                    <div className="mx-auto mt-0.5 h-1 w-full max-w-[60px] overflow-hidden rounded-full bg-neutral-100">
-                      <div
-                        className={`h-full rounded-full ${barColor(stats.rate)}`}
-                        style={{ width: `${stats.rate}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                {/* 4기간 통계 */}
+                <div className="grid flex-1 grid-cols-4 gap-1">
+                  {PERIODS.map(({ key, label }) => {
+                    const stats: PeriodStats = g[key];
+                    return (
+                      <div key={key} className="flex items-center justify-center gap-0.5 whitespace-nowrap">
+                        <span className="text-[10px] text-neutral-400">{label}</span>
+                        <span className={`text-xs font-bold ${rateColor(stats.rate)}`}>
+                          {stats.rate}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className={`shrink-0 text-neutral-300 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+
+              {/* 멤버 상세 */}
+              {isExpanded && g.members.length > 0 && (
+                <div className="border-t border-neutral-50 bg-neutral-50/50 px-3 py-1">
+                  {g.members
+                    .sort((a, b) => b.yearlyRate - a.yearlyRate)
+                    .map((m) => (
+                      <div key={m.userId} className="flex items-center gap-2 py-1.5">
+                        <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
+                          <span className="text-xs font-medium text-neutral-700">{m.name}</span>
+                          <span className="text-[10px] text-neutral-400">
+                            <strong className="text-neutral-500">Day {m.lastDay || 0}</strong>까지
+                          </span>
+                        </div>
+                        <div className="grid flex-1 grid-cols-4 gap-1">
+                          <div className="flex items-center justify-center">
+                            <span className={`text-xs font-bold ${m.todayChecked ? "text-green-600" : "text-neutral-300"}`}>
+                              {m.todayChecked ? "✓" : "—"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-center">
+                            <span className={`text-xs font-bold ${rateColor(m.weeklyRate)}`}>{m.weeklyRate}%</span>
+                          </div>
+                          <div className="flex items-center justify-center">
+                            <span className={`text-xs font-bold ${rateColor(m.monthlyRate)}`}>{m.monthlyRate}%</span>
+                          </div>
+                          <div className="flex items-center justify-center">
+                            <span className={`text-xs font-bold ${rateColor(m.yearlyRate)}`}>{m.yearlyRate}%</span>
+                          </div>
+                        </div>
+                        <div className="w-4 shrink-0" />
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* 묵상 랭킹 */}
+      {topReflections.length > 0 && (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="px-4 py-3 border-b border-neutral-100">
+            <span className="text-xs font-bold text-navy">묵상 TOP 10</span>
+          </div>
+          <div className="flex gap-4 px-4 py-2">
+            {(() => {
+              // 동점 순위 계산
+              const ranked = topReflections.map((r, i) => ({
+                ...r,
+                rank: i === 0 || r.count !== topReflections[i - 1].count
+                  ? i + 1
+                  : (topReflections.findIndex((t) => t.count === r.count) + 1),
+              }));
+              const half = Math.ceil(ranked.length / 2);
+              const left = ranked.slice(0, half);
+              const right = ranked.slice(half);
+              return [left, right].map((col, ci) => (
+                <div key={ci} className="flex-1">
+                  {col.map((r) => (
+                    <div key={r.name} className="flex items-center gap-2 py-1.5">
+                      <span className={`w-5 text-center text-xs font-bold ${r.rank <= 3 ? "text-accent" : "text-neutral-400"}`}>{r.rank}</span>
+                      <span className="flex-1 truncate text-xs font-medium text-neutral-700">{r.name}</span>
+                      <span className="text-xs font-bold text-navy">{r.count}<span className="font-normal text-neutral-400">편</span></span>
+                    </div>
+                  ))}
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* 소통 활발 방 랭킹 */}
+      {groupActivity.length > 0 && (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="px-4 py-3 border-b border-neutral-100">
+            <span className="text-xs font-bold text-navy">소통 활발 방</span>
+          </div>
+          <div className="px-4 py-2">
+            {groupActivity.map((g, i) => (
+              <div key={g.name} className="flex items-center gap-2 py-1.5">
+                <span className={`w-5 text-center text-xs font-bold ${i < 3 ? "text-accent" : "text-neutral-400"}`}>{i + 1}</span>
+                <span className="flex-1 truncate text-xs font-medium text-neutral-700">{g.name}</span>
+                <span className="text-[10px] text-neutral-400">묵상공유{g.shares} 댓글{g.comments} 공감{g.reactions}</span>
+                <span className="text-xs font-bold text-navy">{g.total}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

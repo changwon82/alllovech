@@ -8,7 +8,10 @@ import PageHeader from "@/app/components/ui/PageHeader";
 import CreateGroupForm from "./CreateGroupForm";
 import GroupCard from "./GroupCard";
 import RefreshOnFocus from "./RefreshOnFocus";
-import Link from "next/link";
+import ManagerDashboard from "./dashboard/ManagerDashboard";
+import { getDashboardOverview } from "./dashboard/actions";
+import type { DashboardOverview } from "./dashboard/actions";
+import DashboardToggle from "./DashboardToggle";
 
 export const metadata = { title: "함께읽기 | 다애교회" };
 
@@ -76,6 +79,26 @@ export default async function GroupsPage({
   const isAdmin = isAdminRole(roles);
   const canViewGroups = isAdmin || groupLeader;
   const userName = profileResult.data?.name ?? "이름 없음";
+
+  // 매니저면 대시보드 데이터 + 매니저 이름 목록 가져오기
+  let dashboardData: DashboardOverview | null = null;
+  let managerNames: string[] = [];
+  if (bibleManager) {
+    const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+    const [result, { data: managerRows }] = await Promise.all([
+      getDashboardOverview(),
+      admin.from("bible_managers").select("user_id"),
+    ]);
+    if (!("error" in result)) dashboardData = result;
+    const managerUserIds = (managerRows ?? []).map((m: { user_id: string }) => m.user_id);
+    if (managerUserIds.length > 0) {
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select("name")
+        .in("id", managerUserIds);
+      managerNames = (profiles ?? []).map((p: { name: string }) => p.name).filter(Boolean);
+    }
+  }
 
   // 다코방 목록 + 올해 사용 여부
   type DgRow = {
@@ -194,19 +217,10 @@ export default async function GroupsPage({
         action={<UserMenu name={userName} canViewGroups userId={user.id} unreadCount={unreadCount} />}
       />
 
-      {bibleManager && (
-        <Link
-          href="/365bible/groups/dashboard"
-          className="mt-4 flex items-center justify-between rounded-2xl bg-accent-light p-4 shadow-sm transition-shadow hover:shadow-md"
-        >
-          <div>
-            <span className="text-sm font-bold text-navy">전체 그룹 현황</span>
-            <p className="mt-0.5 text-xs text-neutral-500">모든 그룹의 읽기 현황을 한눈에 확인</p>
-          </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </Link>
+      {bibleManager && dashboardData && (
+        <DashboardToggle managerNames={managerNames}>
+          <ManagerDashboard initialData={dashboardData} />
+        </DashboardToggle>
       )}
 
       <CreateGroupForm dakobangGroups={dakobangGroups} />

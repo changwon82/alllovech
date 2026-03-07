@@ -6,12 +6,12 @@ import { Resend } from "resend";
 import { sendPushToUsers } from "@/lib/push";
 import { contactPushPayload } from "@/lib/push-messages";
 
-export async function submitContact(content: string) {
+export async function submitContact(content: string, imageUrls: string[] = []) {
   const { supabase, user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
 
   const trimmed = content.trim();
-  if (!trimmed) return { error: "내용을 입력해주세요." };
+  if (!trimmed && imageUrls.length === 0) return { error: "내용을 입력해주세요." };
 
   // 사용자 이름 + 관리자 목록 + 이메일 설정 병렬 조회
   const admin = createAdminClient();
@@ -35,7 +35,7 @@ export async function submitContact(content: string) {
       from: "다애교회 <onboarding@resend.dev>",
       to: adminEmail,
       subject: `[다애교회] ${userName}님의 문의`,
-      text: `보낸 사람: ${userName}\n\n${trimmed}`,
+      text: `보낸 사람: ${userName}\n\n${trimmed}${imageUrls.length > 0 ? `\n\n첨부 이미지:\n${imageUrls.join("\n")}` : ""}`,
     }).catch(() => {});
   }
 
@@ -46,7 +46,7 @@ export async function submitContact(content: string) {
         user_id: adminId,
         type: "contact",
         actor_id: user.id,
-        message: trimmed,
+        message: trimmed + (imageUrls.length > 0 ? `\n${imageUrls.join("\n")}` : ""),
       }))
     );
 
