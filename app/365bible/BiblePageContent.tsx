@@ -338,14 +338,14 @@ export default function BiblePageContent({
     return parts;
   }
 
-  const infoRef = useRef<HTMLElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
   const [showSticky, setShowSticky] = useState(false);
   useEffect(() => {
     const el = infoRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setShowSticky(!entry.isIntersecting),
-      { threshold: 0 }
+      { threshold: 0, rootMargin: "-60px 0px 0px 0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -423,59 +423,57 @@ export default function BiblePageContent({
         </div>
       </div>
 
-      {/* Day 번호 (상자 위) */}
-      <p
-        className={`mt-0.5 text-center text-[2.5rem] font-bold leading-tight tracking-tight ${
-          isToday ? "text-accent" : "text-neutral-800"
-        }`}
-      >
-        Day {day}
-      </p>
-
-      {/* 날짜 네비게이션 - 이전/날짜/다음 수직 정렬 동일 */}
-      <div className="mt-2 flex items-stretch justify-between gap-2">
-        {day > 1 ? (
+      {/* Day 헤더 카드 */}
+      <div className={`mt-4 rounded-2xl px-5 py-5 ${isToday ? "bg-gradient-to-br from-accent-light to-white" : "bg-white shadow-sm"}`}>
+        <div className="flex items-center justify-between">
           <button
-            onClick={() => navigateDay(day - 1)}
-            disabled={isNavigating}
-            className="flex shrink-0 items-center rounded-lg bg-white px-3 py-2 text-sm text-neutral-600 shadow-sm transition-all hover:shadow-md active:scale-95 disabled:opacity-50"
+            onClick={() => day > 1 && navigateDay(day - 1)}
+            disabled={isNavigating || day <= 1}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-neutral-400 shadow-sm transition-all hover:shadow-md hover:text-navy active:scale-90 disabled:invisible"
           >
-            ← Day {day - 1}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+            </svg>
           </button>
-        ) : (
-          <div className="w-20 shrink-0" />
-        )}
 
-        <div
-          className={`flex min-w-0 flex-1 flex-nowrap items-center justify-center gap-2 rounded-lg px-2 py-2 sm:px-3 ${
-            isToday ? "bg-accent-light font-medium text-accent" : "bg-white text-neutral-700 shadow-sm"
-          }`}
-        >
-          <span className="min-w-0 shrink truncate text-xs whitespace-nowrap sm:text-sm">
-            {dateStr} ({weekdayStr})
-          </span>
-          {!isToday ? (
-            <button
-              onClick={() => navigateDay(localToday)}
-              disabled={isNavigating}
-              className="shrink-0 rounded bg-navy px-1.5 py-0.5 text-[11px] font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
-            >
-              오늘로
-            </button>
-          ) : null}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2">
+              <span className={`text-[2rem] font-extrabold tracking-tight ${isToday ? "text-accent" : "text-navy"}`}>
+                Day {day}
+              </span>
+              {reading && (
+                <>
+                  <span className="text-neutral-300">|</span>
+                  <span className="text-base font-semibold text-neutral-600">{displayTitle}</span>
+                </>
+              )}
+            </div>
+            <p className="mt-1 flex items-center justify-center gap-1.5 text-sm font-medium text-neutral-400">
+              <span className={isToday ? "text-accent/70" : undefined}>{dateStr} ({weekdayStr})</span>
+              {isToday ? (
+                <span className="rounded-full bg-accent px-2 py-px text-[10px] font-bold text-white">TODAY</span>
+              ) : (
+                <button
+                  onClick={() => navigateDay(localToday)}
+                  disabled={isNavigating}
+                  className="rounded-full bg-navy px-2 py-px text-[10px] font-bold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+                >
+                  오늘로
+                </button>
+              )}
+            </p>
+          </div>
+
+          <button
+            onClick={() => day < 365 && navigateDay(day + 1)}
+            disabled={isNavigating || day >= 365}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-neutral-400 shadow-sm transition-all hover:shadow-md hover:text-navy active:scale-90 disabled:invisible"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+            </svg>
+          </button>
         </div>
-
-        {day < 365 ? (
-          <button
-            onClick={() => navigateDay(day + 1)}
-            disabled={isNavigating}
-            className="flex shrink-0 items-center rounded-lg bg-white px-3 py-2 text-sm text-neutral-600 shadow-sm transition-all hover:shadow-md active:scale-95 disabled:opacity-50"
-          >
-            Day {day + 1} →
-          </button>
-        ) : (
-          <div className="w-20 shrink-0" />
-        )}
       </div>
 
       {!user && (
@@ -489,28 +487,20 @@ export default function BiblePageContent({
         </div>
       )}
 
-      {/* 읽기 정보 */}
-      {reading ? (
-        <section
-          ref={infoRef}
-          className={`mt-4 rounded-2xl p-5 md:p-6 ${
-            isToday ? "bg-accent-light" : "bg-white shadow-sm"
-          }`}
-        >
-          <p className="text-xl font-bold text-neutral-800">{displayTitle}</p>
-          {reading?.youtube_id && (
-            <div className="mt-4">
-              <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
-            </div>
-          )}
-        </section>
-      ) : (
-        <section ref={infoRef} className="mt-4 rounded-2xl bg-white p-6 text-center text-neutral-500 shadow-sm">
+      {/* 유튜브 영상 */}
+      {reading?.youtube_id && (
+        <div className="mt-4 overflow-hidden rounded-2xl bg-black shadow-sm">
+          <YouTubePlayer key={reading.youtube_id} videoId={reading.youtube_id} />
+        </div>
+      )}
+      {reading === null && (
+        <section className="mt-4 rounded-2xl bg-white p-6 text-center text-neutral-500 shadow-sm">
           읽기표를 불러올 수 없습니다
         </section>
       )}
 
       {/* 성경 본문 */}
+      <div ref={infoRef} className="h-px" />
       {sections.length > 0 && (
         <section className="mt-3">
 {/* 상단 로그인 안내에 통합됨 */}

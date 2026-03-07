@@ -8,7 +8,7 @@ export default function YouTubePlayer({ videoId }: { videoId: string }) {
 
   if (playing) {
     return (
-      <div className="relative w-full overflow-hidden rounded-xl pt-[56.25%]">
+      <div className="relative w-full overflow-hidden pt-[56.25%]">
         <iframe
           className="absolute inset-0 h-full w-full"
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
@@ -23,7 +23,7 @@ export default function YouTubePlayer({ videoId }: { videoId: string }) {
   return (
     <button
       onClick={() => setPlaying(true)}
-      className="relative block w-full overflow-hidden rounded-xl pt-[56.25%]"
+      className="relative block w-full overflow-hidden pt-[56.25%]"
     >
       <Image
         src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
