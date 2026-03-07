@@ -41,6 +41,15 @@ export default function UserMenu({
     }
   }, []);
 
+  // 다른 컴포넌트에서 푸시 상태 변경 시 동기화
+  useEffect(() => {
+    function onPushChanged(e: Event) {
+      setPushOn((e as CustomEvent<boolean>).detail);
+    }
+    window.addEventListener("push-changed", onPushChanged);
+    return () => window.removeEventListener("push-changed", onPushChanged);
+  }, []);
+
   function handlePushToggle() {
     startTransition(async () => {
       try {
@@ -51,6 +60,7 @@ export default function UserMenu({
             await unsubscribePush();
           }
           setPushOn(false);
+          window.dispatchEvent(new CustomEvent("push-changed", { detail: false }));
         } else {
           const sub = await subscribePush();
           if (sub) {
@@ -60,6 +70,7 @@ export default function UserMenu({
               keys: { p256dh: json.keys!.p256dh!, auth: json.keys!.auth! },
             });
             setPushOn(true);
+            window.dispatchEvent(new CustomEvent("push-changed", { detail: true }));
           }
         }
       } catch {

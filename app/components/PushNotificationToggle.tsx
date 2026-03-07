@@ -28,6 +28,15 @@ export default function PushNotificationToggle() {
     }
   }, []);
 
+  // 다른 컴포넌트(UserMenu 등)에서 푸시 상태 변경 시 동기화
+  useEffect(() => {
+    function onPushChanged(e: Event) {
+      setSubscribed((e as CustomEvent<boolean>).detail);
+    }
+    window.addEventListener("push-changed", onPushChanged);
+    return () => window.removeEventListener("push-changed", onPushChanged);
+  }, []);
+
   if (!supported) return null;
 
   if (permission === "denied") {
@@ -54,6 +63,7 @@ export default function PushNotificationToggle() {
             await unsubscribePush();
           }
           setSubscribed(false);
+          window.dispatchEvent(new CustomEvent("push-changed", { detail: false }));
         } else {
           const sub = await subscribePush();
           if (sub) {
@@ -64,6 +74,7 @@ export default function PushNotificationToggle() {
             });
             setSubscribed(true);
             setPermission(getNotificationPermission());
+            window.dispatchEvent(new CustomEvent("push-changed", { detail: true }));
           }
         }
       } catch {
