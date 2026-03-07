@@ -826,7 +826,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
 
       {/* 테이블 */}
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+        <table className="w-full text-sm" style={{ tableLayout: "fixed", minWidth: 900 }}>
           <colgroup>{colWidths.map((w, i) => (
               <col key={i} style={{ width: w }} />
             ))}<col key="flex" /></colgroup>
