@@ -100,8 +100,8 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
   }
 
   // 열 너비 (px, 마지막 열은 auto)
-  const COL_DEFAULTS = [50, 170, 240, 160, 150]; // #, 시무장로, 이름, 방장, 부방장
-  const STORAGE_KEY = "dakobang-col-widths-v4";
+  const COL_DEFAULTS = [36, 100, 120, 80, 80]; // #, 시무장로, 이름, 방장, 부방장
+  const STORAGE_KEY = "dakobang-col-widths-v5";
 
   const [colWidths, setColWidths] = useState<number[]>(COL_DEFAULTS);
 
@@ -826,10 +826,13 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
 
       {/* 테이블 */}
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full text-sm" style={{ tableLayout: "fixed", minWidth: 900 }}>
-          <colgroup>{colWidths.map((w, i) => (
+        <table className="w-full text-sm" style={{ minWidth: 700 }}>
+          <colgroup>
+            {colWidths.map((w, i) => (
               <col key={i} style={{ width: w }} />
-            ))}<col key="flex" /></colgroup>
+            ))}
+            <col key="flex" style={{ width: "100%" }} />
+          </colgroup>
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50 text-left text-xs font-medium text-neutral-500">
               {["#", "담당 시무장로", "다코방 이름", "방장", "부방장"].map((label, i) => (
@@ -951,7 +954,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
                     }
                   } : undefined}
                 >
-                  <td className={`py-1.5 align-top text-neutral-400${bulkEditing ? " group/num px-1.5" : " px-3"}`}>
+                  <td className={`whitespace-nowrap py-1.5 align-top text-neutral-400${bulkEditing ? " group/num px-1.5" : " px-3"}`}>
                     <div className="flex items-center gap-0.5 whitespace-nowrap">
                       {bulkEditing && (
                         <span
@@ -974,7 +977,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
                   </td>
 
                   {/* 담당 시무장로 — 읽기 모드: 첫 행만 표시 / 수정 모드: 모든 행 표시 */}
-                  <td className="px-1.5 py-1 align-top">
+                  <td className="whitespace-nowrap px-1.5 py-1 align-top">
                     <div className="flex items-center gap-1">
                       <div className="min-w-0 flex-1">
                         {(showTeam || bulkEditing) ? (
@@ -1013,7 +1016,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
                   </td>
 
                   {/* 다코방 이름 */}
-                  <td className="px-1.5 py-1 align-top font-medium text-neutral-700">
+                  <td className="whitespace-nowrap px-1.5 py-1 align-top font-medium text-neutral-700">
                     {showName ? (
                       bulkEditing ? (
                         <div className="flex h-7 w-full items-center">
@@ -1044,7 +1047,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
                   </td>
 
                   {/* 방장 */}
-                  <td className="px-1.5 py-1 align-top">
+                  <td className="whitespace-nowrap px-1.5 py-1 align-top">
                     <MemberChipSelector
                       selected={bulkEditing ? (bulkMembers[g.id]?.leader ?? []) : getMembersForRole(g, "leader")}
                       allMembers={allMembers}
@@ -1061,7 +1064,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
                   </td>
 
                   {/* 부방장 */}
-                  <td className="px-1.5 py-1 align-top">
+                  <td className="whitespace-nowrap px-1.5 py-1 align-top">
                     <MemberChipSelector
                       selected={bulkEditing ? (bulkMembers[g.id]?.sub_leader ?? []) : getMembersForRole(g, "sub_leader")}
                       allMembers={allMembers}
