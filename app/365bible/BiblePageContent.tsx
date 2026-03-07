@@ -438,7 +438,7 @@ export default function BiblePageContent({
 
           <div className="text-center">
             <div className="flex items-center justify-center gap-2">
-              <span className={`text-[2rem] font-extrabold tracking-tight ${isToday ? "text-accent" : "text-navy"}`}>
+              <span className={`whitespace-nowrap text-[2rem] font-extrabold tracking-tight ${isToday ? "text-accent" : "text-navy"}`}>
                 Day {day}
               </span>
               {reading && (
