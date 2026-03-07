@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { acceptInvite } from "../actions";
@@ -19,36 +19,55 @@ export default function InviteClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [step, setStep] = useState<"initial" | "confirm">(isLoggedIn ? "confirm" : "initial");
 
-  // 로그인된 사용자: 자동으로 가입 처리
-  useEffect(() => {
-    if (isLoggedIn) {
-      startTransition(async () => {
-        const result = await acceptInvite(code);
-        if ("joined" in result || "alreadyMember" in result) {
-          router.push("/365bible/groups");
-        } else if ("error" in result) {
-          setError(result.error as string);
-        }
-      });
-    }
-  }, [isLoggedIn, code, groupId, router]);
+  const handleJoin = (backfill: boolean) => {
+    startTransition(async () => {
+      const result = await acceptInvite(code, backfill);
+      if ("joined" in result || "alreadyMember" in result) {
+        router.push("/365bible/groups");
+      } else if ("error" in result) {
+        setError(result.error as string);
+      }
+    });
+  };
 
-  if (isLoggedIn) {
+  if (error) {
     return (
       <div className="mt-6 text-center">
-        {error ? (
-          <>
-            <p className="text-sm text-red-500">{error}</p>
-            <a href="/" className="mt-2 inline-block text-sm font-medium text-navy hover:underline">
-              홈으로 돌아가기
-            </a>
-          </>
-        ) : (
-          <p className="text-sm text-neutral-500">
-            {isPending ? "그룹에 합류 중..." : "이동 중..."}
+        <p className="text-sm text-red-500">{error}</p>
+        <a href="/" className="mt-2 inline-block text-sm font-medium text-navy hover:underline">
+          홈으로 돌아가기
+        </a>
+      </div>
+    );
+  }
+
+  // 로그인된 사용자: 이전 날짜 체크 여부 확인
+  if (step === "confirm") {
+    return (
+      <div className="mt-6 space-y-4">
+        <div className="rounded-2xl bg-accent-light p-5 text-center">
+          <p className="text-sm font-medium text-neutral-700">
+            참여 이전 날짜를 모두<br />
+            <strong className="text-navy">읽음 처리</strong>할까요?
           </p>
-        )}
+        </div>
+
+        <button
+          onClick={() => handleJoin(true)}
+          disabled={isPending}
+          className="w-full rounded-xl bg-navy px-6 py-3 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+        >
+          {isPending ? "처리 중..." : "네, 모두 읽음 처리"}
+        </button>
+        <button
+          onClick={() => handleJoin(false)}
+          disabled={isPending}
+          className="w-full rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-600 transition-all hover:bg-neutral-50 active:scale-95 disabled:opacity-50"
+        >
+          {isPending ? "처리 중..." : "아니요"}
+        </button>
       </div>
     );
   }
@@ -59,7 +78,7 @@ export default function InviteClient({
     await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/365bible/invite/${code}`)}`,
       },
     });
   };
@@ -96,7 +115,7 @@ export default function InviteClient({
         <p>
           이미 이메일 계정이 있으신가요?{" "}
           <a
-            href={`/login?next=${encodeURIComponent(`/365bible/invite/${code}/accept`)}`}
+            href={`/login?next=${encodeURIComponent(`/365bible/invite/${code}`)}`}
             className="font-semibold text-navy hover:underline"
           >
             로그인
