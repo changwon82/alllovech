@@ -161,21 +161,29 @@ function CommentThread({
   comment,
   replies,
   currentUserId,
+  highlightCommentId,
+  hlFade,
   onReply,
   onDelete,
 }: {
   comment: Comment;
   replies: Comment[];
   currentUserId: string;
+  highlightCommentId?: string | null;
+  hlFade?: boolean;
   onReply: (parentId: string, text: string) => void;
   onDelete: (commentId: string) => void;
 }) {
   const [showReplyInput, setShowReplyInput] = useState(false);
+  const isHighlighted = hlFade && highlightCommentId && comment.id === highlightCommentId;
 
   return (
     <div>
       {/* 원댓글 */}
-      <div className="flex items-start justify-between gap-1">
+      <div
+        {...(isHighlighted ? { "data-hl": "" } : {})}
+        className={`flex items-start justify-between gap-1 rounded-md px-1 -mx-1 transition-colors duration-1000 ${isHighlighted ? "bg-accent-light" : ""}`}
+      >
         <p className="min-w-0 flex-1 text-sm leading-snug">
           <span className="font-bold text-neutral-800">{comment.profiles?.name ?? "이름 없음"}</span>{" "}
           <span className="text-neutral-600">{comment.content}</span>
@@ -200,8 +208,14 @@ function CommentThread({
       {/* 대댓글 목록 */}
       {replies.length > 0 && (
         <div className="ml-4 mt-1 space-y-1 border-l-2 border-neutral-100 pl-3">
-          {replies.map((r) => (
-            <div key={r.id} className="flex items-start justify-between gap-1">
+          {replies.map((r) => {
+            const replyHl = hlFade && highlightCommentId && r.id === highlightCommentId;
+            return (
+            <div
+              key={r.id}
+              {...(replyHl ? { "data-hl": "" } : {})}
+              className={`flex items-start justify-between gap-1 rounded-md px-1 -mx-1 transition-colors duration-1000 ${replyHl ? "bg-accent-light" : ""}`}
+            >
               <p className="min-w-0 flex-1 text-sm leading-snug">
                 <span className="font-bold text-neutral-800">{r.profiles?.name ?? "이름 없음"}</span>{" "}
                 <span className="text-neutral-600">{r.content}</span>
@@ -216,7 +230,8 @@ function CommentThread({
                 </button>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -240,6 +255,8 @@ function ReflectionCard({
   item,
   currentUserId,
   scrollTarget,
+  highlightType,
+  highlightCommentId,
   onToggleReaction,
   onAddComment,
   onAddReply,
@@ -250,6 +267,8 @@ function ReflectionCard({
   item: FeedItem;
   currentUserId: string;
   scrollTarget?: boolean;
+  highlightType?: "comment" | "reaction" | null;
+  highlightCommentId?: string | null;
   onToggleReaction: (type: string) => void;
   onAddComment: (text: string) => void;
   onAddReply: (parentId: string, text: string) => void;
@@ -257,12 +276,15 @@ function ReflectionCard({
   onEdit: (newContent: string) => void;
   onUnshare: () => void;
 }) {
-  const [showComments, setShowComments] = useState(item.comments.length > 0);
+  const [showComments, setShowComments] = useState(item.comments.length > 0 || highlightType === "comment");
   const [showInput, setShowInput] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(item.content);
+  const [hlFade, setHlFade] = useState(!!highlightType);
   const editRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const commentAreaRef = useRef<HTMLDivElement>(null);
+  const reactionAreaRef = useRef<HTMLDivElement>(null);
   const prevCommentCount = useRef(item.comments.length);
   const isOwner = item.authorId === currentUserId;
 
@@ -274,11 +296,27 @@ function ReflectionCard({
     prevCommentCount.current = item.comments.length;
   }, [item.comments.length]);
 
+  // 스크롤 + 하이라이트 (피드 컨테이너 확장 후 충분히 대기)
   useEffect(() => {
-    if (scrollTarget && cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!scrollTarget) return;
+    const scrollTimer = setTimeout(() => {
+      let target: Element | null = null;
+      if (highlightType === "comment") {
+        // 특정 댓글 요소로 스크롤 (data-hl 속성)
+        target = cardRef.current?.querySelector("[data-hl]") ?? commentAreaRef.current ?? cardRef.current;
+      } else if (highlightType === "reaction") {
+        target = reactionAreaRef.current ?? cardRef.current;
+      } else {
+        target = cardRef.current;
+      }
+      (target as HTMLElement)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 400);
+    if (highlightType) {
+      const hlTimer = setTimeout(() => setHlFade(false), 3500);
+      return () => { clearTimeout(scrollTimer); clearTimeout(hlTimer); };
     }
-  }, [scrollTarget]);
+    return () => clearTimeout(scrollTimer);
+  }, [scrollTarget, highlightType]);
 
   useEffect(() => {
     if (isEditing && editRef.current) {
@@ -352,7 +390,7 @@ function ReflectionCard({
             </p>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-3 text-[11px] text-neutral-400">
+        <div ref={reactionAreaRef} className={`mt-1 flex items-center gap-3 text-[11px] text-neutral-400 rounded-md px-1 -mx-1 transition-colors duration-1000 ${hlFade && highlightType === "reaction" ? "bg-accent-light" : ""}`}>
           <span>{timeAgo(item.created_at)}</span>
           <ReactionButton reactions={item.reactions} myReaction={item.myReaction} onToggle={onToggleReaction} />
           {item.comments.length > 0 && (
@@ -370,21 +408,23 @@ function ReflectionCard({
             {item.comments.length === 0 ? "댓글" : "쓰기"}
           </button>
           {isOwner && !isEditing && (
-            <>
+            <span className="ml-auto flex items-center gap-2">
               <button onClick={() => setIsEditing(true)} className="hover:text-navy">수정</button>
-              <button onClick={handleUnshare} className="hover:text-red-500">공유 해제</button>
-            </>
+              <button onClick={handleUnshare} className="hover:text-red-500">묵상공유해제</button>
+            </span>
           )}
         </div>
 
         {showComments && topLevel.length > 0 && (
-          <div className="mt-2 space-y-2">
+          <div ref={commentAreaRef} className="mt-2 space-y-2">
             {topLevel.map((c) => (
               <CommentThread
                 key={c.id}
                 comment={c}
                 replies={repliesMap.get(c.id) ?? []}
                 currentUserId={currentUserId}
+                highlightCommentId={highlightType === "comment" ? highlightCommentId : undefined}
+                hlFade={hlFade}
                 onReply={onAddReply}
                 onDelete={onDeleteComment}
               />
@@ -407,12 +447,16 @@ export default function GroupFeed({
   currentUserName,
   groupId,
   highlightRef,
+  highlightType,
+  highlightCommentId,
 }: {
   feed: FeedItem[];
   currentUserId: string;
   currentUserName: string;
   groupId: string;
   highlightRef?: string | null;
+  highlightType?: "comment" | "reaction" | null;
+  highlightCommentId?: string | null;
 }) {
   const [items, setItems] = useState(feed);
   const supabase = useMemo(() => createClient(), []);
@@ -632,6 +676,8 @@ export default function GroupFeed({
           item={item}
           currentUserId={currentUserId}
           scrollTarget={highlightRef === item.id}
+          highlightType={highlightRef === item.id ? highlightType : undefined}
+          highlightCommentId={highlightRef === item.id ? highlightCommentId : undefined}
           onToggleReaction={(type) => handleToggleReaction(item.id, type)}
           onAddComment={(text) => handleAddComment(item.id, text)}
           onAddReply={(parentId, text) => handleAddComment(item.id, text, parentId)}

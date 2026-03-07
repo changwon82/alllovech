@@ -80,7 +80,7 @@ export default function PushNotificationToggle() {
           <div>
             <p className="text-sm font-medium text-neutral-800">푸시 알림</p>
             <p className="text-xs text-neutral-400">
-              {subscribed ? "댓글, 아멘 알림을 받고 있습니다" : "댓글, 아멘 알림을 받으려면 켜주세요"}
+              {subscribed ? "댓글, 공감 알림을 받고 있습니다" : "댓글, 공감 알림을 받으려면 켜주세요"}
             </p>
           </div>
         </div>

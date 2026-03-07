@@ -15,10 +15,13 @@ export const metadata = { title: "함께읽기 | 다애교회" };
 export default async function GroupsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: Promise<{ ref?: string; group?: string; ht?: string; cid?: string }>;
 }) {
   const params = await searchParams;
   const highlightRef = params.ref ?? null;
+  const highlightGroup = params.group ?? null;
+  const highlightType = (params.ht ?? null) as "comment" | "reaction" | null;
+  const highlightCommentId = params.cid ?? null;
   const { supabase, user } = await getSessionUser();
 
   if (!user) {
@@ -205,7 +208,9 @@ export default async function GroupsPage({
                 members: membersMap[g.id] ?? [],
               }}
               todayDay={todayDay}
-              highlightRef={highlightRef}
+              highlightRef={!highlightGroup || highlightGroup === g.id ? highlightRef : null}
+              highlightType={highlightGroup === g.id ? highlightType : null}
+              highlightCommentId={highlightGroup === g.id ? highlightCommentId : null}
             />
           ))}
         </div>

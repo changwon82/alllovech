@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
+import { parseCommentMessage } from "@/lib/notifications";
 import NotificationList from "./NotificationList";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
@@ -53,17 +54,24 @@ export default async function NotificationsPage() {
   for (const r of fetches[1]?.data ?? []) reflectionDays[r.id] = r.day;
   for (const g of fetches[2]?.data ?? []) groupNames[g.id] = g.name;
 
-  const enrichedNotifications = notifications.map((n) => ({
-    id: n.id,
-    type: n.type,
-    actor_name: n.actor_id ? (actorNames[n.actor_id] ?? null) : null,
-    reference_id: n.reference_id,
-    message: (n as { message?: string | null }).message ?? null,
-    group_name: n.group_id ? (groupNames[n.group_id] ?? null) : null,
-    is_read: n.is_read,
-    created_at: n.created_at,
-    reflection_day: n.reference_id ? (reflectionDays[n.reference_id] ?? null) : null,
-  }));
+  const enrichedNotifications = notifications.map((n) => {
+    const rawMsg = (n as { message?: string | null }).message ?? null;
+    const parsed = n.type === "comment" ? parseCommentMessage(rawMsg) : { commentId: null, text: rawMsg };
+    return {
+      id: n.id,
+      type: n.type,
+      actor_id: n.actor_id ?? null,
+      actor_name: n.actor_id ? (actorNames[n.actor_id] ?? null) : null,
+      reference_id: n.reference_id,
+      comment_id: parsed.commentId,
+      message: parsed.text,
+      group_id: n.group_id ?? null,
+      group_name: n.group_id ? (groupNames[n.group_id] ?? null) : null,
+      is_read: n.is_read,
+      created_at: n.created_at,
+      reflection_day: n.reference_id ? (reflectionDays[n.reference_id] ?? null) : null,
+    };
+  });
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">

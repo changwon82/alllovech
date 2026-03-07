@@ -7,9 +7,12 @@ import { markAllRead, markRead, deleteNotification, deleteAllNotifications } fro
 type Notification = {
   id: string;
   type: string;
+  actor_id: string | null;
   actor_name: string | null;
   reference_id: string | null;
+  comment_id: string | null;
   message: string | null;
+  group_id: string | null;
   group_name: string | null;
   is_read: boolean;
   created_at: string;
@@ -127,13 +130,22 @@ export default function NotificationList({ notifications: initial }: { notificat
         {notifications.map((n) => {
           const isContact = n.type === "contact";
           const isCommentOrAmen = n.type === "comment" || n.type === "amen";
-          const href = isContact
-            ? "#"
-            : isCommentOrAmen && n.reference_id
-              ? `/365bible/groups?ref=${n.reference_id}`
-              : n.reflection_day
-                ? `/365bible?day=${n.reflection_day}`
-                : "/365bible/groups";
+          let href = "#";
+          if (!isContact) {
+            if (isCommentOrAmen && n.reference_id) {
+              const params = new URLSearchParams({ ref: n.reference_id });
+              if (n.group_id) params.set("group", n.group_id);
+              if (n.type === "comment") {
+                params.set("ht", "comment");
+                if (n.comment_id) params.set("cid", n.comment_id);
+              } else {
+                params.set("ht", "reaction");
+              }
+              href = `/365bible/groups?${params}`;
+            } else {
+              href = n.reflection_day ? `/365bible?day=${n.reflection_day}` : "/365bible/groups";
+            }
+          }
           return (
             <a
               key={n.id}

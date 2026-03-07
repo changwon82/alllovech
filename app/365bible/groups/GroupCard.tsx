@@ -100,7 +100,7 @@ function InviteButton({ groupId, groupName }: { groupId: string; groupName: stri
   );
 }
 
-export default function GroupCard({ group: g, todayDay: initialTodayDay, highlightRef }: { group: GroupData; todayDay: number; highlightRef?: string | null }) {
+export default function GroupCard({ group: g, todayDay: initialTodayDay, highlightRef, highlightType, highlightCommentId }: { group: GroupData; todayDay: number; highlightRef?: string | null; highlightType?: "comment" | "reaction" | null; highlightCommentId?: string | null }) {
   const [feedData, setFeedData] = useState<FeedData | null>(null);
   const [, startTransition] = useTransition();
   const [showFeed, setShowFeed] = useState(false);
@@ -157,9 +157,7 @@ export default function GroupCard({ group: g, todayDay: initialTodayDay, highlig
           setMembers(result.members as Member[]);
         }
       });
-      requestAnimationFrame(() => {
-        feedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      // 스크롤은 ReflectionCard에서 처리
     }
   }, [highlightRef, feedData, g.id]);
   const viewDayRef = useRef(initialTodayDay);
@@ -464,6 +462,8 @@ export default function GroupCard({ group: g, todayDay: initialTodayDay, highlig
                     currentUserName={feedData.currentUserName}
                     groupId={g.id}
                     highlightRef={highlightRef}
+                    highlightType={highlightType}
+                    highlightCommentId={highlightCommentId}
                   />;
             })()}
           </div>

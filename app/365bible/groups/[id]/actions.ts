@@ -35,7 +35,7 @@ export async function addComment(reflectionId: string, content: string, parentId
         actor_id: user.id,
         reference_id: reflectionId,
         group_id: groupId ?? null,
-        message: content.length > 30 ? content.slice(0, 30) + "…" : content,
+        message: `${data.id}|${content.length > 30 ? content.slice(0, 30) + "…" : content}`,
       }),
       groupId ? supabase.from("groups").select("name").eq("id", groupId).maybeSingle() : Promise.resolve({ data: null }),
     ]);
