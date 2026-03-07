@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import GroupManager from "./GroupManager";
+import BibleManagerSection from "./BibleManagerSection";
 
 export const metadata = { title: "365 성경읽기 | 관리자 | 다애교회" };
 
@@ -10,6 +11,7 @@ export default async function AdminBiblePage() {
     { data: groups },
     { data: allMembers },
     { data: profiles },
+    { data: bibleManagers },
   ] = await Promise.all([
     admin
       .from("groups")
@@ -17,6 +19,7 @@ export default async function AdminBiblePage() {
       .order("created_at"),
     admin.from("group_members").select("group_id, user_id, role"),
     admin.from("profiles").select("id, name, status").order("name"),
+    admin.from("bible_managers").select("user_id"),
   ]);
 
   // 프로필 맵
@@ -77,12 +80,18 @@ export default async function AdminBiblePage() {
     status: p.status as string,
   }));
 
+  const managerData = (bibleManagers ?? []).map((m) => ({
+    userId: m.user_id as string,
+    name: profileMap[m.user_id as string] ?? "이름 없음",
+  }));
+
   return (
     <div>
       <h2 className="text-xl font-bold text-neutral-800">365 성경읽기</h2>
       <div className="mt-1 h-1 w-10 rounded-full bg-accent" />
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
+        <BibleManagerSection managers={managerData} allUsers={allUsers} />
         <GroupManager groups={groupData} allUsers={allUsers} />
       </div>
     </div>

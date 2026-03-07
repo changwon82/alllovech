@@ -225,6 +225,35 @@ export async function createGroupInvite(groupId: string) {
   return { code };
 }
 
+// ── 매니저 관리 ──
+
+export async function addBibleManager(userId: string) {
+  const { error } = await checkAdmin();
+  if (error) return { error };
+
+  const admin = createAdminClient();
+  const { error: insertError } = await admin
+    .from("bible_managers")
+    .upsert({ user_id: userId }, { onConflict: "user_id" });
+
+  if (insertError) return { error: insertError.message };
+  return { success: true };
+}
+
+export async function removeBibleManager(userId: string) {
+  const { error } = await checkAdmin();
+  if (error) return { error };
+
+  const admin = createAdminClient();
+  const { error: deleteError } = await admin
+    .from("bible_managers")
+    .delete()
+    .eq("user_id", userId);
+
+  if (deleteError) return { error: deleteError.message };
+  return { success: true };
+}
+
 export async function rejectGroup(groupId: string) {
   const { error } = await checkAdmin();
   if (error) return { error };

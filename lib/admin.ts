@@ -27,6 +27,15 @@ export async function isGroupLeader(supabase: SupabaseClient, userId: string): P
   return (count ?? 0) > 0;
 }
 
+/** 365성경읽기 매니저 여부 조회 */
+export async function isBibleManager(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from("bible_managers")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+  return (count ?? 0) > 0;
+}
+
 /** 그룹 멤버 여부 조회 (리더 포함) */
 export async function isGroupMember(supabase: SupabaseClient, userId: string): Promise<boolean> {
   const { count } = await supabase

@@ -507,35 +507,29 @@ export default function MyPageContent({
                             ref={(el) => { if (el) contentRefs.current.set(r.id, el); else contentRefs.current.delete(r.id); }}
                             onClick={() => { if (isOpen || overflowIds.has(r.id)) { setActiveRowId(null); setExpandedIds(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; }); } }}
                             className={`text-sm leading-relaxed text-neutral-700 pr-5 ${
-                              isOpen || searchQuery ? "whitespace-pre-line" : "line-clamp-2"
+                              isOpen || searchQuery ? "whitespace-pre-line" : "line-clamp-2 whitespace-normal"
                             } ${isOpen || overflowIds.has(r.id) ? "cursor-pointer" : ""}`}
                           >
-                            {renderContent(r.content)}
+                            {renderContent(isOpen || searchQuery ? r.content : r.content.replace(/[\r\n]+/g, " "))}
                           </p>
-                          <div className="pointer-events-none absolute right-0 bottom-0">
-                              <div className={`pointer-events-auto flex items-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200 px-1 py-0.5 gap-0.5 transition-opacity ${hoveredRowId === r.id || activeRowId === r.id ? "opacity-100" : "opacity-0"}`}>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setActiveRowId(null); setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
-                                  className="px-2 py-0.5 text-xs text-accent-dark hover:text-accent"
-                                >
-                                  수정
-                                </button>
-                                <span className="text-neutral-300 text-[10px]">|</span>
-                                <button
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    if (!confirm("묵상을 삭제하시겠습니까?")) return;
-                                    setActiveRowId(null);
-                                    const result = await deleteReflection(r.day, year);
-                                    if (!("error" in result)) {
-                                      setLocalReflections(prev => prev.filter(x => x.id !== r.id));
-                                    }
-                                  }}
-                                  className="px-2 py-0.5 text-xs text-red-400 hover:text-red-500"
-                                >
-                                  삭제
-                                </button>
-                              </div>
+                          <div className={`absolute right-0 bottom-0 flex items-center gap-1 px-1 text-[11px] text-neutral-400 bg-white transition-opacity ${hoveredRowId === r.id || activeRowId === r.id ? "opacity-100" : "opacity-0"}`}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setActiveRowId(null); setEditingId(r.id); setEditContent(r.content); setExpandedIds(prev => new Set(prev).add(r.id)); }}
+                              className="hover:text-navy"
+                            >수정</button>
+                            <span className="text-neutral-300">|</span>
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!confirm("묵상을 삭제하시겠습니까?")) return;
+                                setActiveRowId(null);
+                                const result = await deleteReflection(r.day, year);
+                                if (!("error" in result)) {
+                                  setLocalReflections(prev => prev.filter(x => x.id !== r.id));
+                                }
+                              }}
+                              className="hover:text-red-500"
+                            >삭제</button>
                           </div>
                         </div>
                         {(isOpen || overflowIds.has(r.id)) && (

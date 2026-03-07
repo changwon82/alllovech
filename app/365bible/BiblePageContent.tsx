@@ -480,8 +480,11 @@ export default function BiblePageContent({
 
       {!user && (
         <div className="mt-3 text-center">
-          <LoginButton className="text-sm text-neutral-400 hover:text-navy">
-            읽기체크·묵상기록 등은 <span className="text-navy underline">로그인</span> 후 이용 가능
+          <LoginButton className="inline-flex items-center gap-1 text-xs md:text-sm text-neutral-400 hover:text-navy">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-accent" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+            </svg>
+            <span className="text-navy underline">로그인</span> 후 읽기체크·묵상·나눔·함께읽기·타번역(새번역 등) 병행보기 가능
           </LoginButton>
         </div>
       )}
@@ -510,9 +513,7 @@ export default function BiblePageContent({
       {/* 성경 본문 */}
       {sections.length > 0 && (
         <section className="mt-3">
-          {!user && (
-            <p className="mb-1 text-center text-sm text-neutral-400">로그인 후 타번역(새번역 등) 병행보기 가능</p>
-          )}
+{/* 상단 로그인 안내에 통합됨 */}
           <TextSizeControl
             headerLeft={
               versions.length > 0 ? (
@@ -707,28 +708,27 @@ export default function BiblePageContent({
               </div>
 
               {/* 하단 고정: 액션 버튼 */}
-              <div className="border-t border-neutral-100 px-4 py-2.5">
+              <div className="px-4 py-2">
                 <div className="flex items-center justify-between">
                   {reflection && !isEditing ? (
                     <>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs text-neutral-400">
-                          {selectedGroupIds.size === 0
-                            ? "나만 보기"
-                            : `${[...selectedGroupIds].map(id => userGroups.find(g => g.id === id)?.name).filter(Boolean).join(", ")} 공유`}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
+                      <span className="text-xs text-neutral-400">
+                        {selectedGroupIds.size === 0
+                          ? "나만 보기"
+                          : `${[...selectedGroupIds].map(id => userGroups.find(g => g.id === id)?.name).filter(Boolean).join(", ")} 공유`}
+                      </span>
+                      <div className="flex items-center gap-1 text-[11px] text-neutral-400">
                         <button
                           onClick={() => setIsEditing(true)}
-                          className="text-xs text-neutral-500 hover:text-navy"
+                          className="hover:text-navy"
                         >
                           수정
                         </button>
+                        <span className="text-neutral-300">|</span>
                         <button
                           onClick={handleDeleteReflection}
                           disabled={isSaving}
-                          className="text-xs text-neutral-400 hover:text-red-500"
+                          className="hover:text-red-500"
                         >
                           삭제
                         </button>

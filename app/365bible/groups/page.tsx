@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
-import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
+import { getUserRoles, isAdminRole, isGroupLeader, isBibleManager } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
@@ -8,6 +8,7 @@ import PageHeader from "@/app/components/ui/PageHeader";
 import CreateGroupForm from "./CreateGroupForm";
 import GroupCard from "./GroupCard";
 import RefreshOnFocus from "./RefreshOnFocus";
+import Link from "next/link";
 
 export const metadata = { title: "함께읽기 | 다애교회" };
 
@@ -36,9 +37,10 @@ export default async function GroupsPage({
   const yearStart = new Date(yearNum, 0, 0);
   const todayDay = Math.floor((seoulDate.getTime() - yearStart.getTime()) / 86400000);
 
-  const [roles, groupLeader, profileResult, { data: memberships }, unreadCount, { data: dakobangRows }, { data: existingDakobang }] = await Promise.all([
+  const [roles, groupLeader, bibleManager, profileResult, { data: memberships }, unreadCount, { data: dakobangRows }, { data: existingDakobang }] = await Promise.all([
     getUserRoles(supabase, user.id),
     isGroupLeader(supabase, user.id),
+    isBibleManager(supabase, user.id),
     supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
     supabase
       .from("group_members")
@@ -191,6 +193,21 @@ export default async function GroupsPage({
         title="함께읽기"
         action={<UserMenu name={userName} canViewGroups userId={user.id} unreadCount={unreadCount} />}
       />
+
+      {bibleManager && (
+        <Link
+          href="/365bible/groups/dashboard"
+          className="mt-4 flex items-center justify-between rounded-2xl bg-accent-light p-4 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div>
+            <span className="text-sm font-bold text-navy">전체 그룹 현황</span>
+            <p className="mt-0.5 text-xs text-neutral-500">모든 그룹의 읽기 현황을 한눈에 확인</p>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      )}
 
       <CreateGroupForm dakobangGroups={dakobangGroups} />
 
