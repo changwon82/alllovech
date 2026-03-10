@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -12,6 +13,20 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // 카카오 로그인 시 프로필 사진이 비어있으면 동기화
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const avatarUrl = user.user_metadata?.avatar_url;
+        if (avatarUrl) {
+          const admin = createAdminClient();
+          await admin
+            .from("profiles")
+            .update({ avatar_url: avatarUrl })
+            .eq("id", user.id)
+            .is("avatar_url", null);
+        }
+      }
+
       // next 파라미터가 유실된 경우, invite_code 쿠키로 복구
       if (next === "/") {
         const cookieStore = await cookies();

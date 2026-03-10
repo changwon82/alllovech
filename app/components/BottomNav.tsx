@@ -13,6 +13,8 @@ const BASE_ITEMS: NavItem[] = [
   { href: "/my", label: "나의기록", iconActive: "📊", iconInactive: "📊" },
 ];
 
+const SERMON_ITEM: NavItem = { href: "/sermon", label: "설교", iconActive: "🎙️", iconInactive: "🎙️" };
+
 const CONTACT_ITEM: NavItem = { href: "#contact", label: "문의", iconActive: "✉️", iconInactive: "✉️" };
 
 const GROUPS_ITEM: NavItem = { href: "/365bible/groups", label: "함께읽기", iconActive: "👥", iconInactive: "👥" };
@@ -39,6 +41,7 @@ export default function BottomNav({
   const items = [
     ...BASE_ITEMS,
     GROUPS_ITEM,
+    SERMON_ITEM,
     CONTACT_ITEM,
     ...(isAdmin ? [ADMIN_ITEM] : []),
   ];
@@ -56,9 +59,11 @@ export default function BottomNav({
                 ? pathname === "/365bible" || (pathname.startsWith("/365bible") && !pathname.startsWith("/365bible/groups") && !pathname.startsWith("/365bible/invite"))
                 : item.href === "/365bible/groups"
                   ? pathname.startsWith("/365bible/groups")
-                  : item.href === "/admin"
-                    ? pathname.startsWith("/admin")
-                    : pathname === item.href;
+                  : item.href === "/sermon"
+                    ? pathname.startsWith("/sermon")
+                    : item.href === "/admin"
+                      ? pathname.startsWith("/admin")
+                      : pathname === item.href;
 
             if (isContact) {
               return (
