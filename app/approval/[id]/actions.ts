@@ -3,6 +3,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { deleteFromR2 } from "@/lib/r2";
 
 type ApprovalAction = "approve" | "reject" | "execute";
 
@@ -35,12 +36,23 @@ export async function updateApprovalStatus(
 
   if (!post) return { error: "문서를 찾을 수 없습니다." };
 
-  // 권한 확인: 해당 결재자이거나 관리자
-  // cafe24 mb_id 기반 매칭 또는 관리자
+  // 현재 사용자의 결재 mb_id 조회
+  const { data: myMember } = await admin
+    .from("approval_members")
+    .select("mb_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const myMbId = myMember?.mb_id || null;
+
+  // 권한 확인: 해당 단계의 결재자이거나 관리자
   if (!isAdmin) {
-    // 일반 사용자의 경우 cafe24_members에서 mb_id 확인
-    // (현재 로그인 사용자와 결재자 매칭은 관리자만 가능하도록 제한)
-    return { error: "관리자만 결재 상태를 변경할 수 있습니다." };
+    const allowed =
+      (field === "approver1_status" && myMbId === post.approver1_mb_id) ||
+      (field === "approver2_status" && myMbId === post.approver2_mb_id);
+    // 재정/지급은 관리자만
+    if (!allowed) {
+      return { error: "해당 결재 단계의 권한이 없습니다." };
+    }
   }
 
   const now = new Date().toISOString().replace("T", " ").substring(0, 19);
@@ -68,6 +80,90 @@ export async function updateApprovalStatus(
   if (error) return { error: error.message };
 
   revalidatePath(`/approval/${postId}`);
+  revalidatePath("/approval");
+  return { success: true };
+}
+
+// 결재요청 (draft → submitted)
+export async function submitForApproval(postId: number) {
+  const { user } = await getSessionUser();
+  if (!user) return { error: "로그인이 필요합니다." };
+
+  const admin = createAdminClient();
+
+  const { data: post } = await admin
+    .from("approval_posts")
+    .select("requester_mb_id, doc_status")
+    .eq("id", postId)
+    .single();
+
+  if (!post) return { error: "문서를 찾을 수 없습니다." };
+  if (post.requester_mb_id !== user.id) {
+    // 관리자도 결재요청 가능
+    const { data: roles } = await admin
+      .from("user_roles").select("role").eq("user_id", user.id).eq("role", "ADMIN").maybeSingle();
+    if (!roles) return { error: "결재요청 권한이 없습니다." };
+  }
+  if (post.doc_status === "submitted") return { error: "이미 결재요청된 문서입니다." };
+
+  const { error } = await admin
+    .from("approval_posts")
+    .update({ doc_status: "submitted" })
+    .eq("id", postId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/approval/${postId}`);
+  revalidatePath("/approval");
+  return { success: true };
+}
+
+// 결재 문서 삭제 (R2 파일 포함)
+export async function deleteApprovalPost(postId: number) {
+  const { user } = await getSessionUser();
+  if (!user) return { error: "로그인이 필요합니다." };
+
+  const admin = createAdminClient();
+
+  // 관리자 또는 작성자 확인
+  const { data: roles } = await admin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "ADMIN")
+    .maybeSingle();
+  const isAdmin = !!roles;
+
+  const { data: post } = await admin
+    .from("approval_posts")
+    .select("requester_mb_id")
+    .eq("id", postId)
+    .single();
+
+  if (!post) return { error: "문서를 찾을 수 없습니다." };
+  if (!isAdmin && post.requester_mb_id !== user.id) {
+    return { error: "삭제 권한이 없습니다." };
+  }
+
+  // R2 파일 삭제
+  const { data: files } = await admin
+    .from("approval_files")
+    .select("file_name")
+    .eq("post_id", postId);
+
+  if (files && files.length > 0) {
+    await Promise.all(
+      files.map((f) => deleteFromR2(`approval/${f.file_name}`).catch(() => {})),
+    );
+  }
+
+  // DB 삭제: 세부항목 → 첨부파일 → 게시글
+  await admin.from("approval_items").delete().eq("post_id", postId);
+  await admin.from("approval_files").delete().eq("post_id", postId);
+  const { error } = await admin.from("approval_posts").delete().eq("id", postId);
+
+  if (error) return { error: error.message };
+
   revalidatePath("/approval");
   return { success: true };
 }

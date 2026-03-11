@@ -4,6 +4,9 @@ import Link from "next/link";
 import BottomNav from "@/app/components/BottomNav";
 import ApprovalContent from "./ApprovalContent";
 import ApprovalActions from "./ApprovalActions";
+import DeleteButton from "./DeleteButton";
+import ImagePreviews from "./ImagePreviews";
+import SubmitButton from "./SubmitButton";
 
 const R2_APPROVAL =
   "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/approval";
@@ -67,16 +70,16 @@ export default async function ApprovalDetailPage({
     : { data: [] };
   const nameMap = new Map((members || []).map((m) => [m.mb_id, m.name]));
 
-  // 관리자 여부
+  // 관리자 여부 + 현재 사용자의 결재 mb_id 조회
   let isAdmin = false;
+  let currentUserMbId: string | null = null;
   if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
+    const [{ data: roles }, { data: myMember }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "ADMIN").maybeSingle(),
+      supabase.from("approval_members").select("mb_id").eq("user_id", user.id).maybeSingle(),
+    ]);
     isAdmin = !!roles;
+    currentUserMbId = myMember?.mb_id || null;
   }
 
   // 결재 상태 파싱
@@ -112,7 +115,14 @@ export default async function ApprovalDetailPage({
         </Link>
 
         {/* 제목 */}
-        <h1 className="text-xl font-bold text-neutral-800">{post.title}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold text-neutral-800">{post.title}</h1>
+          {post.doc_status === "draft" && (
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+              임시저장
+            </span>
+          )}
+        </div>
 
         {/* 메타 정보 */}
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-500">
@@ -141,8 +151,8 @@ export default async function ApprovalDetailPage({
         </div>
       </div>
 
-      {/* 결재 흐름 */}
-      <div className="mt-6 px-4">
+      {/* 결재 흐름 (결재요청 후에만 표시) */}
+      {post.doc_status === "submitted" && <div className="mt-6 px-4">
         <div className="rounded-2xl bg-white p-5 shadow-sm">
           <h3 className="mb-4 text-sm font-semibold text-neutral-700">결재 흐름</h3>
           <div className="flex items-start gap-0">
@@ -243,10 +253,10 @@ export default async function ApprovalDetailPage({
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
-      {/* 관리자: 결재 처리 버튼 */}
-      {isAdmin && (
+      {/* 관리자: 결재 처리 버튼 (결재요청 후에만) */}
+      {post.doc_status === "submitted" && (isAdmin || currentUserMbId) && (
         <div className="mt-6 px-4">
           <ApprovalActions
             postId={postId}
@@ -255,6 +265,10 @@ export default async function ApprovalDetailPage({
             financeApproved={finance.approved}
             paymentApproved={payment.approved}
             hasApprover2={!!post.approver2_mb_id}
+            currentUserMbId={currentUserMbId}
+            approver1MbId={post.approver1_mb_id}
+            approver2MbId={post.approver2_mb_id}
+            isAdmin={isAdmin}
           />
         </div>
       )}
@@ -323,15 +337,25 @@ export default async function ApprovalDetailPage({
       {files && files.length > 0 && (
         <div className="mt-6 px-4">
           <h3 className="mb-3 text-sm font-semibold text-neutral-600">첨부파일</h3>
+          {/* 이미지 미리보기 */}
+          {files.some((f) => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.original_name || f.file_name)) && (
+            <ImagePreviews
+              images={files
+                .filter((f) => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.original_name || f.file_name))
+                .map((f) => ({ url: getFileUrl(f.file_name), name: f.original_name || f.file_name }))}
+            />
+          )}
+          {/* 파일 목록 */}
           <div className="space-y-2">
             {files.map((file, i) => {
               const url = getFileUrl(file.file_name);
               const displayName = file.original_name || file.file_name;
+              const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(displayName);
               return (
                 <a
                   key={i}
                   href={url}
-                  download={displayName}
+                  download={isImage ? undefined : displayName}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600 transition-colors hover:bg-neutral-100"
@@ -343,18 +367,38 @@ export default async function ApprovalDetailPage({
                         ? "\u{1F4DD}"
                         : /\.(zip|rar|7z)$/i.test(displayName)
                           ? "\u{1F4E6}"
-                          : /\.(jpg|jpeg|png|gif|webp)$/i.test(displayName)
+                          : isImage
                             ? "\u{1F5BC}"
                             : "\u{1F4CE}"}
                   </span>
                   <span className="min-w-0 flex-1 truncate">
                     {displayName}
                   </span>
-                  <span className="shrink-0 text-xs text-neutral-400">다운로드</span>
+                  <span className="shrink-0 text-xs text-neutral-400">
+                    {isImage ? "원본보기" : "다운로드"}
+                  </span>
                 </a>
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* 결재요청 / 수정 / 삭제 버튼 */}
+      {user && (isAdmin || post.requester_mb_id === user.id) && (
+        <div className="mt-6 flex items-center gap-3 px-4">
+          {post.doc_status === "draft" && (
+            <>
+              <SubmitButton postId={postId} />
+              <Link
+                href={`/approval/${postId}/edit`}
+                className="rounded-xl border border-navy px-6 py-2 text-sm font-medium text-navy transition-all hover:bg-navy/5 active:scale-95"
+              >
+                문서 수정
+              </Link>
+            </>
+          )}
+          <DeleteButton postId={postId} />
         </div>
       )}
 

@@ -1,36 +1,8 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
 import BottomNav from "@/app/components/BottomNav";
+import ApprovalTable from "./ApprovalTable";
 import Link from "next/link";
-
-// 상태 파싱
-function parseStatus(status: string | null) {
-  if (!status || status === "0|0") return { approved: false, label: "미결재", color: "text-red-500" };
-  const [code] = status.split("|");
-  if (code === "1") return { approved: true, label: "승인", color: "text-green-600" };
-  if (code === "4") return { approved: true, label: "집행", color: "text-green-600" };
-  return { approved: false, label: "미결재", color: "text-red-500" };
-}
-
-function parseFinance(status: string | null) {
-  if (!status || status === "0|0") return { label: "대기", color: "text-neutral-400" };
-  const [code] = status.split("|");
-  if (code === "1" || code === "4") return { label: "승인", color: "text-green-600" };
-  return { label: "대기", color: "text-neutral-400" };
-}
-
-function parsePayment(status: string | null) {
-  if (!status || status === "0|0") return { label: "미지급", color: "text-neutral-400" };
-  const [code] = status.split("|");
-  if (code === "4") return { label: "집행", color: "text-green-600" };
-  return { label: "결재대기", color: "text-purple-500" };
-}
-
-// 금액 포맷
-function formatAmount(amount: number | null): string {
-  if (!amount) return "";
-  return amount.toLocaleString("ko-KR");
-}
 
 export default async function ApprovalListPage({
   searchParams,
@@ -72,7 +44,7 @@ export default async function ApprovalListPage({
   let query = supabase
     .from("approval_posts")
     .select(
-      "id, title, author_name, requester_mb_id, amount, doc_category, account_name, approver1_mb_id, approver1_status, approver2_mb_id, approver2_status, finance_status, payment_status, post_date, hit_count"
+      "id, title, author_name, requester_mb_id, amount, doc_category, doc_status, account_name, approver1_mb_id, approver1_status, approver2_mb_id, approver2_status, finance_status, payment_status, post_date, hit_count"
     )
     .order("id", { ascending: false });
 
@@ -129,10 +101,9 @@ export default async function ApprovalListPage({
   const { data: members } = mbIds.size > 0
     ? await supabase.from("cafe24_members").select("mb_id, name").in("mb_id", Array.from(mbIds))
     : { data: [] };
-  const nameMap = new Map((members || []).map((m) => [m.mb_id, m.name]));
-  function getName(mbId: string | null, fallback?: string | null) {
-    if (!mbId) return fallback || "-";
-    return nameMap.get(mbId) || fallback || mbId;
+  const nameMap: Record<string, string> = {};
+  for (const m of members || []) {
+    nameMap[m.mb_id] = m.name;
   }
 
   // 관리자 여부
@@ -335,100 +306,7 @@ export default async function ApprovalListPage({
           {search ? `"${search}" 검색 결과가 없습니다.` : "등록된 결재 문서가 없습니다."}
         </p>
       ) : (
-        <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">
-          <table className="w-full min-w-[1200px] text-xs">
-            <thead>
-              <tr className="border-b border-neutral-100 bg-neutral-50 text-neutral-500">
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">번호</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">문서분류</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">계정이름</th>
-                <th className="px-2 py-2.5 text-left font-medium">제목</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">청구자</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">등록일시</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">금액</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">품의</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">결재1</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">결재2</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">재정</th>
-                <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">지급</th>
-              </tr>
-            </thead>
-            <tbody>
-              {posts.map((post) => {
-                const a1 = parseStatus(post.approver1_status);
-                const a2 = parseStatus(post.approver2_status);
-                const fin = parseFinance(post.finance_status);
-                const pay = parsePayment(post.payment_status);
-                const requester = getName(post.requester_mb_id, post.author_name);
-
-                return (
-                  <tr
-                    key={post.id}
-                    className="border-b border-neutral-50 transition-colors hover:bg-neutral-50"
-                  >
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-400">
-                      {post.id}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-500">
-                      {post.doc_category || "-"}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-500">
-                      {post.account_name || "-"}
-                    </td>
-                    <td className="px-2 py-1.5">
-                      <Link
-                        href={`/approval/${post.id}`}
-                        className="font-medium text-neutral-800 hover:text-navy"
-                      >
-                        <span className="line-clamp-1">{post.title}</span>
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-600">
-                      {requester}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-400">
-                      {(() => {
-                        const d = new Date(post.post_date);
-                        const y = d.getFullYear();
-                        const m = String(d.getMonth() + 1).padStart(2, "0");
-                        const dd = String(d.getDate()).padStart(2, "0");
-                        const h = String(d.getHours()).padStart(2, "0");
-                        const mm = String(d.getMinutes()).padStart(2, "0");
-                        return `${y}.${m}.${dd} ${h}:${mm}`;
-                      })()}
-                    </td>
-                    <td className="whitespace-nowrap px-2 py-1.5 text-right font-medium text-neutral-700">
-                      {formatAmount(post.amount)}
-                    </td>
-                    {/* 품의 */}
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center">
-                      <div className="text-neutral-600">{requester}</div>
-                      <div className="text-[10px] text-neutral-400">품의</div>
-                    </td>
-                    {/* 결재1 */}
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center">
-                      <div className={a1.color}>{getName(post.approver1_mb_id)}</div>
-                      <div className={`text-[10px] ${a1.color}`}>{a1.label}</div>
-                    </td>
-                    {/* 결재2 */}
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center">
-                      <div className={a2.color}>{getName(post.approver2_mb_id)}</div>
-                      <div className={`text-[10px] ${a2.color}`}>{a2.label}</div>
-                    </td>
-                    {/* 재정 */}
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center">
-                      <span className={`text-[10px] font-medium ${fin.color}`}>{fin.label}</span>
-                    </td>
-                    {/* 지급 */}
-                    <td className="whitespace-nowrap px-2 py-1.5 text-center">
-                      <span className={`text-[10px] font-medium ${pay.color}`}>{pay.label}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <ApprovalTable posts={posts} nameMap={nameMap} />
       )}
 
       {/* 페이지네이션 */}

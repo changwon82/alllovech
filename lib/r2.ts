@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 const MIME_TYPES: Record<string, string> = {
   jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
@@ -38,6 +38,16 @@ export async function uploadToR2(
       Key: key,
       Body: body,
       ContentType: contentType,
+    }),
+  );
+}
+
+// R2에서 파일 삭제
+export async function deleteFromR2(key: string): Promise<void> {
+  await getR2Client().send(
+    new DeleteObjectCommand({
+      Bucket: process.env.R2_BUCKET!,
+      Key: key,
     }),
   );
 }

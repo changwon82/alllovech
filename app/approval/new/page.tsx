@@ -24,17 +24,11 @@ export default async function NewApprovalPage() {
     .eq("id", user.id)
     .single();
 
-  // 결재자 목록 (실제 결재자로 사용된 사람만)
-  const [{ data: a1Ids }, { data: a2Ids }] = await Promise.all([
-    supabase.from("approval_posts").select("approver1_mb_id"),
-    supabase.from("approval_posts").select("approver2_mb_id"),
-  ]);
-  const approverIds = new Set<string>();
-  for (const r of a1Ids || []) if (r.approver1_mb_id) approverIds.add(r.approver1_mb_id);
-  for (const r of a2Ids || []) if (r.approver2_mb_id) approverIds.add(r.approver2_mb_id);
-  const { data: members } = approverIds.size > 0
-    ? await supabase.from("cafe24_members").select("mb_id, name").in("mb_id", Array.from(approverIds)).order("name")
-    : { data: [] };
+  // 결재자 목록
+  const { data: members } = await supabase
+    .from("approval_members")
+    .select("mb_id, name, position, status")
+    .order("sort_order");
 
   // 예산 목록 (현재 연도)
   const year = new Date().getFullYear().toString();
