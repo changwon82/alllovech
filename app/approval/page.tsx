@@ -72,8 +72,7 @@ export default async function ApprovalListPage({
   let query = supabase
     .from("approval_posts")
     .select(
-      "id, title, author_name, requester_mb_id, amount, doc_category, account_name, approver1_mb_id, approver1_status, approver2_mb_id, approver2_status, finance_status, payment_status, post_date, hit_count",
-      { count: "exact" }
+      "id, title, author_name, requester_mb_id, amount, doc_category, account_name, approver1_mb_id, approver1_status, approver2_mb_id, approver2_status, finance_status, payment_status, post_date, hit_count"
     )
     .order("id", { ascending: false });
 
@@ -94,12 +93,28 @@ export default async function ApprovalListPage({
     }
   }
 
-  const { data: posts, count } = await query.range(
+  const { data: posts } = await query.range(
     (page - 1) * perPage,
     page * perPage - 1
   );
 
-  const totalPages = Math.ceil((count || 0) / perPage);
+  // 필터된 건수 조회
+  let countQuery = supabase
+    .from("approval_posts")
+    .select("id", { count: "exact", head: true });
+  if (search) countQuery = countQuery.ilike("title", `%${search}%`);
+  if (dateFrom) countQuery = countQuery.gte("post_date", `${dateFrom}T00:00:00`);
+  if (dateTo) countQuery = countQuery.lte("post_date", `${dateTo}T23:59:59`);
+  if (category) {
+    if (category === "기타품의") {
+      countQuery = countQuery.or("doc_category.is.null,doc_category.eq.");
+    } else {
+      countQuery = countQuery.eq("doc_category", category);
+    }
+  }
+  const { count: filteredCount } = await countQuery;
+  const displayCount = filteredCount ?? totalCount;
+  const totalPages = Math.ceil(displayCount / perPage);
 
   // 합계금액 (전체, 1000행 제한 우회)
   let sumAll: { amount: number }[] = [];
@@ -293,7 +308,7 @@ export default async function ApprovalListPage({
             문서작성
           </Link>
           <div className="text-sm text-neutral-500">
-          자료수: <span className="font-medium text-neutral-700">{(count || 0).toLocaleString("ko-KR")}</span>개
+          자료수: <span className="font-medium text-neutral-700">{displayCount.toLocaleString("ko-KR")}</span>개
           {totalAmount > 0 && (
             <>
               <span className="mx-2">·</span>
@@ -495,7 +510,7 @@ export default async function ApprovalListPage({
                 </a>
               </div>
               <div className="text-xs text-neutral-400">
-                페이지 {page} / {totalPages} · 보기 {(page - 1) * perPage + 1} - {Math.min(page * perPage, count || 0)} / {count}
+                페이지 {page} / {totalPages} · 보기 {(page - 1) * perPage + 1} - {Math.min(page * perPage, displayCount)} / {displayCount}
               </div>
             </div>
           );
