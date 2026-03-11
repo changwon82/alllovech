@@ -116,21 +116,8 @@ export default async function ApprovalListPage({
   const displayCount = filteredCount ?? totalCount;
   const totalPages = Math.ceil(displayCount / perPage);
 
-  // 합계금액 (전체, 1000행 제한 우회)
-  let sumAll: { amount: number }[] = [];
-  let sumFrom = 0;
-  while (true) {
-    const { data } = await supabase
-      .from("approval_posts")
-      .select("amount")
-      .not("amount", "is", null)
-      .gt("amount", 0)
-      .range(sumFrom, sumFrom + 999);
-    sumAll = sumAll.concat(data || []);
-    if (!data || data.length < 1000) break;
-    sumFrom += 1000;
-  }
-  const totalAmount = sumAll.reduce((s, r) => s + (r.amount || 0), 0);
+  // 합계금액 (현재 페이지)
+  const totalAmount = (posts || []).reduce((s, r) => s + (r.amount || 0), 0);
 
   // cafe24 회원명 조회
   const mbIds = new Set<string>();
