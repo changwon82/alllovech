@@ -4,14 +4,19 @@ import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
 import BottomNav from "@/app/components/BottomNav";
 
-function getYoutubeEmbedUrl(url: string | null): string | null {
-  if (!url) return null;
-  // 이미 embed URL이면 그대로 반환
-  if (url.includes("/embed/")) return url;
-  // watch URL이면 변환
-  const match = url.match(/[?&]v=([a-zA-Z0-9_-]+)/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}`;
-  return url;
+function getEmbedUrl(url: string | null): string | null {
+  if (!url || url === ".") return null;
+  // YouTube embed
+  if (url.includes("youtube.com/embed/")) return url;
+  const ytMatch = url.match(/[?&]v=([a-zA-Z0-9_-]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  const ytShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+  if (ytShort) return `https://www.youtube.com/embed/${ytShort[1]}`;
+  // Vimeo
+  if (url.includes("player.vimeo.com")) return url;
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  return null;
 }
 
 function formatDate(dateStr: string) {
@@ -35,7 +40,7 @@ export default async function SermonDetailPage({
 
   if (!sermon) notFound();
 
-  const embedUrl = getYoutubeEmbedUrl(sermon.youtube_url);
+  const embedUrl = getEmbedUrl(sermon.youtube_url);
 
   // 관리자 여부
   let isAdmin = false;

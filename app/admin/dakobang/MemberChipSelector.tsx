@@ -17,6 +17,7 @@ interface Props {
   placeholder?: string;
   highlightQuery?: string;
   chipColorClass?: string;
+  maxPerRow?: number;
   // 드래그 앤 드롭
   dragGroupId?: string;
   dragRole?: string;
@@ -52,6 +53,7 @@ export default function MemberChipSelector({
   placeholder = "",
   highlightQuery,
   chipColorClass,
+  maxPerRow,
   dragGroupId,
   dragRole,
   onMemberDrop,
@@ -184,6 +186,7 @@ export default function MemberChipSelector({
         )}
         {selected.map((m, idx) => (
           <span key={m.id} className="contents">
+            {maxPerRow && idx > 0 && idx % maxPerRow === 0 && <div className="h-0 basis-full" />}
             {editing && dropIndex === idx && <div className={indicatorClass} />}
             <span
               className={`${chipClass}${editing ? " group/chip cursor-grab active:cursor-grabbing" : ""}`}

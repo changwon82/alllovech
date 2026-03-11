@@ -141,6 +141,20 @@ export default function AdminSidebar() {
           {!collapsed && <span>교인명단</span>}
         </Link>
 
+        {/* 심방 관리 */}
+        <Link
+          href="/admin/visits"
+          className={`mt-0.5 flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+            pathname.startsWith("/admin/visits")
+              ? "bg-white/15 font-medium text-white"
+              : "text-white/60 hover:bg-white/10 hover:text-white/90"
+          }`}
+          title={collapsed ? "심방 관리" : undefined}
+        >
+          <span className="shrink-0 text-base">🏠</span>
+          {!collapsed && <span>심방 관리</span>}
+        </Link>
+
         {/* 다코방사역 */}
         <Link
           href="/admin/dakobang"
@@ -153,6 +167,20 @@ export default function AdminSidebar() {
         >
           <span className="shrink-0 text-base">👥</span>
           {!collapsed && <span>다코방사역</span>}
+        </Link>
+
+        {/* 재정결재 */}
+        <Link
+          href="/approval"
+          className={`mt-0.5 flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+            pathname.startsWith("/approval")
+              ? "bg-white/15 font-medium text-white"
+              : "text-white/60 hover:bg-white/10 hover:text-white/90"
+          }`}
+          title={collapsed ? "재정결재" : undefined}
+        >
+          <span className="shrink-0 text-base">💰</span>
+          {!collapsed && <span>재정결재</span>}
         </Link>
 
         {/* 문의 관리 */}

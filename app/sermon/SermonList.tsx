@@ -10,11 +10,18 @@ type Sermon = {
   youtube_url: string | null;
 };
 
-function getYoutubeThumbnail(url: string | null): string | null {
-  if (!url) return null;
-  // youtube.com/embed/VIDEO_ID 형식에서 ID 추출
-  const match = url.match(/embed\/([a-zA-Z0-9_-]+)/);
-  if (match) return `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`;
+function getThumbnail(url: string | null): string | null {
+  if (!url || url === ".") return null;
+  // YouTube: embed/ID, ?v=ID, youtu.be/ID
+  const ytEmbed = url.match(/embed\/([a-zA-Z0-9_-]+)/);
+  if (ytEmbed) return `https://img.youtube.com/vi/${ytEmbed[1]}/mqdefault.jpg`;
+  const ytWatch = url.match(/[?&]v=([a-zA-Z0-9_-]+)/);
+  if (ytWatch) return `https://img.youtube.com/vi/${ytWatch[1]}/mqdefault.jpg`;
+  const ytShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+  if (ytShort) return `https://img.youtube.com/vi/${ytShort[1]}/mqdefault.jpg`;
+  // Vimeo: player.vimeo.com/video/ID, vimeo.com/ID
+  const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeoMatch) return `https://vumbnail.com/${vimeoMatch[1]}.jpg`;
   return null;
 }
 
@@ -35,7 +42,7 @@ export default function SermonList({ sermons }: { sermons: Sermon[] }) {
   return (
     <div className="mt-4 space-y-3">
       {sermons.map((sermon) => {
-        const thumbnail = getYoutubeThumbnail(sermon.youtube_url);
+        const thumbnail = getThumbnail(sermon.youtube_url);
 
         return (
           <Link

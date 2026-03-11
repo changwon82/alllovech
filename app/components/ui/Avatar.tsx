@@ -13,6 +13,7 @@ export const VARIANTS = [
 ] as const;
 
 const SIZE_CLASS = {
+  xs: "h-6 w-6",
   sm: "h-8 w-8",
   md: "h-10 w-10",
   lg: "h-16 w-16",
@@ -37,7 +38,7 @@ export default function Avatar({
   avatarUrl: string | null;
   name: string;
   seed?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }) {
   const sizeClass = SIZE_CLASS[size];

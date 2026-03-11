@@ -100,7 +100,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
   }
 
   // 열 너비 (px, 마지막 열은 auto)
-  const COL_DEFAULTS = [36, 100, 120, 80, 80]; // #, 시무장로, 이름, 방장, 부방장
+  const COL_DEFAULTS = [36, 100, 180, 80, 80]; // #, 시무장로, 이름, 방장, 부방장
   const STORAGE_KEY = "dakobang-col-widths-v5";
 
   const [colWidths, setColWidths] = useState<number[]>(COL_DEFAULTS);
@@ -829,7 +829,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
         <table className="w-full text-sm" style={{ minWidth: 700 }}>
           <colgroup>
             {colWidths.map((w, i) => (
-              <col key={i} style={{ width: w }} />
+              <col key={i} style={{ width: w, minWidth: w }} />
             ))}
             <col key="flex" style={{ width: "100%" }} />
           </colgroup>
@@ -1092,6 +1092,7 @@ export default function DakobangTable({ initialGroups, allMembers, onMembersAdd 
                           editing={bulkEditing}
                           highlightQuery={search}
                           chipColorClass={roleChipColor.member}
+                          maxPerRow={10}
                           dragGroupId={g.id}
                           dragRole="member"
                           onMemberDrop={(m, fgid, fr, di) => handleMemberDrop(g.id, "member", m, fgid, fr as Role, di)}

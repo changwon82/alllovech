@@ -113,6 +113,8 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const perPage = 40;
   const [, startTransition] = useTransition();
 
   function toggleSort(key: SortKey) {
@@ -160,6 +162,9 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
 
     return list;
   }, [users, filter, search, sortKey, sortDir]);
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const paged = filtered.slice((page - 1) * perPage, page * perPage);
 
   const pendingCount = users.filter((u) => u.status === "pending").length;
   const activeCount = users.filter((u) => u.status === "active").length;
@@ -252,7 +257,7 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
         {(["all", "pending", "active", "inactive"] as const).map((f) => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => { setFilter(f); setPage(1); }}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
               filter === f
                 ? "bg-navy text-white"
@@ -271,7 +276,7 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
         <input
           type="text"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="이름 또는 이메일 검색"
           className="ml-auto rounded-lg border border-neutral-200 bg-white px-3 py-1 text-xs text-neutral-700 outline-none placeholder:text-neutral-400 focus:border-navy/30"
         />
@@ -282,28 +287,29 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-100 bg-neutral-50 text-left text-xs font-medium text-neutral-500">
-              <th className="px-4 py-3 text-center w-10">#</th>
-              <th className="px-4 py-3 cursor-pointer select-none" onClick={() => toggleSort("name")}>
+              <th className="px-3 py-1 text-center w-10">#</th>
+              <th className="px-3 py-1 cursor-pointer select-none" onClick={() => toggleSort("name")}>
                 이름<SortIcon active={sortKey === "name"} dir={sortDir} />
               </th>
-              <th className="px-4 py-3 cursor-pointer select-none" onClick={() => toggleSort("email")}>
+              <th className="px-3 py-1 cursor-pointer select-none" onClick={() => toggleSort("email")}>
                 이메일<SortIcon active={sortKey === "email"} dir={sortDir} />
               </th>
-              <th className="px-4 py-3">인증</th>
-              <th className="px-4 py-3 cursor-pointer select-none" onClick={() => toggleSort("status")}>
+              <th className="px-3 py-1">전화번호</th>
+              <th className="px-3 py-1">인증</th>
+              <th className="px-3 py-1 cursor-pointer select-none" onClick={() => toggleSort("status")}>
                 상태<SortIcon active={sortKey === "status"} dir={sortDir} />
               </th>
-              <th className="px-4 py-3 cursor-pointer select-none" onClick={() => toggleSort("admin")}>
+              <th className="px-3 py-1 cursor-pointer select-none" onClick={() => toggleSort("admin")}>
                 관리자<SortIcon active={sortKey === "admin"} dir={sortDir} />
               </th>
-              <th className="px-4 py-3 cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
+              <th className="px-3 py-1 cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
                 가입일<SortIcon active={sortKey === "created_at"} dir={sortDir} />
               </th>
-              <th className="px-4 py-3">관리</th>
+              <th className="px-3 py-1">관리</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((u, i) => {
+            {paged.map((u, i) => {
               const isAdmin = u.roles.includes("ADMIN");
               return (
                 <tr
@@ -313,23 +319,28 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
                   }`}
                 >
                   {/* 번호 */}
-                  <td className="px-4 py-3 text-center text-xs text-neutral-400">{i + 1}</td>
+                  <td className="px-3 py-1 text-center text-xs text-neutral-400">{(page - 1) * perPage + i + 1}</td>
 
                   {/* 이름 */}
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-1">
                     <div className="flex items-center gap-2">
-                      <Avatar avatarUrl={u.avatar_url} name={u.name} seed={u.id} size="sm" />
+                      <Avatar avatarUrl={u.avatar_url} name={u.name} seed={u.id} size="xs" />
                       <span className="font-medium text-neutral-800">{u.name}</span>
                     </div>
                   </td>
 
                   {/* 이메일 */}
-                  <td className="px-4 py-3 text-neutral-500">
+                  <td className="px-3 py-1 text-neutral-500">
                     {u.email ?? <span className="text-neutral-300">—</span>}
                   </td>
 
+                  {/* 전화번호 */}
+                  <td className="px-3 py-1 text-neutral-500">
+                    {u.phone ?? <span className="text-neutral-300">—</span>}
+                  </td>
+
                   {/* 인증 */}
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-1">
                     <div className="flex gap-1">
                       {u.providers.map((p) => (
                         <ProviderBadge key={p} provider={p} />
@@ -339,7 +350,7 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
                   </td>
 
                   {/* 상태 */}
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-1">
                     <StatusSelect
                       status={u.status}
                       onChange={(s) => handleStatusChange(u.id, s)}
@@ -348,7 +359,7 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
                   </td>
 
                   {/* 관리자 */}
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-1">
                     <AdminToggle
                       isAdmin={isAdmin}
                       onToggle={() => handleToggleAdmin(u.id, isAdmin)}
@@ -357,12 +368,12 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
                   </td>
 
                   {/* 가입일 */}
-                  <td className="px-4 py-3 text-neutral-400">
+                  <td className="px-3 py-1 text-neutral-400">
                     {formatDate(u.created_at)}
                   </td>
 
                   {/* 관리 */}
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-1">
                     <button
                       onClick={() => handleDelete(u)}
                       disabled={deleting === u.id}
@@ -381,6 +392,74 @@ export default function UserList({ users: initialUsers }: { users: User[] }) {
           <p className="py-8 text-center text-sm text-neutral-400">사용자가 없습니다</p>
         )}
       </div>
+
+      {/* 페이지네이션 */}
+      {totalPages > 1 && (() => {
+        const pages: number[] = [];
+        const start = Math.max(1, page - 7);
+        const end = Math.min(totalPages, page + 7);
+        for (let p = start; p <= end; p++) pages.push(p);
+
+        return (
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-1">
+              {pages[0] > 1 && (
+                <>
+                  <button onClick={() => setPage(1)} className="flex h-8 w-8 items-center justify-center rounded-lg text-sm text-neutral-500 hover:bg-neutral-100">1</button>
+                  {pages[0] > 2 && <span className="px-1 text-xs text-neutral-300">···</span>}
+                </>
+              )}
+              {pages.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm ${
+                    p === page ? "bg-navy font-bold text-white" : "text-neutral-500 hover:bg-neutral-100"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              {pages[pages.length - 1] < totalPages && (
+                <>
+                  {pages[pages.length - 1] < totalPages - 1 && <span className="px-1 text-xs text-neutral-300">···</span>}
+                  <button onClick={() => setPage(totalPages)} className="flex h-8 w-8 items-center justify-center rounded-lg text-sm text-neutral-500 hover:bg-neutral-100">{totalPages}</button>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-30"
+              >
+                « 처음
+              </button>
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-30"
+              >
+                ‹ 이전
+              </button>
+              <button
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages}
+                className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-30"
+              >
+                다음 ›
+              </button>
+              <button
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+                className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-30"
+              >
+                마지막 »
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
