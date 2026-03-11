@@ -400,10 +400,15 @@ export default async function ApprovalListPage({
                       {requester}
                     </td>
                     <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-400">
-                      {new Date(post.post_date).toLocaleString("ko-KR", {
-                        year: "numeric", month: "2-digit", day: "2-digit",
-                        hour: "2-digit", minute: "2-digit",
-                      })}
+                      {(() => {
+                        const d = new Date(post.post_date);
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, "0");
+                        const dd = String(d.getDate()).padStart(2, "0");
+                        const h = String(d.getHours()).padStart(2, "0");
+                        const mm = String(d.getMinutes()).padStart(2, "0");
+                        return `${y}.${m}.${dd} ${h}:${mm}`;
+                      })()}
                     </td>
                     <td className="whitespace-nowrap px-2 py-1.5 text-right font-medium text-neutral-700">
                       {formatAmount(post.amount)}
