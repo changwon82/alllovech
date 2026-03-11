@@ -47,10 +47,18 @@ export default async function ApprovalListPage({
 
   const { supabase, user } = await getSessionUser();
 
-  // 카테고리별 건수 조회
-  const { data: catCounts } = await supabase
-    .from("approval_posts")
-    .select("doc_category");
+  // 카테고리별 건수 조회 (1000행 제한 우회)
+  let catCounts: { doc_category: string | null }[] = [];
+  let catFrom = 0;
+  while (true) {
+    const { data } = await supabase
+      .from("approval_posts")
+      .select("doc_category")
+      .range(catFrom, catFrom + 999);
+    catCounts = catCounts.concat(data || []);
+    if (!data || data.length < 1000) break;
+    catFrom += 1000;
+  }
   const catCountMap: Record<string, number> = {};
   let totalCount = 0;
   for (const r of catCounts || []) {
@@ -93,13 +101,21 @@ export default async function ApprovalListPage({
 
   const totalPages = Math.ceil((count || 0) / perPage);
 
-  // 합계금액 (전체)
-  const { data: sumData } = await supabase
-    .from("approval_posts")
-    .select("amount")
-    .not("amount", "is", null)
-    .gt("amount", 0);
-  const totalAmount = (sumData || []).reduce((s, r) => s + (r.amount || 0), 0);
+  // 합계금액 (전체, 1000행 제한 우회)
+  let sumAll: { amount: number }[] = [];
+  let sumFrom = 0;
+  while (true) {
+    const { data } = await supabase
+      .from("approval_posts")
+      .select("amount")
+      .not("amount", "is", null)
+      .gt("amount", 0)
+      .range(sumFrom, sumFrom + 999);
+    sumAll = sumAll.concat(data || []);
+    if (!data || data.length < 1000) break;
+    sumFrom += 1000;
+  }
+  const totalAmount = sumAll.reduce((s, r) => s + (r.amount || 0), 0);
 
   // cafe24 회원명 조회
   const mbIds = new Set<string>();
