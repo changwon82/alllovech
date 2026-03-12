@@ -26,12 +26,17 @@ export async function middleware(request: NextRequest) {
         maxAge: 60 * 60, // 1시간
         sameSite: "lax",
       });
+      response.headers.set("x-pathname", pathname);
       return response;
     }
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set("x-pathname", pathname);
+    return response;
   }
 
-  return await updateSession(request);
+  const response = await updateSession(request);
+  response.headers.set("x-pathname", pathname);
+  return response;
 }
 
 export const config = {

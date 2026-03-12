@@ -2,8 +2,6 @@ import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
 import BottomNav from "@/app/components/BottomNav";
-import NewsImageList from "./NewsImageList";
-
 const R2_NEWS = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/news";
 
 // 이미지 확장자 판별
@@ -34,27 +32,8 @@ export default async function NewsDetailPage({
 
   if (!post) notFound();
 
-  // content에서 이미지 파일명 추출
-  const contentImages: string[] = [];
-  if (post.content) {
-    const regex = /src=["']?([^"'\s>]+)["'\s>]/g;
-    let match;
-    while ((match = regex.exec(post.content)) !== null) {
-      const url = match[1];
-      if (!isImageFile(url)) continue;
-      const fileName = url.split("/").pop();
-      if (fileName) contentImages.push(fileName);
-    }
-  }
-
-  // 첨부파일 중 이미지만 분리
-  const attachImageFiles = (files || []).filter((f) => isImageFile(f.file_name));
+  // 첨부파일 중 이미지가 아닌 파일만 (다운로드용)
   const attachOtherFiles = (files || []).filter((f) => !isImageFile(f.file_name));
-
-  // 이미지 URL 합치기 (첨부파일 우선, 중복 제거)
-  const attachImageUrls = attachImageFiles.map((img) => `${R2_NEWS}/${img.file_name}`);
-  const contentImageUrls = contentImages.map((name) => `${R2_NEWS}/${name}`);
-  const allImageUrls = [...new Set([...attachImageUrls, ...contentImageUrls])];
 
   // 관리자 여부
   let isAdmin = false;
@@ -87,59 +66,30 @@ export default async function NewsDetailPage({
         </div>
       </div>
 
-      {/* 이미지 목록 */}
-      {allImageUrls.length > 0 && (
-        <div className="mt-4 px-4">
-          <NewsImageList images={allImageUrls} title={post.title} />
-        </div>
+      {/* 본문 — 원본 HTML 그대로 렌더링 */}
+      {post.content && (
+        <div
+          className="post-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
       )}
 
-      {/* 유튜브 영상 */}
-      {post.content && (() => {
-        const videos: string[] = [];
-        const iframeRegex = /src=["']?(https?:\/\/(?:www\.)?youtube\.com\/embed\/[^"'\s]+)["'\s]/g;
-        let m;
-        while ((m = iframeRegex.exec(post.content)) !== null) {
-          videos.push(m[1]);
+      <style>{`
+        .post-content img {
+          width: 100%;
+          border-radius: 0.5rem;
+          margin: 0.5rem 0;
         }
-        if (videos.length === 0) return null;
-        return (
-          <div className="mt-6 space-y-3 px-4">
-            {videos.map((url, i) => (
-              <div key={i} className="aspect-video w-full overflow-hidden rounded-lg">
-                <iframe
-                  src={url}
-                  title={`영상 ${i + 1}`}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            ))}
-          </div>
-        );
-      })()}
-
-      {/* 텍스트 내용 */}
-      {post.content && (() => {
-        const text = post.content
-          .replace(/<img[^>]*>/gi, "")
-          .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
-          .replace(/<br\s*\/?>/gi, "\n")
-          .replace(/<\/p>/gi, "\n")
-          .replace(/<[^>]+>/g, "")
-          .replace(/&nbsp;/g, " ")
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">")
-          .replace(/&amp;/g, "&")
-          .trim();
-        if (!text) return null;
-        return (
-          <div className="mt-6 whitespace-pre-line px-4 text-sm leading-relaxed text-neutral-600">
-            {text}
-          </div>
-        );
-      })()}
+        .post-content iframe {
+          width: 100%;
+          aspect-ratio: 16/9;
+          border-radius: 0.5rem;
+          margin: 0.5rem 0;
+        }
+        .post-content p {
+          margin: 0.25rem 0;
+        }
+      `}</style>
 
       {/* 첨부파일 다운로드 (이미지가 아닌 파일) */}
       {attachOtherFiles.length > 0 && (

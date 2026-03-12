@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
 import BottomNav from "@/app/components/BottomNav";
-import GalleryViewer from "./GalleryViewer";
 import GalleryImageList from "./GalleryImageList";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
@@ -65,12 +64,6 @@ export default async function GalleryDetailPage({
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl pb-20">
-      {/* 이미지 뷰어 */}
-      <GalleryViewer
-        images={allImages.map((name) => `${R2_BASE}/${name}`)}
-      />
-
-      {/* 게시글 정보 */}
       <div className="px-4 pt-4">
         <Link
           href="/gallery"
@@ -90,62 +83,42 @@ export default async function GalleryDetailPage({
           <span>·</span>
           <span className="text-xs text-neutral-400">조회 {post.hit_count}</span>
         </div>
+      </div>
 
-        {/* 이미지 목록 (전체) */}
-        {allImages.length > 1 && (
+      {/* 본문 — 원본 HTML 그대로 렌더링 */}
+      {post.content && (
+        <div
+          className="post-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+      )}
+
+      {/* 첨부파일 이미지 (본문에 없는 것) */}
+      {allImages.length > 0 && (
+        <div className="mt-4 px-4">
           <GalleryImageList
             images={allImages.map((name) => `${R2_BASE}/${name}`)}
             title={post.title}
           />
-        )}
+        </div>
+      )}
 
-        {/* 유튜브 영상 */}
-        {post.content && (() => {
-          const videos: string[] = [];
-          const iframeRegex = /src=["']?(https?:\/\/(?:www\.)?youtube\.com\/embed\/[^"'\s]+)["'\s]/g;
-          let m;
-          while ((m = iframeRegex.exec(post.content)) !== null) {
-            videos.push(m[1]);
-          }
-          if (videos.length === 0) return null;
-          return (
-            <div className="mt-6 space-y-3">
-              {videos.map((url, i) => (
-                <div key={i} className="aspect-video w-full overflow-hidden rounded-lg">
-                  <iframe
-                    src={url}
-                    title={`영상 ${i + 1}`}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              ))}
-            </div>
-          );
-        })()}
-
-        {/* 텍스트 내용 */}
-        {post.content && (() => {
-          const text = post.content
-            .replace(/<img[^>]*>/gi, "")
-            .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
-            .replace(/<br\s*\/?>/gi, "\n")
-            .replace(/<\/p>/gi, "\n")
-            .replace(/<[^>]+>/g, "")
-            .replace(/&nbsp;/g, " ")
-            .replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">")
-            .replace(/&amp;/g, "&")
-            .trim();
-          if (!text) return null;
-          return (
-            <div className="mt-6 whitespace-pre-line text-sm leading-relaxed text-neutral-600">
-              {text}
-            </div>
-          );
-        })()}
-      </div>
+      <style>{`
+        .post-content img {
+          width: 100%;
+          border-radius: 0.5rem;
+          margin: 0.5rem 0;
+        }
+        .post-content iframe {
+          width: 100%;
+          aspect-ratio: 16/9;
+          border-radius: 0.5rem;
+          margin: 0.5rem 0;
+        }
+        .post-content p {
+          margin: 0.25rem 0;
+        }
+      `}</style>
 
       <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>

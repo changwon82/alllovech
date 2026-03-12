@@ -14,6 +14,7 @@ import {
   deletePushSubscription,
 } from "@/app/notifications/push-actions";
 import NotificationModal from "./NotificationModal";
+import { createClient } from "@/lib/supabase/client";
 
 export default function UserMenu({
   name,
@@ -49,6 +50,12 @@ export default function UserMenu({
     window.addEventListener("push-changed", onPushChanged);
     return () => window.removeEventListener("push-changed", onPushChanged);
   }, []);
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  }
 
   function handlePushToggle() {
     startTransition(async () => {
@@ -119,6 +126,17 @@ export default function UserMenu({
             </button>
           </>
         )}
+        <span className="text-neutral-300">·</span>
+        <button
+          onClick={handleLogout}
+          className="text-neutral-400 hover:text-red-500"
+          aria-label="로그아웃"
+          title="로그아웃"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+          </svg>
+        </button>
       </div>
 
       <NotificationModal open={notifOpen} onClose={() => setNotifOpen(false)} />
