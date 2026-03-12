@@ -90,8 +90,8 @@ export default async function Home() {
             <HeroIcon href="/365bible" label="365성경읽기" labelClass="text-accent">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7 text-accent animate-glow"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
             </HeroIcon>
-            <HeroIcon href="/news" label="교회소식">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+            <HeroIcon href="/jubo" label="주보">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" /></svg>
             </HeroIcon>
             <HeroIcon href="/gallery" label="다애사진">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" /></svg>
@@ -106,7 +106,7 @@ export default async function Home() {
       {/* 모바일 서비스 아이콘 */}
       <div className="grid grid-cols-3 gap-[1px] bg-neutral-100 md:hidden">
         <MobileIcon href="/about" label="교회소개">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" /></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 2v3m0 0V4m0 1h-1.5m1.5 0h1.5M3 21h18M5 21V11l7-5 7 5v10M9 21v-4a3 3 0 0 1 6 0v4" /></svg>
         </MobileIcon>
         <MobileIcon href="/worship" label="예배안내">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
@@ -114,8 +114,8 @@ export default async function Home() {
         <MobileIcon href="/365bible" label="365성경읽기" labelClass="text-accent">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6 text-accent animate-glow"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
         </MobileIcon>
-        <MobileIcon href="/news" label="교회소식">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+        <MobileIcon href="/jubo" label="주보">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" /></svg>
         </MobileIcon>
         <MobileIcon href="/gallery" label="다애사진">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" /></svg>
@@ -134,7 +134,7 @@ export default async function Home() {
         {sermons.length > 0 && (
           <section className="mx-auto max-w-6xl px-4 py-12 md:px-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-[20px] font-bold text-neutral-800">예배영상</h2>
+              <h2 className="text-[22px] font-bold text-neutral-800">예배영상</h2>
               <Link href="/sermon" className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-100 text-neutral-300 transition hover:bg-neutral-200 hover:text-neutral-500" title="더보기"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-4 w-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></Link>
             </div>
             {/* 모바일: 가로형 2개 */}
@@ -143,7 +143,7 @@ export default async function Home() {
                 const id = ytId(s.youtube_url);
                 return (
                   <Link key={s.id} href={`/sermon/${s.id}`} className="group flex gap-3">
-                    <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-neutral-200">
+                    <div className="relative aspect-video w-40 shrink-0 overflow-hidden bg-neutral-200">
                       {id && (
                         <Image src={`https://img.youtube.com/vi/${id}/mqdefault.jpg`} alt={s.title} fill className="object-cover" />
                       )}
@@ -164,7 +164,7 @@ export default async function Home() {
                 const id = ytId(s.youtube_url);
                 return (
                   <Link key={s.id} href={`/sermon/${s.id}`} className="group">
-                    <div className="relative aspect-video overflow-hidden rounded-lg bg-neutral-200">
+                    <div className="relative aspect-video overflow-hidden bg-neutral-200">
                       {id && (
                         <Image src={`https://img.youtube.com/vi/${id}/mqdefault.jpg`} alt={s.title} fill className="object-cover transition-transform group-hover:scale-105" />
                       )}
@@ -197,7 +197,7 @@ export default async function Home() {
             {/* 교회소식 */}
             <div>
               <div className="flex items-center justify-between">
-                <h2 className="text-[18px] font-bold text-neutral-800">교회소식</h2>
+                <h2 className="text-[22px] font-bold text-neutral-800">교회소식</h2>
                 <Link href="/news" className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-100 text-neutral-300 transition hover:bg-neutral-200 hover:text-neutral-500" title="더보기"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-3.5 w-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></Link>
               </div>
               <div className="mt-3 divide-y divide-neutral-100">
@@ -213,7 +213,7 @@ export default async function Home() {
             {/* 교우소식 */}
             <div>
               <div className="flex items-center justify-between">
-                <h2 className="text-[18px] font-bold text-neutral-800">교우소식</h2>
+                <h2 className="text-[22px] font-bold text-neutral-800">교우소식</h2>
                 <Link href="/brothers" className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-100 text-neutral-300 transition hover:bg-neutral-200 hover:text-neutral-500" title="더보기"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-3.5 w-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></Link>
               </div>
               <div className="mt-3 divide-y divide-neutral-100">
@@ -229,7 +229,7 @@ export default async function Home() {
             {/* 주보 — 최신 1건 이미지 (모바일 숨김) */}
             <div className="hidden flex-col md:flex">
               <div className="flex items-center justify-between">
-                <h2 className="text-[18px] font-bold text-neutral-800">주보</h2>
+                <h2 className="text-[22px] font-bold text-neutral-800">주보</h2>
                 <Link href="/jubo" className="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-100 text-neutral-300 transition hover:bg-neutral-200 hover:text-neutral-500" title="더보기"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-3.5 w-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></Link>
               </div>
               {juboPosts[0] && (() => {
@@ -238,17 +238,17 @@ export default async function Home() {
                   ?.sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))?.[0];
                 return (
                   <Link href={`/jubo/${jubo.id}`} className="mt-3 block flex-1 group">
-                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-neutral-100 md:aspect-auto md:h-full">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100 md:aspect-auto md:h-full">
                       {img && (
                         <Image
                           src={`${R2_JUBO}/${img.file_name}`}
                           alt={jubo.title}
                           fill
-                          className="object-cover object-top transition-transform group-hover:scale-105"
+                          className="object-cover object-top scale-110"
                         />
                       )}
                       <div className="absolute inset-x-0 bottom-0 bg-black/40 px-3 py-2 transition-colors group-hover:bg-black/70">
-                        <p className="truncate text-center text-[13px] font-medium text-white">{jubo.title}</p>
+                        <p className="truncate text-center text-[15px] font-bold text-white">{jubo.title}</p>
                       </div>
                     </div>
                   </Link>
@@ -279,7 +279,7 @@ export default async function Home() {
         {galleryPosts.length > 0 && (
           <section className="mx-auto max-w-6xl px-4 py-12 md:px-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-[20px] font-bold text-neutral-800">다애사진</h2>
+              <h2 className="text-[22px] font-bold text-neutral-800">다애사진</h2>
               <Link href="/gallery" className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-100 text-neutral-300 transition hover:bg-neutral-200 hover:text-neutral-500" title="더보기"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-4 w-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></Link>
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -287,12 +287,12 @@ export default async function Home() {
                 const img = post.gallery_images
                   ?.sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))?.[0];
                 return (
-                  <Link key={post.id} href={`/gallery/${post.id}`} className="group relative aspect-[4/3] overflow-hidden rounded-lg bg-neutral-200">
+                  <Link key={post.id} href={`/gallery/${post.id}`} className="group relative aspect-[4/3] overflow-hidden bg-neutral-200">
                     {img && (
                       <Image src={`${R2_GALLERY}/${img.file_name}`} alt={post.title} fill className="object-cover transition-transform group-hover:scale-105" />
                     )}
                     <div className="absolute inset-x-0 bottom-0 bg-black/40 px-3 py-2 transition-colors group-hover:bg-black/70">
-                      <p className="truncate text-center text-[12px] font-medium text-white">{post.title}</p>
+                      <p className="truncate text-center text-[15px] font-bold text-white">{post.title}</p>
                     </div>
                   </Link>
                 );
