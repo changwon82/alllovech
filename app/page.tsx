@@ -349,7 +349,7 @@ export default async function Home() {
             {/* 찾아오시는 길 — 3/5 너비, 왼쪽 높이에 맞춤 */}
             <div className="flex flex-col md:col-span-3">
               <Link href="/about/location" className="text-[18px] font-bold text-neutral-800 hover:text-navy transition">오시는 길</Link>
-              <div className="mt-4 aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto md:min-h-[280px] md:flex-1">
+              <div className="mt-4 h-[200px] overflow-hidden rounded-2xl md:h-auto md:min-h-[280px] md:flex-1">
                 <ChurchMap />
               </div>
               <p className="mt-3 text-sm text-neutral-600">서울 서초구 탑성말길 37 (신원동 561)</p>
