@@ -1,4 +1,5 @@
 import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ChurchMap from "@/app/components/ChurchMap";
 import ParkingMap from "./ParkingMap";
 
@@ -15,7 +16,18 @@ export default function LocationPage() {
         ]}
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-10 pb-20 md:px-8">
+      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+        <SubpageSidebar
+          title="교회소개"
+          items={[
+            { label: "인사말씀", href: "/about" },
+            { label: "설립목사", href: "/about/founder" },
+            { label: "교회연혁", href: "/about/history" },
+            { label: "섬기는 사람들", href: "/about/staff" },
+            { label: "오시는 길", href: "/about/location" },
+          ]}
+        />
+        <div className="min-w-0 flex-1">
         <h2 className="text-xl font-bold text-navy md:text-2xl">오시는 길</h2>
         <div className="mt-1 h-1 w-12 rounded-full bg-accent" />
 
@@ -214,6 +226,7 @@ export default function LocationPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </>
   );

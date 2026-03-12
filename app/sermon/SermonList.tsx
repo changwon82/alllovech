@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SermonCardAdmin } from "./SermonAdmin";
 
 type Sermon = {
@@ -22,6 +21,17 @@ function getThumbnail(url: string | null): string | null {
   const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (vimeoMatch) return `https://vumbnail.com/${vimeoMatch[1]}.jpg`;
   return null;
+}
+
+function getYoutubeUrl(url: string | null): string {
+  if (!url || url === ".") return "#";
+  const ytEmbed = url.match(/embed\/([a-zA-Z0-9_-]+)/);
+  if (ytEmbed) return `https://www.youtube.com/watch?v=${ytEmbed[1]}`;
+  const ytWatch = url.match(/[?&]v=([a-zA-Z0-9_-]+)/);
+  if (ytWatch) return `https://www.youtube.com/watch?v=${ytWatch[1]}`;
+  const ytShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+  if (ytShort) return `https://www.youtube.com/watch?v=${ytShort[1]}`;
+  return url;
 }
 
 function formatDate(dateStr: string) {
@@ -52,9 +62,11 @@ export default function SermonList({
         const thumbnail = getThumbnail(sermon.youtube_url);
 
         return (
-          <Link
+          <a
             key={sermon.id}
-            href={`/sermon/${sermon.id}`}
+            href={getYoutubeUrl(sermon.youtube_url)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="group relative"
           >
             {/* 관리자 수정/삭제 */}
@@ -63,7 +75,7 @@ export default function SermonList({
             )}
 
             {/* 썸네일 */}
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-neutral-100">
+            <div className="relative aspect-video w-full overflow-hidden bg-neutral-100">
               {thumbnail ? (
                 <img
                   src={thumbnail}
@@ -80,19 +92,18 @@ export default function SermonList({
 
             {/* 정보 */}
             <div className="mt-2.5">
-              <p className="line-clamp-2 text-sm font-semibold text-neutral-800 group-hover:text-navy md:text-base">
+              <p className="line-clamp-2 text-base font-semibold text-neutral-800 group-hover:text-navy">
                 {sermon.title}
               </p>
               {sermon.scripture && (
-                <p className="mt-1 text-xs text-neutral-500 md:text-sm">
-                  {sermon.scripture} | {sermon.preacher}
-                </p>
+                <p className="mt-1 text-sm text-neutral-500">{sermon.scripture}</p>
               )}
-              <p className="mt-1 text-xs text-neutral-400">
+              <p className="mt-0.5 text-sm text-neutral-500">{sermon.preacher}</p>
+              <p className="mt-0.5 text-sm text-neutral-400">
                 {formatDate(sermon.sermon_date)}
               </p>
             </div>
-          </Link>
+          </a>
         );
       })}
     </div>
