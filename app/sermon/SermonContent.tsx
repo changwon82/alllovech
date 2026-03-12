@@ -158,7 +158,43 @@ export default function SermonContent({
             등록된 설교가 없습니다.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4 md:gap-x-6 md:gap-y-10">
+          <>
+          {/* 모바일: 가로 레이아웃, 10개 제한 */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {sermons.slice(0, 10).map((sermon) => {
+              const thumbnail = getThumbnail(sermon.youtube_url);
+              return (
+                <button
+                  key={sermon.id}
+                  onClick={() => playVideo(sermon)}
+                  className="group flex items-start gap-3 text-left"
+                >
+                  <div className="relative aspect-video w-[30%] shrink-0 overflow-hidden bg-neutral-100">
+                    {thumbnail ? (
+                      <img src={thumbnail} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xl text-neutral-300">🎙️</div>
+                    )}
+                    {/* 재생 아이콘 */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-3.5 w-3.5">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <p className="line-clamp-2 text-[14px] font-semibold text-neutral-800 group-hover:text-navy">{sermon.title}</p>
+                    {sermon.scripture && <p className="mt-0.5 text-[12px] text-neutral-500">{sermon.scripture}</p>}
+                    <p className="mt-0.5 text-[12px] text-neutral-400">{sermon.preacher} · {formatDate(sermon.sermon_date)}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          {/* 데스크톱: 기존 그리드 */}
+          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-x-6 md:gap-y-10">
             {sermons.map((sermon) => {
               const thumbnail = getThumbnail(sermon.youtube_url);
               return (
@@ -180,7 +216,6 @@ export default function SermonContent({
                         🎙️
                       </div>
                     )}
-                    {/* 재생 아이콘 */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white">
                         <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-5 w-5">
@@ -205,6 +240,7 @@ export default function SermonContent({
               );
             })}
           </div>
+          </>
         )}
       </div>
     </>
