@@ -7,6 +7,7 @@ import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
 import BottomNav from "@/app/components/BottomNav";
 import { BOOK_FULL_TO_CODE } from "./plan";
+import HideTopNavOnScroll from "./HideTopNavOnScroll";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -539,6 +540,7 @@ export default async function BiblePage({
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
+      <HideTopNavOnScroll />
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <h1 className="text-2xl font-bold text-navy md:text-3xl">
