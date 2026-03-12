@@ -72,6 +72,7 @@ export default function SermonContent({
     (sermon: Sermon) => {
       setCurrent(sermon);
       setPlaying(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     [],
   );
@@ -84,7 +85,7 @@ export default function SermonContent({
     <>
       {/* 히어로 플레이어 */}
       {current && (
-        <div ref={playerRef} className="flex flex-col overflow-hidden bg-neutral-800 md:flex-row">
+        <div ref={playerRef} className="scroll-mt-16 flex flex-col overflow-hidden bg-neutral-800 md:flex-row">
           <div className="relative w-full shrink-0 overflow-hidden md:w-[420px]">
             {(() => {
               const videoId = getYouTubeId(current.youtube_url);
