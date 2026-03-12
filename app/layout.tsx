@@ -61,6 +61,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head />
       <body className={`${notoSansKR.variable} ${notoSerifKR.variable} antialiased`}>
         <ServiceWorkerRegister />
         <TopNav />

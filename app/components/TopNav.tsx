@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "./UserMenu";
 import DesktopMenu from "./DesktopMenu";
-import DarkModeToggle from "./DarkModeToggle";
+
 
 export default async function TopNav() {
   const headersList = await headers();
@@ -33,7 +33,7 @@ export default async function TopNav() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
+    <nav className="sticky top-0 z-50 border-b border-neutral-200 bg-white">
       <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
         {/* 좌측: 로고 */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
@@ -49,7 +49,7 @@ export default async function TopNav() {
           {user ? (
             <UserMenu name={profileName ?? "마이페이지"} avatarUrl={avatarUrl} userId={user.id} unreadCount={unreadCount} />
           ) : (
-            <div className="hidden items-center gap-4 md:flex">
+            <>
               <Link href={`/login?next=${encodeURIComponent(pathname)}`} className="flex items-center gap-1 text-[13px] font-medium text-neutral-500 transition hover:text-navy">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
@@ -62,11 +62,8 @@ export default async function TopNav() {
                 </svg>
                 회원가입
               </Link>
-            </div>
+            </>
           )}
-
-          {/* 다크모드 (항상 표시) */}
-          <DarkModeToggle />
 
           {/* 모바일 햄버거 */}
           <MobileMenu />

@@ -17,7 +17,6 @@ import NotificationModal from "./NotificationModal";
 import Avatar from "./ui/Avatar";
 import AvatarPicker from "@/app/365bible/my/AvatarPicker";
 import { createClient } from "@/lib/supabase/client";
-import DarkModeToggle from "./DarkModeToggle";
 
 export default function UserMenu({
   name,
