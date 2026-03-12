@@ -1,33 +1,7 @@
-"use client";
-
-const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}</style>
-</head>
-<body>
-<div id="daumRoughmapContainer1697626619705" class="root_daum_roughmap root_daum_roughmap_landing" style="width:100%;height:100%"></div>
-<script charset="UTF-8" src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"></script>
-<script charset="UTF-8">
-var w = document.documentElement.clientWidth;
-var h = document.documentElement.clientHeight;
-new daum.roughmap.Lander({
-  "timestamp":"1697626619705",
-  "key":"2ghtb",
-  "mapWidth": String(w),
-  "mapHeight": String(h)
-}).render();
-</script>
-</body>
-</html>`;
-
 export default function ChurchMap() {
   return (
     <iframe
-      srcDoc={html}
-      sandbox="allow-scripts allow-same-origin"
+      src="/maps/church.html"
       className="h-full w-full"
       style={{ border: 0 }}
       loading="lazy"
