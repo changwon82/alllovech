@@ -119,18 +119,18 @@ export default function DesktopMenu() {
               <div className="grid grid-cols-[1fr_1px_1fr] gap-x-6 p-6">
                 {/* 봉사 */}
                 <div>
-                  <h4 className="mb-3 text-[13px] font-bold text-navy">봉사</h4>
+                  <h4 className="mb-3 text-[15px] font-bold text-navy">봉사</h4>
                   <div className="space-y-1">
                     {[
                       { label: "중보기도", href: "/service/prayer" },
                       { label: "다애다문화학교", href: "/service/multicultural" },
-                      { label: "에즈마이야", href: "/service/azmaya" },
+                      { label: "에즈마이야", href: "/service/ezemiah" },
                     ].map((item) => (
                       <Link
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpenIdx(null)}
-                        className="block rounded-lg px-3 py-2 text-[14px] text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
+                        className="block rounded-lg px-3 py-1.5 text-[15px] font-semibold text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
                       >
                         {item.label}
                       </Link>
@@ -143,7 +143,7 @@ export default function DesktopMenu() {
 
                 {/* 선교 */}
                 <div>
-                  <h4 className="mb-3 text-[13px] font-bold text-navy">선교</h4>
+                  <h4 className="mb-3 text-[15px] font-bold text-navy">선교</h4>
                   <div className="space-y-1">
                     {[
                       { label: "숨바선교", href: "/mission/sumba" },
@@ -154,7 +154,7 @@ export default function DesktopMenu() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpenIdx(null)}
-                        className="block rounded-lg px-3 py-2 text-[14px] text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
+                        className="block rounded-lg px-3 py-1.5 text-[15px] font-semibold text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
                       >
                         {item.label}
                       </Link>
@@ -274,7 +274,7 @@ export default function DesktopMenu() {
                     onClick={() => setOpenIdx(null)}
                     className="group rounded-xl px-5 py-4 transition hover:bg-neutral-50"
                   >
-                    <span className="text-[15px] font-semibold text-neutral-800 group-hover:text-navy">
+                    <span className="text-[14px] font-semibold text-neutral-800 group-hover:text-navy">
                       {child.label}
                     </span>
                   </Link>
