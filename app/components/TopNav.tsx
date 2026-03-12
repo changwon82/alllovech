@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "./UserMenu";
 import DesktopMenu from "./DesktopMenu";
+import DarkModeToggle from "./DarkModeToggle";
 
 export default async function TopNav() {
   const headersList = await headers();
@@ -32,7 +33,7 @@ export default async function TopNav() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-neutral-200 bg-white">
+    <nav className="sticky top-0 z-50 border-b border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
       <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
         {/* 좌측: 로고 */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
@@ -63,6 +64,9 @@ export default async function TopNav() {
               </Link>
             </>
           )}
+
+          {/* 다크모드 (항상 표시) */}
+          <DarkModeToggle />
 
           {/* 모바일 햄버거 */}
           <MobileMenu />
