@@ -14,7 +14,7 @@ export default function FounderPage() {
       <div className="mx-auto max-w-4xl px-4 py-10 pb-10 md:px-8">
         <div className="flex flex-col items-start gap-8 md:flex-row">
           {/* 사진 */}
-          <div className="w-full shrink-0 overflow-hidden rounded-2xl md:w-64">
+          <div className="w-1/2 shrink-0 overflow-hidden rounded-2xl md:w-64">
             <Image
               src="https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/site/pastor.png"
               alt="설립목사 이순근"
