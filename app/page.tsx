@@ -87,8 +87,8 @@ export default async function Home() {
             <HeroIcon href="/worship" label="예배안내">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
             </HeroIcon>
-            <HeroIcon href="/jubo" label="주보">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+            <HeroIcon href="/365bible" label="365성경읽기" labelClass="text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7 text-accent animate-glow"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
             </HeroIcon>
             <HeroIcon href="/news" label="교회소식">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
@@ -106,13 +106,13 @@ export default async function Home() {
       {/* 모바일 서비스 아이콘 */}
       <div className="grid grid-cols-3 gap-[1px] bg-neutral-100 md:hidden">
         <MobileIcon href="/about" label="교회소개">
-          <Image src="/logo.png" alt="다애교회" width={24} height={24} className="brightness-0 invert" />
+          <Image src="/logo.png" alt="다애교회" width={24} height={24} className="brightness-0" />
         </MobileIcon>
         <MobileIcon href="/worship" label="예배안내">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
         </MobileIcon>
-        <MobileIcon href="/jubo" label="주보">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+        <MobileIcon href="/365bible" label="365성경읽기" labelClass="text-accent">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6 text-accent animate-glow"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
         </MobileIcon>
         <MobileIcon href="/news" label="교회소식">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
@@ -382,27 +382,27 @@ export default async function Home() {
 
 
 /* ── Hero 서비스 아이콘 (반투명 박스) ── */
-function HeroIcon({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+function HeroIcon({ href, label, labelClass, children }: { href: string; label: string; labelClass?: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
       className="flex h-[90px] w-[100px] flex-col items-center justify-center gap-2 border border-white/20 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-95 md:h-[100px] md:w-[120px]"
     >
       {children}
-      <span className="text-sm font-medium">{label}</span>
+      <span className={`text-sm font-medium ${labelClass ? `${labelClass} animate-glow` : ""}`}>{label}</span>
     </Link>
   );
 }
 
 /* ── 모바일 서비스 아이콘 (밝은 배경) ── */
-function MobileIcon({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+function MobileIcon({ href, label, labelClass, children }: { href: string; label: string; labelClass?: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
       className="flex flex-col items-center justify-center gap-1.5 bg-white py-4 text-navy transition active:scale-95 active:bg-neutral-50"
     >
       {children}
-      <span className="text-[11px] font-medium text-neutral-600">{label}</span>
+      <span className={`text-[11px] font-medium ${labelClass ? `${labelClass} animate-glow` : "text-neutral-600"}`}>{label}</span>
     </Link>
   );
 }

@@ -29,3 +29,11 @@ body {
 .animate-fade-in {
   animation: fade-in 0.8s ease-out;
 }
+
+@keyframes gentle-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.4); }
+}
+.animate-glow {
+  animation: gentle-glow 2.5s ease-in-out infinite;
+}
