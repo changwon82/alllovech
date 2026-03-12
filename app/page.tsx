@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import LoginForm from "@/app/login/LoginForm";
 import HeroSlider from "@/app/components/HeroSlider";
 import ChurchMap from "@/app/components/ChurchMap";
 
@@ -82,10 +81,10 @@ export default async function Home() {
         <HeroSlider slides={heroSlides}>
           {/* 우측: 서비스 아이콘 — 모바일에서 숨기고 아래에 별도 배치 */}
           <div className="mb-8 hidden shrink-0 grid-cols-3 gap-[1px] md:mb-16 md:grid">
-            <HeroIcon href="/365bible" label="성경읽기">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+            <HeroIcon href="/about" label="교회소개">
+              <Image src="/logo.png" alt="다애교회" width={28} height={28} className="brightness-0 invert" />
             </HeroIcon>
-            <HeroIcon href="/sermon" label="말씀">
+            <HeroIcon href="/worship" label="예배안내">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
             </HeroIcon>
             <HeroIcon href="/jubo" label="주보">
@@ -106,10 +105,10 @@ export default async function Home() {
 
       {/* 모바일 서비스 아이콘 */}
       <div className="grid grid-cols-3 gap-[1px] bg-neutral-100 md:hidden">
-        <MobileIcon href="/365bible" label="성경읽기">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+        <MobileIcon href="/about" label="교회소개">
+          <Image src="/logo.png" alt="다애교회" width={24} height={24} className="brightness-0 invert" />
         </MobileIcon>
-        <MobileIcon href="/sermon" label="말씀">
+        <MobileIcon href="/worship" label="예배안내">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
         </MobileIcon>
         <MobileIcon href="/jubo" label="주보">
@@ -135,7 +134,7 @@ export default async function Home() {
         {sermons.length > 0 && (
           <section className="mx-auto max-w-6xl px-4 py-12 md:px-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-[20px] font-bold text-neutral-800">설교영상</h2>
+              <h2 className="text-[20px] font-bold text-neutral-800">예배영상</h2>
               <Link href="/sermon" className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-100 text-neutral-300 transition hover:bg-neutral-200 hover:text-neutral-500" title="더보기"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-4 w-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></Link>
             </div>
             {/* 모바일: 가로형 2개 */}
@@ -347,10 +346,10 @@ export default async function Home() {
               </a>
             </div>
 
-            {/* 찾아오시는 길 — 3/5 너비 */}
-            <div className="md:col-span-3">
-              <h2 className="text-[18px] font-bold text-neutral-800">찾아오시는 길</h2>
-              <div className="mt-4 aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto md:h-[267px]">
+            {/* 찾아오시는 길 — 3/5 너비, 왼쪽 높이에 맞춤 */}
+            <div className="flex flex-col md:col-span-3">
+              <Link href="/about/location" className="text-[18px] font-bold text-neutral-800 hover:text-navy transition">오시는 길</Link>
+              <div className="mt-4 aspect-[4/2] overflow-hidden rounded-2xl md:aspect-auto md:flex-1">
                 <ChurchMap />
               </div>
               <p className="mt-3 text-sm text-neutral-600">서울 서초구 탑성말길 37 (신원동 561)</p>
@@ -375,21 +374,6 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ── 로그인 (비로그인 시만) ── */}
-        {!user && (
-          <section className="hidden bg-white py-10 md:block">
-            <div className="mx-auto max-w-sm px-4">
-              <p className="text-center text-[16px] font-bold text-navy">로그인</p>
-              <div className="mt-4">
-                <LoginForm />
-              </div>
-              <p className="mt-5 text-center text-sm text-neutral-500">
-                아직 계정이 없으신가요?{" "}
-                <Link href="/signup" className="font-medium text-navy hover:underline">회원가입</Link>
-              </p>
-            </div>
-          </section>
-        )}
 
       </div>
     </div>
@@ -405,7 +389,7 @@ function HeroIcon({ href, label, children }: { href: string; label: string; chil
       className="flex h-[90px] w-[100px] flex-col items-center justify-center gap-2 border border-white/20 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-95 md:h-[100px] md:w-[120px]"
     >
       {children}
-      <span className="text-[11px] font-medium">{label}</span>
+      <span className="text-sm font-medium">{label}</span>
     </Link>
   );
 }

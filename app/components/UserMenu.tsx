@@ -54,7 +54,7 @@ export default function UserMenu({
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/";
+    window.location.href = window.location.pathname;
   }
 
   function handlePushToggle() {

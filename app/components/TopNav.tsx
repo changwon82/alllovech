@@ -4,13 +4,14 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount } from "@/lib/notifications";
 import UserMenu from "./UserMenu";
+import DesktopMenu from "./DesktopMenu";
 
 export default async function TopNav() {
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "/";
 
-  // admin, spend-report, login, signup 등에서는 숨김
-  if (pathname.startsWith("/admin") || pathname.startsWith("/spend-report") || pathname === "/login" || pathname === "/signup") {
+  // admin, spend-report 등에서는 숨김
+  if (pathname.startsWith("/admin") || pathname.startsWith("/spend-report")) {
     return null;
   }
 
@@ -30,7 +31,7 @@ export default async function TopNav() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-neutral-200 bg-white">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
+      <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
         {/* 좌측: 로고 */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <Image src="/logo.png" alt="다애교회" width={34} height={34} />
@@ -38,22 +39,15 @@ export default async function TopNav() {
         </Link>
 
         {/* 중앙: 메뉴 (데스크톱) */}
-        <div className="hidden items-center gap-10 md:flex">
-          <NavLink href="/about">교회소개</NavLink>
-          <NavLink href="/worship">예배</NavLink>
-          <NavLink href="/nurture">양육</NavLink>
-          <NavLink href="/dacobang">다코방</NavLink>
-          <NavLink href="/service">봉사와 선교</NavLink>
-          <NavLink href="/mission">선교</NavLink>
-        </div>
+        <DesktopMenu />
 
         {/* 우측: 로그인/유저 */}
-        <div className="flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-4">
           {user ? (
             <UserMenu name={profileName ?? "마이페이지"} userId={user.id} unreadCount={unreadCount} />
           ) : (
             <>
-              <Link href="/login" className="flex items-center gap-1 text-[13px] font-medium text-neutral-500 transition hover:text-navy">
+              <Link href={`/login?next=${encodeURIComponent(pathname)}`} className="flex items-center gap-1 text-[13px] font-medium text-neutral-500 transition hover:text-navy">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
                 </svg>
@@ -73,14 +67,6 @@ export default async function TopNav() {
         </div>
       </div>
     </nav>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="text-[16px] font-semibold text-neutral-700 transition hover:text-navy">
-      {children}
-    </Link>
   );
 }
 
@@ -106,7 +92,7 @@ function MobileMenu() {
           <div className="flex flex-col gap-5">
             <MobileLink href="/">홈</MobileLink>
             <MobileLink href="/365bible">성경읽기</MobileLink>
-            <MobileLink href="/sermon">말씀</MobileLink>
+            <MobileLink href="/worship">예배와 말씀</MobileLink>
             <MobileLink href="/365bible/groups">함께읽기</MobileLink>
             <MobileLink href="/jubo">주보</MobileLink>
             <MobileLink href="/gallery">다애사진</MobileLink>
