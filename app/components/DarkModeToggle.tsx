@@ -2,33 +2,33 @@
 
 import { useEffect, useState } from "react";
 
+function applyTheme(isDark: boolean) {
+  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+}
+
 export default function DarkModeToggle() {
   const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      setDark(true);
-      document.documentElement.classList.add("dark");
-    }
+    setMounted(true);
+    const isDark = document.documentElement.classList.contains("dark");
+    setDark(isDark);
   }, []);
 
-  const toggle = () => {
-    const next = !dark;
-    setDark(next);
-    if (next) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
+  if (!mounted) return null;
 
   return (
     <button
-      onClick={toggle}
-      className="text-neutral-400 transition hover:text-navy"
+      onPointerDown={(e) => {
+        e.preventDefault();
+        const next = !dark;
+        setDark(next);
+        applyTheme(next);
+        localStorage.setItem("theme", next ? "dark" : "light");
+      }}
+      className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-navy"
       aria-label={dark ? "라이트 모드" : "다크 모드"}
     >
       {dark ? (
