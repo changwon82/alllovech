@@ -76,7 +76,7 @@ export default async function GalleryDetailPage({
       {post.content && (
         <div
           className="post-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: post.content.replaceAll("http://alllovechurch.org/", "/proxy/old-site/") }}
         />
       )}
 
