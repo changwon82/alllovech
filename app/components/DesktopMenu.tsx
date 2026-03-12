@@ -55,9 +55,7 @@ const MENUS: MenuItem[] = [
   {
     label: "봉사와 선교",
     href: "/service",
-    children: [
-      { label: "봉사안내", href: "/service", desc: "다양한 봉사에 참여하세요" },
-    ],
+    children: [],
   },
   {
     label: "교제와 소식",
@@ -117,7 +115,54 @@ export default function DesktopMenu() {
             </div>
 
             {/* 하위 메뉴 */}
-            {MENUS[openIdx].label === "예배와 말씀" ? (
+            {MENUS[openIdx].label === "봉사와 선교" ? (
+              <div className="grid grid-cols-[1fr_1px_1fr] gap-x-6 p-6">
+                {/* 봉사 */}
+                <div>
+                  <h4 className="mb-3 text-[13px] font-bold text-navy">봉사</h4>
+                  <div className="space-y-1">
+                    {[
+                      { label: "중보기도", href: "/service/prayer" },
+                      { label: "다애다문화학교", href: "/service/multicultural" },
+                      { label: "에즈마이야", href: "/service/azmaya" },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpenIdx(null)}
+                        className="block rounded-lg px-3 py-2 text-[14px] text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 구분선 */}
+                <div className="bg-neutral-100" />
+
+                {/* 선교 */}
+                <div>
+                  <h4 className="mb-3 text-[13px] font-bold text-navy">선교</h4>
+                  <div className="space-y-1">
+                    {[
+                      { label: "숨바선교", href: "/mission/sumba" },
+                      { label: "국내선교", href: "/mission/domestic" },
+                      { label: "해외선교", href: "/mission/overseas" },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpenIdx(null)}
+                        className="block rounded-lg px-3 py-2 text-[14px] text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : MENUS[openIdx].label === "예배와 말씀" ? (
               <div className="p-4">
                 {/* 1행: 예배영상 */}
                 <div className="grid grid-cols-2 gap-4 px-4 py-3">

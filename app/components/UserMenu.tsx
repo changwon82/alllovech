@@ -72,6 +72,7 @@ export default function UserMenu({
   }, [pushTooltip]);
 
   async function handleLogout() {
+    if (!window.confirm("로그아웃 하시겠습니까?")) return;
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = window.location.pathname;
