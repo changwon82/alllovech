@@ -27,6 +27,7 @@ export default function ChurchMap() {
   return (
     <iframe
       srcDoc={html}
+      sandbox="allow-scripts allow-same-origin"
       className="h-full w-full"
       style={{ border: 0 }}
       loading="lazy"
