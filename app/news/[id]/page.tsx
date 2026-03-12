@@ -53,16 +53,11 @@ export default async function NewsDetailPage({
         </div>
       </div>
 
-      {/* 본문 — 원본 HTML 렌더링 (구 사이트 HTTP 이미지를 프록시 경로로 치환) */}
+      {/* 본문 — 원본 HTML 그대로 렌더링 */}
       {post.content && (
         <div
           className="post-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
-          dangerouslySetInnerHTML={{
-            __html: post.content.replaceAll(
-              "http://alllovechurch.org/",
-              "/proxy/old-site/"
-            ),
-          }}
+          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       )}
 
