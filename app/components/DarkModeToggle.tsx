@@ -21,12 +21,13 @@ export default function DarkModeToggle() {
 
   return (
     <button
-      onPointerDown={(e) => {
-        e.preventDefault();
+      onClick={() => {
         const next = !dark;
         setDark(next);
         applyTheme(next);
         localStorage.setItem("theme", next ? "dark" : "light");
+        // 디버그: 모바일 테스트용 (확인 후 제거)
+        alert(`다크모드: ${next ? "ON" : "OFF"}\nhtml class: ${document.documentElement.className}`);
       }}
       className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-navy"
       aria-label={dark ? "라이트 모드" : "다크 모드"}
