@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import GalleryImageList from "./GalleryImageList";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
@@ -50,7 +52,25 @@ export default async function GalleryDetailPage({
   const allImages = [...new Set([...attachImages, ...contentImages])];
 
   return (
-    <div className="mx-auto max-w-2xl pb-10">
+    <>
+    <SubpageHeader
+      title="교제와 소식"
+      breadcrumbs={[
+        { label: "교제와 소식", href: "/news" },
+        { label: "다애사진", href: "/gallery" },
+      ]}
+    />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교제와 소식"
+        items={[
+          { label: "교회소식", href: "/news" },
+          { label: "교우소식", href: "/brothers" },
+          { label: "주보", href: "/jubo" },
+          { label: "다애사진", href: "/gallery" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
       <div className="px-4 pt-4">
         <Link
           href="/gallery"
@@ -108,5 +128,7 @@ export default async function GalleryDetailPage({
       `}</style>
 
     </div>
+    </div>
+    </>
   );
 }

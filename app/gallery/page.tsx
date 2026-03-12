@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import Link from "next/link";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
@@ -36,8 +37,18 @@ export default async function GalleryPage({
 
   return (
     <>
-    <SubpageHeader title="다코방" breadcrumbs={[{ label: "다코방", href: "/dacobang" }, { label: "다애사진" }]} />
-    <div className="mx-auto max-w-2xl px-4 pt-3 pb-10">
+    <SubpageHeader title="교제와 소식" breadcrumbs={[{ label: "교제와 소식", href: "/news" }, { label: "다애사진" }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교제와 소식"
+        items={[
+          { label: "교회소식", href: "/news" },
+          { label: "교우소식", href: "/brothers" },
+          { label: "주보", href: "/jubo" },
+          { label: "다애사진", href: "/gallery" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
       <PageHeader title="사진갤러리" />
 
       {/* 카테고리 필터 */}
@@ -176,6 +187,7 @@ export default async function GalleryPage({
         );
       })()}
 
+    </div>
     </div>
     </>
   );

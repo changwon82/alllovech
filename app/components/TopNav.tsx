@@ -141,7 +141,12 @@ function MobileMenu() {
             </MobileSection>
 
             {/* 교제와 소식 */}
-            <MobileLink href="/fellowship">교제와 소식</MobileLink>
+            <MobileSection title="교제와 소식">
+              <MobileSubLink href="/news">교회소식</MobileSubLink>
+              <MobileSubLink href="/brothers">교우소식</MobileSubLink>
+              <MobileSubLink href="/jubo">주보</MobileSubLink>
+              <MobileSubLink href="/gallery">다애사진</MobileSubLink>
+            </MobileSection>
 
             {/* 구분선 */}
             <div className="my-2 mx-3 h-px bg-white/10" />

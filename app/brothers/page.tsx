@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import Link from "next/link";
 
 export default async function BrothersPage({
@@ -10,39 +11,33 @@ export default async function BrothersPage({
 }) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
-  const perPage = 36;
+  const perPage = 10;
 
   const { supabase } = await getSessionUser();
 
   const { data: posts, count } = await supabase
     .from("brothers_posts")
-    .select("id, title, content, post_date, hit_count", { count: "exact" })
+    .select("id, title, post_date, hit_count", { count: "exact" })
     .order("post_date", { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
 
   const totalPages = Math.ceil((count || 0) / perPage);
 
-  function getPreview(content: string | null): string {
-    if (!content) return "";
-    const text = content
-      .replace(/<img[^>]*>/gi, "")
-      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
-      .replace(/<br\s*\/?>/gi, " ")
-      .replace(/<\/p>/gi, " ")
-      .replace(/<[^>]+>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&amp;/g, "&")
-      .replace(/\s+/g, " ")
-      .trim();
-    return text.length > 80 ? text.slice(0, 80) + "..." : text;
-  }
 
   return (
     <>
-    <SubpageHeader title="다코방" breadcrumbs={[{ label: "다코방", href: "/dacobang" }, { label: "교우소식" }]} />
-    <div className="mx-auto max-w-6xl px-4 pt-3 pb-10">
+    <SubpageHeader title="교제와 소식" breadcrumbs={[{ label: "교제와 소식", href: "/news" }, { label: "교우소식" }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교제와 소식"
+        items={[
+          { label: "교회소식", href: "/news" },
+          { label: "교우소식", href: "/brothers" },
+          { label: "주보", href: "/jubo" },
+          { label: "다애사진", href: "/gallery" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
       <PageHeader title="교우소식" />
 
       {!posts || posts.length === 0 ? (
@@ -50,29 +45,28 @@ export default async function BrothersPage({
           등록된 소식이 없습니다.
         </p>
       ) : (
-        <div className="mt-4 space-y-3">
-          {posts.map((post) => (
-            <Link
-              key={post.id}
-              href={`/brothers/${post.id}`}
-              className="block rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <p className="text-sm font-semibold text-neutral-800 line-clamp-1">
-                {post.title}
-              </p>
-              {post.content && (
-                <p className="mt-1.5 text-xs leading-relaxed text-neutral-400 line-clamp-2">
-                  {getPreview(post.content)}
-                </p>
-              )}
-              <div className="mt-2 flex items-center gap-2 text-xs text-neutral-400">
-                <span>{new Date(post.post_date).toLocaleDateString("ko-KR")}</span>
-                <span>·</span>
-                <span>조회 {post.hit_count}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <table className="mt-4 w-full text-sm">
+          <thead>
+            <tr className="border-b border-neutral-200 text-neutral-500">
+              <th className="whitespace-nowrap py-3 pr-4 text-left font-medium">날짜</th>
+              <th className="py-3 text-left font-medium">제목</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posts.map((post) => (
+              <tr key={post.id} className="border-b border-neutral-100">
+                <td className="whitespace-nowrap py-2.5 pr-4 text-neutral-400">
+                  {new Date(post.post_date).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, "-").replace(".", "")}
+                </td>
+                <td className="py-2.5">
+                  <Link href={`/brothers/${post.id}`} className="font-semibold text-neutral-800 transition hover:text-navy">
+                    {post.title}
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       {/* 페이지네이션 */}
@@ -123,6 +117,7 @@ export default async function BrothersPage({
         );
       })()}
 
+    </div>
     </div>
     </>
   );

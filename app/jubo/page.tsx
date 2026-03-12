@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import Link from "next/link";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
@@ -12,7 +13,7 @@ export default async function JuboPage({
 }) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
-  const perPage = 36;
+  const perPage = 16;
 
   const { supabase } = await getSessionUser();
 
@@ -37,8 +38,18 @@ export default async function JuboPage({
 
   return (
     <>
-    <SubpageHeader title="예배" breadcrumbs={[{ label: "예배", href: "/worship" }, { label: "주보" }]} />
-    <div className="mx-auto max-w-6xl px-4 pt-3 pb-10">
+    <SubpageHeader title="교제와 소식" breadcrumbs={[{ label: "교제와 소식", href: "/news" }, { label: "주보" }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교제와 소식"
+        items={[
+          { label: "교회소식", href: "/news" },
+          { label: "교우소식", href: "/brothers" },
+          { label: "주보", href: "/jubo" },
+          { label: "다애사진", href: "/gallery" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
       <PageHeader title="주보" />
 
       {!posts || posts.length === 0 ? (
@@ -46,14 +57,14 @@ export default async function JuboPage({
           등록된 주보가 없습니다.
         </p>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {posts.map((post) => {
             const thumb = getThumb(post);
             return (
               <Link
                 key={post.id}
                 href={`/jubo/${post.id}`}
-                className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-shadow hover:shadow-md"
+                className="group relative overflow-hidden bg-white shadow-sm transition-shadow hover:shadow-md"
               >
                 {thumb ? (
                   <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
@@ -69,12 +80,9 @@ export default async function JuboPage({
                     <span className="text-3xl text-neutral-300">📋</span>
                   </div>
                 )}
-                <div className="p-2.5">
-                  <p className="truncate text-sm font-semibold text-neutral-800">
+                <div className="absolute inset-x-0 bottom-0 bg-black/70 px-2.5 py-2">
+                  <p className="truncate text-xs font-medium text-white">
                     {post.title}
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {new Date(post.post_date).toLocaleDateString("ko-KR")}
                   </p>
                 </div>
               </Link>
@@ -131,6 +139,7 @@ export default async function JuboPage({
         );
       })()}
 
+    </div>
     </div>
     </>
   );

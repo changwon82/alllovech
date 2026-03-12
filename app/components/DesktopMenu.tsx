@@ -29,7 +29,7 @@ const MENUS: MenuItem[] = [
   },
   {
     label: "예배와 말씀",
-    href: "/worship",
+    href: "/sermon",
     children: [
       { label: "예배영상", href: "/sermon", desc: "설교 영상 모아보기" },
       { label: "예배안내", href: "/worship", desc: "예배 시간과 장소 안내" },
@@ -54,14 +54,17 @@ const MENUS: MenuItem[] = [
   },
   {
     label: "봉사와 선교",
-    href: "/service",
+    href: "/service/prayer",
     children: [],
   },
   {
     label: "교제와 소식",
     href: "/fellowship",
     children: [
-      { label: "교제와 소식", href: "/fellowship", desc: "교제와 소식" },
+      { label: "교회소식", href: "/news" },
+      { label: "교우소식", href: "/brothers" },
+      { label: "주보", href: "/jubo" },
+      { label: "다애사진", href: "/gallery" },
     ],
   },
 ];

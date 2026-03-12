@@ -1,5 +1,6 @@
 import Image from "next/image";
 import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 
 export const metadata = { title: "에즈마이야 Ezemiah | 다애교회" };
 
@@ -11,12 +12,24 @@ export default function EzemaiahPage() {
       <SubpageHeader
         title="봉사와 선교"
         breadcrumbs={[
-          { label: "봉사와 선교", href: "/service" },
+          { label: "봉사와 선교", href: "/service/prayer" },
           { label: "에즈마이야", href: "/service/ezemiah" },
         ]}
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-10 pb-20 md:px-8">
+      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+        <SubpageSidebar
+          title="봉사와 선교"
+          items={[
+            { label: "중보기도", href: "/service/prayer", group: "봉사" },
+            { label: "다애다문화학교", href: "/service/multicultural", group: "봉사" },
+            { label: "에즈마이야", href: "/service/ezemiah", group: "봉사" },
+            { label: "숨바선교", href: "/mission/sumba", group: "선교" },
+            { label: "국내선교", href: "/mission/domestic", group: "선교" },
+            { label: "해외선교", href: "/mission/overseas", group: "선교" },
+          ]}
+        />
+        <div className="min-w-0 flex-1">
         {/* 제목 */}
         <h2 className="text-xl font-bold text-navy md:text-2xl">
           에즈마이야 Ezemiah
@@ -70,6 +83,7 @@ export default function EzemaiahPage() {
           />
         </div>
 
+      </div>
       </div>
     </>
   );

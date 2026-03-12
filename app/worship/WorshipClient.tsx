@@ -219,7 +219,7 @@ export default function WorshipClient({
                     >
                       {i === 0 ? (
                         <div className="self-center px-6 py-5 text-center">
-                          <p className="text-base font-bold text-neutral-700">{s.name}</p>
+                          <p className="text-sm font-bold text-neutral-700">{s.name}</p>
                           {s.sub && <p className="text-sm text-neutral-500">{s.sub}</p>}
                         </div>
                       ) : (
@@ -227,10 +227,10 @@ export default function WorshipClient({
                       )}
                       <div className={dividerClass}>
                         {block.times.map((t) => (
-                          <p key={t} className="text-base text-neutral-600">{t}</p>
+                          <p key={t} className="text-sm text-neutral-600">{t}</p>
                         ))}
                       </div>
-                      <div className={`${dividerClass} text-base text-neutral-600`}>
+                      <div className={`${dividerClass} text-sm text-neutral-600`}>
                         {block.location}
                       </div>
                     </div>
@@ -240,15 +240,15 @@ export default function WorshipClient({
                 /* 일반 행 */
                 <div className="grid grid-cols-[1fr_2fr_1fr] items-center">
                   <div className="px-6 py-5 text-center">
-                    <p className="text-base font-bold text-neutral-700">{s.name}</p>
+                    <p className="text-sm font-bold text-neutral-700">{s.name}</p>
                     {s.sub && <p className="text-sm text-neutral-500">{s.sub}</p>}
                   </div>
                   <div className={dividerClass}>
                     {s.times.map((t) => (
-                      <p key={t} className="text-base text-neutral-600">{t}</p>
+                      <p key={t} className="text-sm text-neutral-600">{t}</p>
                     ))}
                   </div>
-                  <div className={`${dividerClass} text-base text-neutral-600`}>
+                  <div className={`${dividerClass} text-sm text-neutral-600`}>
                     {s.location}
                   </div>
                 </div>

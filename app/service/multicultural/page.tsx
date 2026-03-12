@@ -1,5 +1,6 @@
 import Image from "next/image";
 import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 
 export const metadata = { title: "다애다문화학교 | 다애교회" };
 
@@ -11,12 +12,24 @@ export default function MulticulturalPage() {
       <SubpageHeader
         title="봉사와 선교"
         breadcrumbs={[
-          { label: "봉사와 선교", href: "/service" },
+          { label: "봉사와 선교", href: "/service/prayer" },
           { label: "다애다문화학교", href: "/service/multicultural" },
         ]}
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-10 pb-20 md:px-8">
+      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+        <SubpageSidebar
+          title="봉사와 선교"
+          items={[
+            { label: "중보기도", href: "/service/prayer", group: "봉사" },
+            { label: "다애다문화학교", href: "/service/multicultural", group: "봉사" },
+            { label: "에즈마이야", href: "/service/ezemiah", group: "봉사" },
+            { label: "숨바선교", href: "/mission/sumba", group: "선교" },
+            { label: "국내선교", href: "/mission/domestic", group: "선교" },
+            { label: "해외선교", href: "/mission/overseas", group: "선교" },
+          ]}
+        />
+        <div className="min-w-0 flex-1">
         {/* 제목 */}
         <h2 className="text-xl font-bold text-navy md:text-2xl">
           다애다문화학교
@@ -162,6 +175,7 @@ export default function MulticulturalPage() {
             이들이 조국으로 돌아와 신앙을 개혁하고 나라를 재건하였던 것처럼, 다애다문화학교를 통하여 다니엘과 에스더처럼 자란 하나님의 사람들이 에스라와 느헤미야처럼 자신들의 조국을 일으키는 운동이 일어나기를 꿈꿉니다.
           </p>
         </div>
+      </div>
       </div>
     </>
   );

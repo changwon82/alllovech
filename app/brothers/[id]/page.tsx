@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export default async function BrothersDetailPage({
   params,
@@ -19,21 +22,37 @@ export default async function BrothersDetailPage({
   if (!post) notFound();
 
   return (
-    <div className="mx-auto max-w-2xl pb-10">
-      <div className="px-4 pt-4">
-        <Link
-          href="/brothers"
-          className="mb-3 inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
-        >
-          ← 목록으로
-        </Link>
-
-        <h1 className="text-xl font-bold text-neutral-800">{post.title}</h1>
-
-        <div className="mt-2 flex items-center gap-3 text-sm text-neutral-500">
-          <span>{new Date(post.post_date).toLocaleDateString("ko-KR")}</span>
-          <span>·</span>
-          <span className="text-xs text-neutral-400">조회 {post.hit_count}</span>
+    <>
+    <SubpageHeader
+      title="교제와 소식"
+      breadcrumbs={[
+        { label: "교제와 소식", href: "/news" },
+        { label: "교우소식", href: "/brothers" },
+      ]}
+    />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교제와 소식"
+        items={[
+          { label: "교회소식", href: "/news" },
+          { label: "교우소식", href: "/brothers" },
+          { label: "주보", href: "/jubo" },
+          { label: "다애사진", href: "/gallery" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
+      <PageHeader title="교우소식" />
+      {/* 글 헤더 */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between border-y border-neutral-200 bg-neutral-50 px-5 py-3">
+          <h1 className="text-[15px] font-bold text-neutral-800">{post.title}</h1>
+          <span className="shrink-0 pl-4 text-xs text-neutral-400">
+            {new Date(post.post_date).toLocaleDateString("ko-KR")}
+          </span>
+        </div>
+        <div className="flex items-center justify-between border-b border-neutral-200 bg-white px-5 py-2.5 text-xs text-neutral-400">
+          <span>{post.author ?? "다애교회"}</span>
+          <span>조회수 &nbsp;{post.hit_count}</span>
         </div>
       </div>
 
@@ -63,5 +82,7 @@ export default async function BrothersDetailPage({
       `}</style>
 
     </div>
+    </div>
+    </>
   );
 }
