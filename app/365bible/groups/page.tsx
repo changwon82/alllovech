@@ -214,7 +214,6 @@ export default async function GroupsPage({
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
         title="함께읽기"
-        action={<UserMenu name={userName} canViewGroups userId={user.id} unreadCount={unreadCount} />}
       />
 
       {bibleManager && dashboardData && (

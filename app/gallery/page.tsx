@@ -1,6 +1,6 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
-import BottomNav from "@/app/components/BottomNav";
+import SubpageHeader from "@/app/components/SubpageHeader";
 import Link from "next/link";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
@@ -17,7 +17,7 @@ export default async function GalleryPage({
   const page = parseInt(params.page || "1", 10);
   const perPage = 12;
 
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   // 게시글 + 첫 번째 이미지 조회
   let query = supabase
@@ -34,20 +34,10 @@ export default async function GalleryPage({
   const { data: posts, count } = await query;
   const totalPages = Math.ceil((count || 0) / perPage);
 
-  // 관리자 여부
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
-
   return (
-    <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20">
+    <>
+    <SubpageHeader title="다코방" breadcrumbs={[{ label: "다코방", href: "/dacobang" }, { label: "다애사진" }]} />
+    <div className="mx-auto max-w-2xl px-4 pt-3 pb-10">
       <PageHeader title="사진갤러리" />
 
       {/* 카테고리 필터 */}
@@ -186,7 +176,7 @@ export default async function GalleryPage({
         );
       })()}
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
+    </>
   );
 }

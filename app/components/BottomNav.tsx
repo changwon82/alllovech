@@ -10,7 +10,7 @@ type NavItem = { href: string; label: string; iconActive: string; iconInactive: 
 
 const BASE_ITEMS: NavItem[] = [
   { href: "/365bible", label: "성경읽기", iconActive: "📖", iconInactive: "📖" },
-  { href: "/my", label: "나의기록", iconActive: "📊", iconInactive: "📊" },
+  { href: "/365bible/my", label: "나의기록", iconActive: "📊", iconInactive: "📊" },
 ];
 
 const SERMON_ITEM: NavItem = { href: "/sermon", label: "설교", iconActive: "🎙️", iconInactive: "🎙️" };
@@ -41,9 +41,7 @@ export default function BottomNav({
   const items = [
     ...BASE_ITEMS,
     GROUPS_ITEM,
-    SERMON_ITEM,
     CONTACT_ITEM,
-    ...(isAdmin ? [ADMIN_ITEM] : []),
   ];
 
   return (

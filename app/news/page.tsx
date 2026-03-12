@@ -1,6 +1,6 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
-import BottomNav from "@/app/components/BottomNav";
+import SubpageHeader from "@/app/components/SubpageHeader";
 import Link from "next/link";
 
 export default async function NewsPage({
@@ -12,7 +12,7 @@ export default async function NewsPage({
   const page = parseInt(params.page || "1", 10);
   const perPage = 36;
 
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   const { data: posts, count } = await supabase
     .from("news_posts")
@@ -21,18 +21,6 @@ export default async function NewsPage({
     .range((page - 1) * perPage, page * perPage - 1);
 
   const totalPages = Math.ceil((count || 0) / perPage);
-
-  // 관리자 여부
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
 
   // HTML 태그 제거하여 미리보기 텍스트 생성
   function getPreview(content: string | null): string {
@@ -53,7 +41,9 @@ export default async function NewsPage({
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-4 pt-3 pb-20">
+    <>
+    <SubpageHeader title="다코방" breadcrumbs={[{ label: "다코방", href: "/dacobang" }, { label: "교회소식" }]} />
+    <div className="mx-auto max-w-6xl px-4 pt-3 pb-10">
       <PageHeader title="교회소식" />
 
       {!posts || posts.length === 0 ? (
@@ -134,7 +124,7 @@ export default async function NewsPage({
         );
       })()}
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
+    </>
   );
 }

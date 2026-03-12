@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
-import BottomNav from "@/app/components/BottomNav";
 
 export default async function BrothersDetailPage({
   params,
@@ -9,7 +8,7 @@ export default async function BrothersDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   const { data: post } = await supabase
     .from("brothers_posts")
@@ -19,19 +18,8 @@ export default async function BrothersDetailPage({
 
   if (!post) notFound();
 
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
-
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-20">
+    <div className="mx-auto max-w-2xl pb-10">
       <div className="px-4 pt-4">
         <Link
           href="/brothers"
@@ -74,7 +62,6 @@ export default async function BrothersDetailPage({
         }
       `}</style>
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
   );
 }

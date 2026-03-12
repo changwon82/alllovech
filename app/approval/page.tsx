@@ -1,6 +1,5 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
-import BottomNav from "@/app/components/BottomNav";
 import ApprovalTable from "./ApprovalTable";
 import Link from "next/link";
 
@@ -17,7 +16,7 @@ export default async function ApprovalListPage({
   const dateTo = params.to || "";
   const perPage = 20;
 
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   // 카테고리별 건수 조회 (1000행 제한 우회)
   let catCounts: { doc_category: string | null }[] = [];
@@ -106,18 +105,6 @@ export default async function ApprovalListPage({
     nameMap[m.mb_id] = m.name;
   }
 
-  // 관리자 여부
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
-
   // 검색 URL 빌더
   function buildHref(p: number, q?: string, cat?: string, from?: string, to?: string) {
     const sp = new URLSearchParams();
@@ -176,7 +163,7 @@ export default async function ApprovalListPage({
   ];
 
   return (
-    <div className="mx-auto min-h-screen max-w-7xl px-4 pt-3 pb-20">
+    <div className="mx-auto max-w-7xl px-4 pt-3 pb-10">
       <PageHeader title="재정결재" />
 
       {/* 일자 검색 */}
@@ -386,7 +373,6 @@ export default async function ApprovalListPage({
           );
         })()}
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
   );
 }

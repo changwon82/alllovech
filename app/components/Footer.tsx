@@ -5,8 +5,8 @@ export default async function Footer() {
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "/";
 
-  // admin, spend-report, login, signup 등에서는 숨김
-  if (pathname.startsWith("/admin") || pathname.startsWith("/spend-report") || pathname === "/login" || pathname === "/signup") {
+  // admin, spend-report 등에서는 숨김
+  if (pathname.startsWith("/admin") || pathname.startsWith("/spend-report")) {
     return null;
   }
 

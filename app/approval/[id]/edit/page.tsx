@@ -1,7 +1,6 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
-import BottomNav from "@/app/components/BottomNav";
 import ApprovalForm from "../../new/ApprovalForm";
 
 export default async function EditApprovalPage({
@@ -55,7 +54,7 @@ export default async function EditApprovalPage({
     : null;
 
   return (
-    <div className="mx-auto min-h-screen max-w-4xl px-4 pt-3 pb-20">
+    <div className="mx-auto max-w-4xl px-4 pt-3 pb-10">
       <PageHeader title="문서수정" />
 
       <ApprovalForm
@@ -88,7 +87,6 @@ export default async function EditApprovalPage({
         }}
       />
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user.id} />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
-import BottomNav from "@/app/components/BottomNav";
 const R2_NEWS = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/news";
 
 // 이미지 확장자 판별
@@ -15,7 +14,7 @@ export default async function NewsDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   const [{ data: post }, { data: files }] = await Promise.all([
     supabase
@@ -35,20 +34,8 @@ export default async function NewsDetailPage({
   // 첨부파일 중 이미지가 아닌 파일만 (다운로드용)
   const attachOtherFiles = (files || []).filter((f) => !isImageFile(f.file_name));
 
-  // 관리자 여부
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
-
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-20">
+    <div className="mx-auto max-w-2xl pb-10">
       <div className="px-4 pt-4">
         <Link
           href="/news"
@@ -121,7 +108,6 @@ export default async function NewsDetailPage({
         </div>
       )}
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
-import BottomNav from "@/app/components/BottomNav";
 import ApprovalContent from "./ApprovalContent";
 import ApprovalActions from "./ApprovalActions";
 import DeleteButton from "./DeleteButton";
@@ -104,7 +103,7 @@ export default async function ApprovalDetailPage({
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-20">
+    <div className="mx-auto max-w-2xl pb-10">
       <div className="px-4 pt-4">
         {/* 목록으로 */}
         <Link
@@ -402,7 +401,6 @@ export default async function ApprovalDetailPage({
         </div>
       )}
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
   );
 }

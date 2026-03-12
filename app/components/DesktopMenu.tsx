@@ -31,13 +31,8 @@ const MENUS: MenuItem[] = [
     label: "예배와 말씀",
     href: "/worship",
     children: [
+      { label: "예배영상", href: "/sermon", desc: "설교 영상 모아보기" },
       { label: "예배안내", href: "/worship", desc: "예배 시간과 장소 안내" },
-      { label: "주일예배", href: "/sermon?cat=주일예배", desc: "주일예배 설교 영상" },
-      { label: "수요오전예배", href: "/sermon?cat=수요오전예배", desc: "수요 오전 말씀" },
-      { label: "금요기도회", href: "/sermon?cat=금요기도회", desc: "금요 기도회 말씀" },
-      { label: "새벽기도회", href: "/sermon?cat=새벽기도회", desc: "새벽 기도회 말씀" },
-      { label: "설교나눔 자료", href: "/sermon/workbook", desc: "설교 나눔 교재" },
-      { label: "주보", href: "/jubo", desc: "매주 주보를 확인하세요" },
     ],
   },
   {
@@ -65,10 +60,10 @@ const MENUS: MenuItem[] = [
     ],
   },
   {
-    label: "선교",
-    href: "/mission",
+    label: "교제와 소식",
+    href: "/fellowship",
     children: [
-      { label: "선교안내", href: "/mission", desc: "국내외 선교 활동" },
+      { label: "교제와 소식", href: "/fellowship", desc: "교제와 소식" },
     ],
   },
 ];
@@ -88,12 +83,12 @@ export default function DesktopMenu() {
   }, []);
 
   return (
-    <div ref={menuRef} className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
+    <div ref={menuRef} className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex lg:gap-8">
       {MENUS.map((menu, i) => (
         <div key={menu.label} className="relative">
           <button
             onClick={() => setOpenIdx(openIdx === i ? null : i)}
-            className={`flex items-center gap-1 text-[15px] font-bold transition ${
+            className={`flex shrink-0 whitespace-nowrap items-center gap-1 text-[14px] font-bold transition ${
               openIdx === i ? "text-navy" : "text-neutral-700 hover:text-navy"
             }`}
           >
@@ -122,20 +117,125 @@ export default function DesktopMenu() {
             </div>
 
             {/* 하위 메뉴 */}
-            <div className="grid grid-cols-2 gap-1 p-4">
-              {MENUS[openIdx].children.map((child) => (
-                <Link
-                  key={child.href}
-                  href={child.href}
-                  onClick={() => setOpenIdx(null)}
-                  className="group rounded-xl px-5 py-4 transition hover:bg-neutral-50"
-                >
-                  <span className="text-[15px] font-semibold text-neutral-800 group-hover:text-navy">
-                    {child.label}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            {MENUS[openIdx].label === "예배와 말씀" ? (
+              <div className="p-4">
+                {/* 1행: 예배영상 */}
+                <div className="grid grid-cols-2 gap-4 px-4 py-3">
+                  <div className="flex items-center gap-4">
+                    <Link
+                      href="/sermon"
+                      onClick={() => setOpenIdx(null)}
+                      className="group flex items-center gap-3 rounded-xl transition hover:opacity-80"
+                    >
+                      <svg className="h-5 w-5 shrink-0 text-neutral-400 group-hover:text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                      </svg>
+                      <span className="text-[15px] font-semibold text-neutral-800 group-hover:text-navy">예배영상</span>
+                    </Link>
+                    <a
+                      href="https://www.youtube.com/@alllovechurch"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-600 transition hover:bg-red-100"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                      </svg>
+                      유튜브 채널
+                    </a>
+                  </div>
+                  <Link
+                    href="/365bible"
+                    onClick={() => setOpenIdx(null)}
+                    className="group flex items-center gap-3 rounded-xl transition hover:opacity-80"
+                  >
+                    <svg className="h-5 w-5 shrink-0 text-neutral-400 group-hover:text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
+                    <span className="text-[15px] font-semibold text-neutral-800 group-hover:text-navy">365 성경읽기</span>
+                  </Link>
+                </div>
+
+                <div className="my-2 h-px bg-neutral-100" />
+
+                {/* 2행: 예배안내 = 2열 (예배시간 | 교육부서) */}
+                <div className="px-4 pt-2">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-[14px] font-semibold text-neutral-800">예배안내</span>
+                    <Link
+                      href="/worship"
+                      onClick={() => setOpenIdx(null)}
+                      className="text-[12px] text-neutral-400 transition hover:text-navy"
+                    >
+                      자세히 보기
+                      <svg className="inline h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                      </svg>
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-[1fr_1px_1fr] gap-x-5">
+                    {/* 왼쪽: 주일예배 등 */}
+                    <div className="space-y-1.5 text-[12.5px]">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">주일예배</span>
+                        <span className="text-neutral-400">오전 9시 · 11시 · 오후 2시</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">수요오전예배</span>
+                        <span className="text-neutral-400">오전 10시 30분</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">금요기도회</span>
+                        <span className="text-neutral-400">저녁 8시 30분</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">새벽기도회</span>
+                        <span className="text-right text-neutral-400">화–토 오전 6시<br />매월 첫 주 토 오전 7시</span>
+                      </div>
+                    </div>
+
+                    {/* 구분선 */}
+                    <div className="bg-neutral-100" />
+
+                    {/* 오른쪽: 교육부서 */}
+                    <div className="space-y-1.5 text-[12.5px]">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">유아유치부</span>
+                        <span className="text-neutral-400">주일 오전 11시</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">유초등부</span>
+                        <span className="text-neutral-400">주일 오전 11시</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">청소년부</span>
+                        <span className="text-neutral-400">주일 오전 11시</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-neutral-600">청년부</span>
+                        <span className="text-neutral-400">주일 오후 1시</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-1 p-4">
+                {MENUS[openIdx].children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    onClick={() => setOpenIdx(null)}
+                    className="group rounded-xl px-5 py-4 transition hover:bg-neutral-50"
+                  >
+                    <span className="text-[15px] font-semibold text-neutral-800 group-hover:text-navy">
+                      {child.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

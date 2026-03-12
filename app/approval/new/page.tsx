@@ -1,21 +1,11 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
-import BottomNav from "@/app/components/BottomNav";
 import ApprovalForm from "./ApprovalForm";
 
 export default async function NewApprovalPage() {
   const { supabase, user } = await getSessionUser();
   if (!user) redirect("/login?next=/approval/new");
-
-  // 관리자 여부
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "ADMIN")
-    .maybeSingle();
-  const isAdmin = !!roles;
 
   // 현재 유저의 cafe24 mb_id & 이름 조회
   const { data: profile } = await supabase
@@ -39,7 +29,7 @@ export default async function NewApprovalPage() {
     .order("account");
 
   return (
-    <div className="mx-auto min-h-screen max-w-4xl px-4 pt-3 pb-20">
+    <div className="mx-auto max-w-4xl px-4 pt-3 pb-10">
       <PageHeader title="문서작성" />
 
       <ApprovalForm
@@ -49,7 +39,6 @@ export default async function NewApprovalPage() {
         budgetYear={year}
       />
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user.id} />
     </div>
   );
 }

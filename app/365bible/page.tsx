@@ -5,9 +5,7 @@ import { getUserRoles, isAdminRole, isGroupLeader } from "@/lib/admin";
 import { getUnreadCount } from "@/lib/notifications";
 import ReadingPlanModal from "./ReadingPlanModal";
 import BiblePageContent from "./BiblePageContent";
-import UserMenu from "@/app/components/UserMenu";
 import BottomNav from "@/app/components/BottomNav";
-import LoginButton from "./LoginButton";
 import { BOOK_FULL_TO_CODE } from "./plan";
 
 const siteUrl =
@@ -550,11 +548,6 @@ export default async function BiblePage({
             <ReadingPlanModal readings={allReadings} currentDay={day} versionCode={versionCode} compareMode={compareMode} compareWithCode={compareVersion?.code} />
           )}
         </div>
-        {user ? (
-          <UserMenu name={userProfile?.name ?? "이름 없음"} canViewGroups={canViewGroups} userId={user.id} unreadCount={unreadCount} />
-        ) : (
-          <LoginButton />
-        )}
       </div>
       <div className="mt-2 h-1 w-12 rounded-full bg-accent" />
 

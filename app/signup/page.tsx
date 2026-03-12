@@ -20,7 +20,7 @@ export default async function SignUpPage({
   const inviteCode = params.invite;
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex justify-center px-4 py-16">
       <div className="w-full max-w-sm">
         <h1 className="mb-1 text-center text-[32px] font-bold text-navy">
           회원가입

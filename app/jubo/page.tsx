@@ -1,6 +1,6 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
-import BottomNav from "@/app/components/BottomNav";
+import SubpageHeader from "@/app/components/SubpageHeader";
 import Link from "next/link";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
@@ -14,7 +14,7 @@ export default async function JuboPage({
   const page = parseInt(params.page || "1", 10);
   const perPage = 36;
 
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   const { data: posts, count } = await supabase
     .from("jubo_posts")
@@ -23,17 +23,6 @@ export default async function JuboPage({
     .range((page - 1) * perPage, page * perPage - 1);
 
   const totalPages = Math.ceil((count || 0) / perPage);
-
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
 
   function getThumb(post: any): string | undefined {
     const images = post.jubo_images as { file_name: string }[];
@@ -47,7 +36,9 @@ export default async function JuboPage({
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-4 pt-3 pb-20">
+    <>
+    <SubpageHeader title="예배" breadcrumbs={[{ label: "예배", href: "/worship" }, { label: "주보" }]} />
+    <div className="mx-auto max-w-6xl px-4 pt-3 pb-10">
       <PageHeader title="주보" />
 
       {!posts || posts.length === 0 ? (
@@ -140,7 +131,7 @@ export default async function JuboPage({
         );
       })()}
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
+    </>
   );
 }

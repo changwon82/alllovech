@@ -38,7 +38,6 @@ export default async function ManagerDashboardPage() {
     <div className="mx-auto min-h-screen max-w-2xl px-4 pt-3 pb-20 md:pt-4 md:pb-24">
       <PageHeader
         title="전체 그룹 현황"
-        action={<UserMenu name={userName} canViewGroups userId={user.id} unreadCount={unreadCount} />}
       />
 
       <ManagerDashboard initialData={overview} />

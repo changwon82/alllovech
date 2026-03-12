@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
-import BottomNav from "@/app/components/BottomNav";
 import GalleryImageList from "./GalleryImageList";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
@@ -12,7 +11,7 @@ export default async function GalleryDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   const [{ data: post }, { data: images }] = await Promise.all([
     supabase
@@ -50,20 +49,8 @@ export default async function GalleryDetailPage({
   // 합치기 (첨부파일 우선, 중복 제거)
   const allImages = [...new Set([...attachImages, ...contentImages])];
 
-  // 관리자 여부
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
-
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-20">
+    <div className="mx-auto max-w-2xl pb-10">
       <div className="px-4 pt-4">
         <Link
           href="/gallery"
@@ -120,7 +107,6 @@ export default async function GalleryDetailPage({
         }
       `}</style>
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
-import BottomNav from "@/app/components/BottomNav";
 import JuboImageList from "./JuboImageList";
 
 const R2_JUBO = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
@@ -12,7 +11,7 @@ export default async function JuboDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, user } = await getSessionUser();
+  const { supabase } = await getSessionUser();
 
   const [{ data: post }, { data: images }] = await Promise.all([
     supabase
@@ -47,19 +46,8 @@ export default async function JuboDetailPage({
   const contentUrls = contentImages.map((name) => `${R2_JUBO}/${name}`);
   const allImageUrls = [...new Set([...attachUrls, ...contentUrls])];
 
-  let isAdmin = false;
-  if (user) {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "ADMIN")
-      .maybeSingle();
-    isAdmin = !!roles;
-  }
-
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-20">
+    <div className="mx-auto max-w-2xl pb-10">
       <div className="px-4 pt-4">
         <Link
           href="/jubo"
@@ -85,7 +73,6 @@ export default async function JuboDetailPage({
         />
       </div>
 
-      <BottomNav isAdmin={isAdmin} canViewGroups userId={user?.id} />
     </div>
   );
 }
