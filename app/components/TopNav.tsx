@@ -19,13 +19,15 @@ export default async function TopNav() {
   const { data: { user } } = await supabase.auth.getUser();
 
   let profileName: string | null = null;
+  let avatarUrl: string | null = null;
   let unreadCount = 0;
   if (user) {
     const [profileResult, count] = await Promise.all([
-      supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("name, avatar_url").eq("id", user.id).maybeSingle(),
       getUnreadCount(supabase, user.id),
     ]);
     profileName = profileResult.data?.name ?? null;
+    avatarUrl = profileResult.data?.avatar_url ?? null;
     unreadCount = count;
   }
 
@@ -44,7 +46,7 @@ export default async function TopNav() {
         {/* 우측: 로그인/유저 */}
         <div className="ml-auto flex items-center gap-4">
           {user ? (
-            <UserMenu name={profileName ?? "마이페이지"} userId={user.id} unreadCount={unreadCount} />
+            <UserMenu name={profileName ?? "마이페이지"} avatarUrl={avatarUrl} userId={user.id} unreadCount={unreadCount} />
           ) : (
             <>
               <Link href={`/login?next=${encodeURIComponent(pathname)}`} className="flex items-center gap-1 text-[13px] font-medium text-neutral-500 transition hover:text-navy">
@@ -97,7 +99,7 @@ function MobileMenu() {
             <MobileLink href="/jubo">주보</MobileLink>
             <MobileLink href="/gallery">다애사진</MobileLink>
             <MobileLink href="/news">교회소식</MobileLink>
-            <MobileLink href="/my">나의기록</MobileLink>
+            <MobileLink href="/365bible/my">나의기록</MobileLink>
             <MobileLink href="/notifications">알림</MobileLink>
           </div>
         </div>
