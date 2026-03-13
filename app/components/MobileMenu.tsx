@@ -10,6 +10,12 @@ export default function MobileMenu() {
     setOpenIdx(openIdx === idx ? null : idx);
   }
 
+  function closeMenu() {
+    const el = document.getElementById("mobile-menu-toggle") as HTMLInputElement | null;
+    if (el) el.checked = false;
+    setOpenIdx(null);
+  }
+
   return (
     <div className="md:hidden">
       <label htmlFor="mobile-menu-toggle" className="cursor-pointer text-neutral-400 transition hover:text-navy">
@@ -31,57 +37,57 @@ export default function MobileMenu() {
           </div>
 
           <div className="px-2 py-3">
-            <MobileLink href="/">홈</MobileLink>
+            <MobileLink href="/" onClick={closeMenu}>홈</MobileLink>
 
             <MobileSection title="교회소개" index={0} openIdx={openIdx} toggle={toggle}>
-              <MobileSubLink href="/about">인사말씀</MobileSubLink>
-              <MobileSubLink href="/about/founder">설립목사</MobileSubLink>
-              <MobileSubLink href="/about/history">교회연혁</MobileSubLink>
-              <MobileSubLink href="/about/staff">섬기는 사람들</MobileSubLink>
-              <MobileSubLink href="/about/location">오시는 길</MobileSubLink>
+              <MobileSubLink href="/about" onClick={closeMenu}>인사말씀</MobileSubLink>
+              <MobileSubLink href="/about/founder" onClick={closeMenu}>설립목사</MobileSubLink>
+              <MobileSubLink href="/about/history" onClick={closeMenu}>교회연혁</MobileSubLink>
+              <MobileSubLink href="/about/staff" onClick={closeMenu}>섬기는 사람들</MobileSubLink>
+              <MobileSubLink href="/about/location" onClick={closeMenu}>오시는 길</MobileSubLink>
             </MobileSection>
 
             <MobileSection title="예배와 말씀" index={1} openIdx={openIdx} toggle={toggle}>
-              <MobileSubLink href="/sermon">예배영상</MobileSubLink>
-              <MobileSubLink href="/worship">예배안내</MobileSubLink>
-              <MobileSubLink href="/365bible">365 성경읽기</MobileSubLink>
+              <MobileSubLink href="/sermon" onClick={closeMenu}>예배영상</MobileSubLink>
+              <MobileSubLink href="/worship" onClick={closeMenu}>예배안내</MobileSubLink>
+              <MobileSubLink href="/365bible" onClick={closeMenu}>365 성경읽기</MobileSubLink>
             </MobileSection>
 
             <MobileSection title="양육" index={2} openIdx={openIdx} toggle={toggle}>
-              <MobileSubLink href="/365bible">365 성경읽기</MobileSubLink>
-              <MobileSubLink href="/365bible/groups">함께읽기 그룹</MobileSubLink>
+              <MobileSubLink href="/365bible" onClick={closeMenu}>365 성경읽기</MobileSubLink>
+              <MobileSubLink href="/365bible/groups" onClick={closeMenu}>함께읽기 그룹</MobileSubLink>
             </MobileSection>
 
             <MobileSection title="다코방" index={3} openIdx={openIdx} toggle={toggle}>
-              <MobileSubLink href="/brothers">교우소식</MobileSubLink>
-              <MobileSubLink href="/gallery">다애사진</MobileSubLink>
-              <MobileSubLink href="/news">교회소식</MobileSubLink>
+              <MobileSubLink href="/brothers" onClick={closeMenu}>교우소식</MobileSubLink>
+              <MobileSubLink href="/gallery" onClick={closeMenu}>다애사진</MobileSubLink>
+              <MobileSubLink href="/news" onClick={closeMenu}>교회소식</MobileSubLink>
             </MobileSection>
 
             <MobileSection title="봉사와 선교" index={4} openIdx={openIdx} toggle={toggle}>
               <div className="mb-1 px-3 pt-1 text-[11px] font-semibold uppercase tracking-wider text-white/30">봉사</div>
-              <MobileSubLink href="/service/prayer">중보기도</MobileSubLink>
-              <MobileSubLink href="/service/multicultural">다애다문화학교</MobileSubLink>
-              <MobileSubLink href="/service/ezemiah">에즈마이야</MobileSubLink>
+              <MobileSubLink href="/service/prayer" onClick={closeMenu}>중보기도</MobileSubLink>
+              <MobileSubLink href="/service/multicultural" onClick={closeMenu}>다애다문화학교</MobileSubLink>
+              <MobileSubLink href="/service/ezemiah" onClick={closeMenu}>에즈마이야</MobileSubLink>
               <div className="mb-1 mt-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-white/30">선교</div>
-              <MobileSubLink href="/mission/sumba">숨바선교</MobileSubLink>
-              <MobileSubLink href="/mission/domestic">국내선교</MobileSubLink>
-              <MobileSubLink href="/mission/overseas">해외선교</MobileSubLink>
+              <MobileSubLink href="/mission/sumba" onClick={closeMenu}>숨바선교</MobileSubLink>
+              <MobileSubLink href="/mission/domestic" onClick={closeMenu}>국내선교</MobileSubLink>
+              <MobileSubLink href="/mission/overseas" onClick={closeMenu}>해외선교</MobileSubLink>
             </MobileSection>
 
             <MobileSection title="교제와 소식" index={5} openIdx={openIdx} toggle={toggle}>
-              <MobileSubLink href="/news">교회소식</MobileSubLink>
-              <MobileSubLink href="/brothers">교우소식</MobileSubLink>
-              <MobileSubLink href="/jubo">주보</MobileSubLink>
-              <MobileSubLink href="/gallery">다애사진</MobileSubLink>
+              <MobileSubLink href="/news" onClick={closeMenu}>교회소식</MobileSubLink>
+              <MobileSubLink href="/brothers" onClick={closeMenu}>교우소식</MobileSubLink>
+              <MobileSubLink href="/jubo" onClick={closeMenu}>주보</MobileSubLink>
+              <MobileSubLink href="/gallery" onClick={closeMenu}>다애사진</MobileSubLink>
             </MobileSection>
 
             <div className="my-2 mx-3 h-px bg-white/10" />
 
             <MobileSection title="교회재정" index={6} openIdx={openIdx} toggle={toggle}>
-              <MobileSubLink href="/approval">재정청구</MobileSubLink>
-              <MobileSubLink href="/approval/notice">재정공지</MobileSubLink>
-              <MobileSubLink href="/approval/donation">기부금영수증</MobileSubLink>
+              <MobileSubLink href="/approval" onClick={closeMenu}>재정청구</MobileSubLink>
+              <MobileSubLink href="/approval/notice" onClick={closeMenu}>재정공지</MobileSubLink>
+              <MobileSubLink href="/approval/donation" onClick={closeMenu}>기부금영수증</MobileSubLink>
             </MobileSection>
           </div>
         </div>
@@ -124,17 +130,17 @@ function MobileSection({
   );
 }
 
-function MobileLink({ href, children }: { href: string; children: React.ReactNode }) {
+function MobileLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) {
   return (
-    <Link href={href} className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-white/80 transition hover:bg-white/5 hover:text-white">
+    <Link href={href} onClick={onClick} className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-white/80 transition hover:bg-white/5 hover:text-white">
       {children}
     </Link>
   );
 }
 
-function MobileSubLink({ href, children }: { href: string; children: React.ReactNode }) {
+function MobileSubLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) {
   return (
-    <Link href={href} className="block rounded-lg px-3 py-2 text-[13px] text-white/60 transition hover:bg-white/5 hover:text-white">
+    <Link href={href} onClick={onClick} className="block rounded-lg px-3 py-2 text-[13px] text-white/60 transition hover:bg-white/5 hover:text-white">
       {children}
     </Link>
   );
