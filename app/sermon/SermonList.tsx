@@ -92,7 +92,7 @@ export default function SermonList({
 
             {/* 정보 */}
             <div className="mt-2.5">
-              <p className="line-clamp-2 text-base font-semibold text-neutral-800 group-hover:text-navy">
+              <p className="line-clamp-1 text-base font-semibold text-neutral-800 group-hover:text-navy">
                 {sermon.title}
               </p>
               {sermon.scripture && (
