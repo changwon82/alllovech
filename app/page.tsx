@@ -339,7 +339,6 @@ export default async function Home() {
                   </a>
                 </div>
               </div>
-              <hr className="my-4 border-neutral-200" />
               <a href="https://mas3.ohjic.com/member/intro/alc" target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-between rounded-2xl bg-[#4a7fb5] p-5 text-white transition hover:brightness-110">
                 <div>
@@ -359,8 +358,8 @@ export default async function Home() {
               </Link>
             </div>
 
-            {/* 찾아오시는 길 — 3/5 너비, 왼쪽 높이에 맞춤 */}
-            <div className="flex flex-col md:col-span-3">
+            {/* 찾아오시는 길 — 3/5 너비, 왼쪽 구분선 포함 */}
+            <div className="flex flex-col border-t border-neutral-200 pt-8 md:col-span-3 md:border-t-0 md:border-l md:pt-0 md:pl-8">
               <Link href="/about/location" className="text-[18px] font-bold text-neutral-800 hover:text-navy transition">오시는 길</Link>
               <div className="mt-4 h-[200px] overflow-hidden rounded-2xl md:h-auto md:min-h-[280px] md:flex-1">
                 <ChurchMap />
