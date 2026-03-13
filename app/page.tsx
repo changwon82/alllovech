@@ -334,7 +334,7 @@ export default async function Home() {
                   <a href="https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/site/iphone_mobile.png" target="_blank" rel="noopener noreferrer" className="flex flex-1 flex-col items-center gap-1 py-3.5 text-white/60 transition hover:bg-white/5 hover:text-white">
                     <span>📱</span><span>아이폰 문제</span>
                   </a>
-                  <a href="https://mas3.ohjic.com/member/intro/alc" target="_blank" rel="noopener noreferrer" className="flex flex-1 flex-col items-center gap-1 py-3.5 text-white/60 transition hover:bg-white/5 hover:text-white">
+                  <a href="/approval/donation" className="flex flex-1 flex-col items-center gap-1 py-3.5 text-white/60 transition hover:bg-white/5 hover:text-white">
                     <span>🧾</span><span>기부금영수증</span>
                   </a>
                 </div>
