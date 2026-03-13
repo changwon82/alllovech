@@ -21,26 +21,19 @@ export default async function ApprovalListPage({
 
   const { supabase, user } = await getSessionUser();
 
-  // 카테고리별 건수 조회 (1000행 제한 우회)
-  let catCounts: { doc_category: string | null }[] = [];
-  let catFrom = 0;
-  while (true) {
-    const { data } = await supabase
-      .from("approval_posts")
-      .select("doc_category")
-      .range(catFrom, catFrom + 999);
-    catCounts = catCounts.concat(data || []);
-    if (!data || data.length < 1000) break;
-    catFrom += 1000;
-  }
-  const catCountMap: Record<string, number> = {};
-  let totalCount = 0;
-  for (const r of catCounts || []) {
-    totalCount++;
-    const cat = r.doc_category || "기타품의";
-    catCountMap[cat] = (catCountMap[cat] || 0) + 1;
-  }
+  // 카테고리별 건수 조회 (병렬 count 쿼리)
   const categories = ["일반재정청구", "건축재정청구", "예산전용품의", "사전품의", "기타품의"];
+  const [totalResult, ...catResults] = await Promise.all([
+    supabase.from("approval_posts").select("id", { count: "exact", head: true }),
+    ...categories.map((cat) =>
+      cat === "기타품의"
+        ? supabase.from("approval_posts").select("id", { count: "exact", head: true }).or("doc_category.is.null,doc_category.eq.")
+        : supabase.from("approval_posts").select("id", { count: "exact", head: true }).eq("doc_category", cat),
+    ),
+  ]);
+  const totalCount = totalResult.count ?? 0;
+  const catCountMap: Record<string, number> = {};
+  categories.forEach((cat, i) => { catCountMap[cat] = catResults[i].count ?? 0; });
 
   // 쿼리 빌드
   let query = supabase

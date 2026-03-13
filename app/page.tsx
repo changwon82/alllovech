@@ -1,54 +1,67 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
 import HeroSlider from "@/app/components/HeroSlider";
 import ChurchMap from "@/app/components/ChurchMap";
 
 const R2_GALLERY = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
 const R2_JUBO = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
 
+const getHomeData = unstable_cache(
+  async () => {
+    const supabase = await createClient();
+    const [sermonsResult, newsResult, brothersResult, juboResult, galleryResult, heroResult] = await Promise.all([
+      supabase
+        .from("sermons")
+        .select("id, title, preacher, sermon_date, scripture, category, youtube_url")
+        .order("sermon_date", { ascending: false })
+        .limit(4),
+      supabase
+        .from("news_posts")
+        .select("id, title, post_date")
+        .order("post_date", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(5),
+      supabase
+        .from("brothers_posts")
+        .select("id, title, post_date")
+        .order("post_date", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(5),
+      supabase
+        .from("jubo_posts")
+        .select("id, title, post_date, jubo_images(file_name, sort_order)")
+        .order("post_date", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(1),
+      supabase
+        .from("gallery_posts")
+        .select("id, title, post_date, category, gallery_images(file_name, sort_order)")
+        .order("post_date", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(8),
+      supabase
+        .from("admin_settings")
+        .select("value")
+        .eq("key", "hero_slides")
+        .maybeSingle(),
+    ]);
+    return { sermonsResult, newsResult, brothersResult, juboResult, galleryResult, heroResult };
+  },
+  ["home-data"],
+  { revalidate: 60 },
+);
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [profileResult, sermonsResult, newsResult, brothersResult, juboResult, galleryResult, heroResult] = await Promise.all([
+  const [profileResult, { sermonsResult, newsResult, brothersResult, juboResult, galleryResult, heroResult }] = await Promise.all([
     user
       ? supabase.from("profiles").select("name").eq("id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
-    supabase
-      .from("sermons")
-      .select("id, title, preacher, sermon_date, scripture, category, youtube_url")
-      .order("sermon_date", { ascending: false })
-      .limit(4),
-    supabase
-      .from("news_posts")
-      .select("id, title, post_date")
-      .order("post_date", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(5),
-    supabase
-      .from("brothers_posts")
-      .select("id, title, post_date")
-      .order("post_date", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(5),
-    supabase
-      .from("jubo_posts")
-      .select("id, title, post_date, jubo_images(file_name, sort_order)")
-      .order("post_date", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(1),
-    supabase
-      .from("gallery_posts")
-      .select("id, title, post_date, category, gallery_images(file_name, sort_order)")
-      .order("post_date", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(8),
-    supabase
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "hero_slides")
-      .maybeSingle(),
+    getHomeData(),
   ]);
 
   const profileName = profileResult.data?.name ?? null;
