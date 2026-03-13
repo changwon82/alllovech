@@ -11,24 +11,26 @@ export default function HideTopNavOnScroll({ threshold = 80 }: { threshold?: num
     const nav = document.querySelector("nav.sticky");
     if (!nav) return;
 
+    const navEl = nav as HTMLElement;
+    const navHeight = navEl.offsetHeight;
+
     function onScroll() {
       if (window.scrollY > threshold) {
-        (nav as HTMLElement).style.transform = "translateY(-100%)";
+        navEl.style.marginTop = `-${navHeight}px`;
       } else {
-        (nav as HTMLElement).style.transform = "";
+        navEl.style.marginTop = "";
       }
     }
 
-    // 부드러운 전환을 위해 transition 추가
-    (nav as HTMLElement).style.transition = "transform 0.3s ease";
+    navEl.style.transition = "margin-top 0.3s ease";
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // 초기 상태 체크
+    onScroll();
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      (nav as HTMLElement).style.transition = "";
-      (nav as HTMLElement).style.transform = "";
+      navEl.style.transition = "";
+      navEl.style.marginTop = "";
     };
   }, [threshold]);
 
