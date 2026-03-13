@@ -1,5 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import PageHeader from "@/app/components/ui/PageHeader";
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalTable from "./ApprovalTable";
 import Link from "next/link";
 
@@ -163,7 +165,19 @@ export default async function ApprovalListPage({
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-3 pb-10">
+    <>
+    <SubpageHeader title="다코방" breadcrumbs={[{ label: "다코방", href: "/brothers" }, { label: "재정결재" }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="다코방"
+        items={[
+          { label: "교우소식", href: "/brothers" },
+          { label: "다애사진", href: "/gallery" },
+          { label: "교회소식", href: "/news" },
+          { label: "재정결재", href: "/approval" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
       <PageHeader title="재정결재" />
 
       {/* 일자 검색 */}
@@ -374,5 +388,7 @@ export default async function ApprovalListPage({
         })()}
 
     </div>
+    </div>
+    </>
   );
 }
