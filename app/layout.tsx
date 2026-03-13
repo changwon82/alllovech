@@ -40,10 +40,10 @@ export const metadata: Metadata = {
     url: siteUrl,
     images: [
       {
-        url: `${siteUrl}/logo.png`,
-        width: 280,
-        height: 280,
-        alt: "다애교회",
+        url: "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/site/og_image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "다애교회 - 하나님의 마음에 합한교회",
       },
     ],
     type: "website",
