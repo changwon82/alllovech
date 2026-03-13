@@ -141,14 +141,14 @@ export default function LocationPage() {
                   <dt className="shrink-0 font-bold">한 번에 투입 가능 수량</dt>
                   <dd>: 3장</dd>
                 </div>
-                <div className="mt-2 ml-[calc(theme(spacing.9)-0.25rem)] space-y-1.5">
+                <div className="mt-2 space-y-1.5">
                   <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
                     {[
                       ["1장", "2시간 30분"],
                       ["2장", "4시간 30분"],
                       ["3장", "6시간 30분"],
                     ].map(([tickets, time]) => (
-                      <span key={tickets} className="inline-flex items-center gap-1 rounded-full bg-accent-light px-3 py-0.5 text-sm font-medium text-neutral-700">
+                      <span key={tickets} className="inline-flex w-fit items-center gap-1 rounded-full bg-accent-light px-3 py-0.5 text-sm font-medium text-neutral-700">
                         <span className="font-bold text-navy">{tickets}</span> → {time}
                       </span>
                     ))}
