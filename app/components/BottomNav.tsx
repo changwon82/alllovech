@@ -47,7 +47,7 @@ export default function BottomNav({
   return (
     <>
       {userId && <NotificationToast userId={userId} />}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral-200 bg-white/95 backdrop-blur-sm">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm">
         <div className="mx-auto flex max-w-2xl">
           {items.map((item) => {
             const isContact = item.href === "#contact";

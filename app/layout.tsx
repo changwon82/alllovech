@@ -27,6 +27,7 @@ const siteUrl =
 
 export const viewport: Viewport = {
   themeColor: "#002c60",
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
