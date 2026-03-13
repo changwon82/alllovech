@@ -9,12 +9,13 @@ import Link from "next/link";
 export default async function SermonPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; page?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; page?: string; q?: string; play?: string }>;
 }) {
   const params = await searchParams;
   const category = params.category || "전체";
   const page = parseInt(params.page || "1", 10);
   const q = params.q?.trim() || "";
+  const playId = params.play ? parseInt(params.play, 10) : null;
   const perPage = 12;
 
   const { supabase, user } = await getSessionUser();
@@ -34,9 +35,16 @@ export default async function SermonPage({
   const categories = categoryRows || [];
   const categoryNames = categories.map((c) => c.name);
 
-  // 검색이 없을 때만 히어로 표시 — 항상 주일예배 최신 영상
+  // 히어로: play 파라미터가 있으면 해당 설교, 없으면 주일예배 최신
   let featured = null;
-  if (!q) {
+  if (playId) {
+    const { data: playSermon } = await supabase
+      .from("sermons")
+      .select("id, title, preacher, sermon_date, scripture, category, youtube_url")
+      .eq("id", playId)
+      .single();
+    featured = playSermon ?? null;
+  } else if (!q) {
     const { data: featuredList } = await supabase
       .from("sermons")
       .select("id, title, preacher, sermon_date, scripture, category, youtube_url")

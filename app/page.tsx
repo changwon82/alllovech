@@ -146,7 +146,7 @@ export default async function Home() {
               {sermons.slice(0, 3).map((s) => {
                 const id = ytId(s.youtube_url);
                 return (
-                  <Link key={s.id} href={`/sermon/${s.id}`} className="group flex gap-3">
+                  <Link key={s.id} href={`/sermon?play=${s.id}`} className="group flex gap-3">
                     <div className="relative aspect-video w-40 shrink-0 overflow-hidden bg-neutral-200">
                       {id && (
                         <Image src={`https://img.youtube.com/vi/${id}/mqdefault.jpg`} alt={s.title} fill className="object-cover" />
@@ -167,7 +167,7 @@ export default async function Home() {
               {sermons.map((s) => {
                 const id = ytId(s.youtube_url);
                 return (
-                  <Link key={s.id} href={`/sermon/${s.id}`} className="group">
+                  <Link key={s.id} href={`/sermon?play=${s.id}`} className="group">
                     <div className="relative aspect-video overflow-hidden bg-neutral-200">
                       {id && (
                         <Image src={`https://img.youtube.com/vi/${id}/mqdefault.jpg`} alt={s.title} fill className="object-cover transition-transform group-hover:scale-105" />
