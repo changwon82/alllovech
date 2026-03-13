@@ -111,8 +111,8 @@ export default async function ApprovalDetailPage({
       <SubpageSidebar
         title="교회재정"
         items={[
-          { label: "결재 목록", href: "/approval" },
-          { label: "문서 작성", href: "/approval/new" },
+          { label: "재정청구", href: "/approval" },
+          { label: "재정공지", href: "/approval/notice" },
         ]}
       />
       <div className="min-w-0 flex-1">
