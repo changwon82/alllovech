@@ -1,6 +1,8 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalForm from "./ApprovalForm";
 
 export default async function NewApprovalPage() {
@@ -29,16 +31,26 @@ export default async function NewApprovalPage() {
     .order("account");
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-3 pb-10">
-      <PageHeader title="문서작성" />
-
-      <ApprovalForm
-        authorName={profile?.name || user.email || ""}
-        members={members || []}
-        budgets={budgets || []}
-        budgetYear={year}
+    <>
+    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정", href: "/approval" }, { label: "문서작성" }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교회재정"
+        items={[
+          { label: "결재 목록", href: "/approval" },
+          { label: "문서 작성", href: "/approval/new" },
+        ]}
       />
-
+      <div className="min-w-0 flex-1">
+        <PageHeader title="문서작성" />
+        <ApprovalForm
+          authorName={profile?.name || user.email || ""}
+          members={members || []}
+          budgets={budgets || []}
+          budgetYear={year}
+        />
+      </div>
     </div>
+    </>
   );
 }

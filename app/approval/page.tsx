@@ -166,15 +166,13 @@ export default async function ApprovalListPage({
 
   return (
     <>
-    <SubpageHeader title="다코방" breadcrumbs={[{ label: "다코방", href: "/brothers" }, { label: "재정결재" }]} />
+    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정" }]} />
     <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
       <SubpageSidebar
-        title="다코방"
+        title="교회재정"
         items={[
-          { label: "교우소식", href: "/brothers" },
-          { label: "다애사진", href: "/gallery" },
-          { label: "교회소식", href: "/news" },
-          { label: "재정결재", href: "/approval" },
+          { label: "결재 목록", href: "/approval" },
+          { label: "문서 작성", href: "/approval/new" },
         ]}
       />
       <div className="min-w-0 flex-1">

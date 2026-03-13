@@ -1,6 +1,8 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalForm from "../../new/ApprovalForm";
 
 export default async function EditApprovalPage({
@@ -54,39 +56,49 @@ export default async function EditApprovalPage({
     : null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-3 pb-10">
-      <PageHeader title="문서수정" />
-
-      <ApprovalForm
-        authorName={profile?.name || user.email || ""}
-        members={members || []}
-        budgets={budgets}
-        budgetYear={year}
-        initialData={{
-          id: postId,
-          approver1_mb_id: post.approver1_mb_id || "",
-          approver2_mb_id: post.approver2_mb_id || null,
-          doc_category: post.doc_category || "",
-          title: post.title || "",
-          content: post.content || "",
-          account_name: post.account_name || null,
-          ref_department: post.ref_department || null,
-          ref_members: post.ref_members || null,
-          budget_id: matchedBudget?.id ?? null,
-          committee: matchedBudget?.committee ?? null,
-          items: (items || []).map((item) => ({
-            item_name: item.item_name || "",
-            quantity: item.quantity || 0,
-            unit_price: item.unit_price || 0,
-            note: item.note || "",
-          })),
-          files: (files || []).map((f) => ({
-            file_name: f.file_name,
-            original_name: f.original_name,
-          })),
-        }}
+    <>
+    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정", href: "/approval" }, { label: "문서수정" }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교회재정"
+        items={[
+          { label: "결재 목록", href: "/approval" },
+          { label: "문서 작성", href: "/approval/new" },
+        ]}
       />
-
+      <div className="min-w-0 flex-1">
+        <PageHeader title="문서수정" />
+        <ApprovalForm
+          authorName={profile?.name || user.email || ""}
+          members={members || []}
+          budgets={budgets}
+          budgetYear={year}
+          initialData={{
+            id: postId,
+            approver1_mb_id: post.approver1_mb_id || "",
+            approver2_mb_id: post.approver2_mb_id || null,
+            doc_category: post.doc_category || "",
+            title: post.title || "",
+            content: post.content || "",
+            account_name: post.account_name || null,
+            ref_department: post.ref_department || null,
+            ref_members: post.ref_members || null,
+            budget_id: matchedBudget?.id ?? null,
+            committee: matchedBudget?.committee ?? null,
+            items: (items || []).map((item) => ({
+              item_name: item.item_name || "",
+              quantity: item.quantity || 0,
+              unit_price: item.unit_price || 0,
+              note: item.note || "",
+            })),
+            files: (files || []).map((f) => ({
+              file_name: f.file_name,
+              original_name: f.original_name,
+            })),
+          }}
+        />
+      </div>
     </div>
+    </>
   );
 }

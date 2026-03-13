@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalContent from "./ApprovalContent";
 import ApprovalActions from "./ApprovalActions";
 import DeleteButton from "./DeleteButton";
@@ -103,15 +105,17 @@ export default async function ApprovalDetailPage({
   }
 
   return (
-    <div className="mx-auto max-w-2xl pb-10">
-      <div className="px-4 pt-4">
-        {/* 목록으로 */}
-        <Link
-          href="/approval"
-          className="mb-3 inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
-        >
-          ← 목록으로
-        </Link>
+    <>
+    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정", href: "/approval" }, { label: post.title }]} />
+    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+      <SubpageSidebar
+        title="교회재정"
+        items={[
+          { label: "결재 목록", href: "/approval" },
+          { label: "문서 작성", href: "/approval/new" },
+        ]}
+      />
+      <div className="min-w-0 flex-1">
 
         {/* 제목 */}
         <div className="flex items-center gap-2">
@@ -401,6 +405,8 @@ export default async function ApprovalDetailPage({
         </div>
       )}
 
+      </div>
     </div>
+    </>
   );
 }
