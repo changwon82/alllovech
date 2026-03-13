@@ -142,7 +142,7 @@ export default function LocationPage() {
                   <dd>: 3장</dd>
                 </div>
                 <div className="mt-2 ml-[calc(theme(spacing.9)-0.25rem)] space-y-1.5">
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
                     {[
                       ["1장", "2시간 30분"],
                       ["2장", "4시간 30분"],
