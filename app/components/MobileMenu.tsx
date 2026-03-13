@@ -78,7 +78,11 @@ export default function MobileMenu() {
 
             <div className="my-2 mx-3 h-px bg-white/10" />
 
-            <MobileLink href="/approval">재정청구</MobileLink>
+            <MobileSection title="교회재정" index={6} openIdx={openIdx} toggle={toggle}>
+              <MobileSubLink href="/approval">재정청구</MobileSubLink>
+              <MobileSubLink href="/approval/notice">재정공지</MobileSubLink>
+              <MobileSubLink href="/approval/donation">기부금영수증</MobileSubLink>
+            </MobileSection>
           </div>
         </div>
       </div>
