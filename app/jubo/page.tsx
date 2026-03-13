@@ -40,7 +40,12 @@ export default async function JuboPage({
     const imgFile = images?.find((img) => /\.(jpg|jpeg|png|gif|webp)$/i.test(img.file_name));
     if (imgFile) {
       const url = `${R2_BASE}/${imgFile.file_name}`;
-      return { url, thumbUrl: `${R2_BASE}/_thumb/${imgFile.file_name}` };
+      // file_name이 "2507/photo.jpg"처럼 서브폴더를 포함할 수 있음
+      // _thumb은 파일명 바로 앞에: jubo/2507/_thumb/photo.jpg
+      const parts = imgFile.file_name.split("/");
+      const fileName = parts.pop()!;
+      const thumbPath = [...parts, "_thumb", fileName].join("/");
+      return { url, thumbUrl: `${R2_BASE}/${thumbPath}` };
     }
     if (post.content) {
       const match = post.content.match(/src=["']+([^"']+\.(?:jpg|jpeg|png|gif|webp))["']+/i);

@@ -107,10 +107,14 @@ export default async function GalleryPage({
               if (match) originalUrl = match[1];
             }
 
-            // 썸네일 URL: gallery/photo.webp → gallery/_thumb/photo.webp
-            const thumbUrl = originalUrl && firstAttach
-              ? `${R2_BASE}/_thumb/${firstAttach}`
-              : originalUrl;
+            // 썸네일 URL: gallery/2507/photo.webp → gallery/2507/_thumb/photo.webp
+            let thumbUrl = originalUrl;
+            if (originalUrl && firstAttach) {
+              const parts = firstAttach.split("/");
+              const fileName = parts.pop()!;
+              const thumbPath = [...parts, "_thumb", fileName].join("/");
+              thumbUrl = `${R2_BASE}/${thumbPath}`;
+            }
 
             return (
               <Link
