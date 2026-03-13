@@ -310,7 +310,7 @@ export default async function Home() {
           <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-5 md:px-8">
             {/* 헌금안내 — 2/5 너비 */}
             <div className="md:col-span-2">
-              <div className="overflow-hidden rounded-2xl bg-navy text-white">
+              <div className="overflow-hidden bg-navy text-white">
                 {/* 계좌 정보 */}
                 <div className="p-5">
                   <p className="mb-3 text-base font-bold">온라인 헌금안내</p>
@@ -340,7 +340,7 @@ export default async function Home() {
                 </div>
               </div>
               <a href="https://mas3.ohjic.com/member/intro/alc" target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-2xl bg-[#4a7fb5] p-5 text-white transition hover:brightness-110">
+                className="mt-2 flex items-center justify-between bg-[#4a7fb5] p-5 text-white transition hover:brightness-110">
                 <div>
                   <p className="text-base font-bold">온라인 교인센터</p>
                   <p className="mt-1.5 text-sm text-white/70">온라인 교인증, 나의 교적 정보</p>
@@ -349,7 +349,7 @@ export default async function Home() {
                 <svg viewBox="0 0 48 48" className="h-14 w-14 shrink-0 text-white/90"><rect x="4" y="8" width="40" height="32" rx="5" fill="currentColor"/><circle cx="18" cy="20" r="5.5" fill="#4a7fb5"/><path d="M8 34c0-4.5 4.5-8 10-8s10 3.5 10 8" fill="#4a7fb5"/><rect x="30" y="16" width="10" height="2.5" rx="1.25" fill="#4a7fb5"/><rect x="30" y="22" width="10" height="2.5" rx="1.25" fill="#4a7fb5"/><rect x="30" y="28" width="7" height="2.5" rx="1.25" fill="#4a7fb5"/></svg>
               </a>
               <Link href="/spend-report"
-                className="mt-2 flex items-center justify-between rounded-2xl bg-[#3d6e9e] p-5 text-white transition hover:brightness-110">
+                className="mt-2 flex items-center justify-between bg-[#3d6e9e] p-5 text-white transition hover:brightness-110">
                 <div>
                   <p className="text-base font-bold">교인전용 재정청구</p>
                   <p className="mt-1.5 text-sm text-white/70">영수증 제출, 청구 내역 관리</p>
@@ -361,7 +361,7 @@ export default async function Home() {
             {/* 찾아오시는 길 — 3/5 너비, 왼쪽 구분선 포함 */}
             <div className="flex flex-col border-t border-neutral-200 pt-8 md:col-span-3 md:border-t-0 md:border-l md:pt-0 md:pl-8">
               <Link href="/about/location" className="text-[18px] font-bold text-neutral-800 hover:text-navy transition">오시는 길</Link>
-              <div className="mt-4 h-[200px] overflow-hidden rounded-2xl md:h-auto md:min-h-[280px] md:flex-1">
+              <div className="mt-4 h-[200px] overflow-hidden md:h-auto md:min-h-[280px] md:flex-1">
                 <ChurchMap />
               </div>
               <p className="mt-3 text-sm text-neutral-600">서울 서초구 탑성말길 37 (신원동 561)</p>
