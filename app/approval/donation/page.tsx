@@ -1,5 +1,3 @@
-import SubpageHeader from "@/app/components/SubpageHeader";
-import SubpageSidebar from "@/app/components/SubpageSidebar";
 import PageHeader from "@/app/components/ui/PageHeader";
 
 const R2 = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/donation";
@@ -7,26 +5,9 @@ const R2 = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/donation";
 export default function DonationPage() {
   return (
     <>
-      <SubpageHeader
-        title="교회재정"
-        breadcrumbs={[
-          { label: "교회재정", href: "/approval" },
-          { label: "기부금영수증" },
-        ]}
-      />
-      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
-        <SubpageSidebar
-          title="교회재정"
-          items={[
-            { label: "재정청구", href: "/approval" },
-            { label: "재정공지", href: "/approval/notice" },
-            { label: "기부금영수증", href: "/approval/donation" },
-          ]}
-        />
-        <div className="min-w-0 flex-1">
-          <PageHeader title="기부금영수증" />
+      <PageHeader title="기부금영수증" />
 
-          <div className="mt-6 space-y-8">
+      <div className="mt-6 space-y-8">
             {/* 상단 안내 이미지 */}
             <img src={`${R2}/header.png`} alt="기부금영수증 안내" className="w-full rounded-lg" />
 
@@ -53,8 +34,6 @@ export default function DonationPage() {
 
             {/* 공지사항 */}
             <img src={`${R2}/notice.png`} alt="기부금영수증 공지" className="w-full" />
-          </div>
-        </div>
       </div>
     </>
   );

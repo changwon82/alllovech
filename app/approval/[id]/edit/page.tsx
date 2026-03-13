@@ -1,8 +1,6 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import PageHeader from "@/app/components/ui/PageHeader";
-import SubpageHeader from "@/app/components/SubpageHeader";
-import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalForm from "../../new/ApprovalForm";
 
 export default async function EditApprovalPage({
@@ -57,19 +55,8 @@ export default async function EditApprovalPage({
 
   return (
     <>
-    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정", href: "/approval" }, { label: "문서수정" }]} />
-    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
-      <SubpageSidebar
-        title="교회재정"
-        items={[
-          { label: "재정청구", href: "/approval" },
-          { label: "재정공지", href: "/approval/notice" },
-          { label: "기부금영수증", href: "/approval/donation" },
-        ]}
-      />
-      <div className="min-w-0 flex-1">
-        <PageHeader title="문서수정" />
-        <ApprovalForm
+      <PageHeader title="문서수정" />
+      <ApprovalForm
           authorName={profile?.name || user.email || ""}
           members={members || []}
           budgets={budgets}
@@ -97,9 +84,7 @@ export default async function EditApprovalPage({
               original_name: f.original_name,
             })),
           }}
-        />
-      </div>
-    </div>
+      />
     </>
   );
 }

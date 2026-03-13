@@ -95,6 +95,20 @@ const SECTIONS: SectionConfig[] = [
       { label: "다애사진", href: "/gallery" },
     ],
   },
+  {
+    title: "교회재정",
+    breadcrumbLink: "/approval",
+    breadcrumbs: {
+      "/approval": "재정청구",
+      "/approval/notice": "재정공지",
+      "/approval/donation": "기부금영수증",
+    },
+    items: [
+      { label: "재정청구", href: "/approval" },
+      { label: "재정공지", href: "/approval/notice" },
+      { label: "기부금영수증", href: "/approval/donation" },
+    ],
+  },
 ];
 
 function getSection(pathname: string): SectionConfig | null {

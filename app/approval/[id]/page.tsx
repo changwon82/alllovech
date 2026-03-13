@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
 import Link from "next/link";
-import SubpageHeader from "@/app/components/SubpageHeader";
-import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalContent from "./ApprovalContent";
 import ApprovalActions from "./ApprovalActions";
 import DeleteButton from "./DeleteButton";
@@ -106,18 +104,6 @@ export default async function ApprovalDetailPage({
 
   return (
     <>
-    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정", href: "/approval" }, { label: post.title }]} />
-    <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
-      <SubpageSidebar
-        title="교회재정"
-        items={[
-          { label: "재정청구", href: "/approval" },
-          { label: "재정공지", href: "/approval/notice" },
-          { label: "기부금영수증", href: "/approval/donation" },
-        ]}
-      />
-      <div className="min-w-0 flex-1">
-
         {/* 제목 */}
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-neutral-800">{post.title}</h1>
@@ -405,8 +391,6 @@ export default async function ApprovalDetailPage({
         </div>
       )}
 
-      </div>
-    </div>
     </>
   );
 }
