@@ -168,7 +168,7 @@ export default function StaffClient({
           ) : (
             <div
               key={s.id}
-              className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm"
+              className="flex items-center gap-4 bg-white p-4 shadow-sm"
             >
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-neutral-100">
                 {s.photo_url ? (
