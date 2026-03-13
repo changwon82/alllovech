@@ -241,7 +241,15 @@ export default function AdminSidebar() {
       </nav>
 
       {/* 하단 */}
-      <div className="border-t border-white/10 px-2 py-4">
+      <div className="border-t border-white/10 px-2 py-4 space-y-1">
+        <a
+          href="/"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/40 transition-colors hover:bg-white/10 hover:text-white/70"
+          title={collapsed ? "홈으로 가기" : undefined}
+        >
+          <span className="shrink-0 text-base">🏠</span>
+          {!collapsed && <span>홈으로 가기</span>}
+        </a>
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/40 transition-colors hover:bg-white/10 hover:text-red-300"
