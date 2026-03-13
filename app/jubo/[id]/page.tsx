@@ -7,6 +7,7 @@ import SubpageSidebar from "@/app/components/SubpageSidebar";
 import JuboImageList from "./JuboImageList";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
+import PostContent from "@/app/components/ui/PostContent";
 
 const R2_JUBO = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
 
@@ -40,23 +41,8 @@ export default async function JuboDetailPage({
 
   if (!post) notFound();
 
-  // content에서 이미지 파일명 추출
-  const contentImages: string[] = [];
-  if (post.content) {
-    const regex = /src=["']+([^"']+)["']+/g;
-    let match;
-    while ((match = regex.exec(post.content)) !== null) {
-      const url = match[1];
-      if (!/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url)) continue;
-      const fileName = url.split("/").pop();
-      if (fileName) contentImages.push(fileName);
-    }
-  }
-
-  // 첨부파일 + content 이미지 모두 jubo/
+  // 첨부파일 이미지 — content 인라인 이미지와 별도
   const attachUrls = (images || []).map((img) => `${R2_JUBO}/${img.file_name}`);
-  const contentUrls = contentImages.map((name) => `${R2_JUBO}/${name}`);
-  const allImageUrls = [...new Set([...attachUrls, ...contentUrls])];
 
   return (
     <>
@@ -107,13 +93,22 @@ export default async function JuboDetailPage({
           </div>
         </div>
 
-        {/* 주보 이미지 */}
-        <div className="mt-6">
-          <JuboImageList
-            images={allImageUrls}
-            title={post.title}
-          />
-        </div>
+        {/* 인라인 이미지 (content) */}
+        {post.content && (
+          <div className="mt-6">
+            <PostContent html={post.content} className="[&_img]:w-full" />
+          </div>
+        )}
+
+        {/* 첨부 이미지 */}
+        {attachUrls.length > 0 && (
+          <div className="mt-6">
+            <JuboImageList
+              images={attachUrls}
+              title={post.title}
+            />
+          </div>
+        )}
 
         {/* 목록으로 */}
         <div className="mt-8 flex justify-center">

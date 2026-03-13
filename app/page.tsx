@@ -24,21 +24,25 @@ export default async function Home() {
       .from("news_posts")
       .select("id, title, post_date")
       .order("post_date", { ascending: false })
+      .order("id", { ascending: false })
       .limit(5),
     supabase
       .from("brothers_posts")
       .select("id, title, post_date")
       .order("post_date", { ascending: false })
+      .order("id", { ascending: false })
       .limit(5),
     supabase
       .from("jubo_posts")
       .select("id, title, post_date, jubo_images(file_name, sort_order)")
       .order("post_date", { ascending: false })
+      .order("id", { ascending: false })
       .limit(1),
     supabase
       .from("gallery_posts")
       .select("id, title, post_date, category, gallery_images(file_name, sort_order)")
       .order("post_date", { ascending: false })
+      .order("id", { ascending: false })
       .limit(8),
     supabase
       .from("admin_settings")

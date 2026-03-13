@@ -2,7 +2,8 @@
 
 import { requireAdmin } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
-import { uploadToR2, deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2 } from "@/lib/r2";
+import { processAndUpload } from "@/lib/upload";
 
 const R2_PUBLIC = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev";
 const R2_SITE_PREFIX = `${R2_PUBLIC}/site/`;
@@ -38,15 +39,14 @@ export async function uploadSiteImage(formData: FormData): Promise<{ url?: strin
   if (!file) return { error: "파일이 없습니다" };
 
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-  const key = `site/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const keyBase = `site/${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await uploadToR2(key, buffer, file.name);
-    return { url: `${R2_PUBLIC}/${key}` };
+    const { r2Key } = await processAndUpload(file, keyBase, ext, "ATTACHMENT");
+    return { url: `${R2_PUBLIC}/${r2Key}` };
   } catch (e) {
     console.error("R2 upload error:", e);
-    return { error: "업로드 실패" };
+    return { error: e instanceof Error ? e.message : "업로드 실패" };
   }
 }
 

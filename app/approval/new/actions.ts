@@ -2,7 +2,8 @@
 
 import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { uploadToR2, deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2 } from "@/lib/r2";
+import { processAndUpload } from "@/lib/upload";
 
 export async function submitApproval(formData: FormData) {
   const { user } = await getSessionUser();
@@ -93,13 +94,10 @@ export async function submitApproval(formData: FormData) {
 
       const ext = file.name.split(".").pop() || "bin";
       const ts = Date.now();
-      const fileName = `${post.id}_${ts}_${i}.${ext}`;
-      const r2Key = `approval/${fileName}`;
+      const keyBase = `approval/${post.id}_${ts}_${i}`;
 
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        await uploadToR2(r2Key, buffer, file.name);
-
+        const { fileName } = await processAndUpload(file, keyBase, ext, "APPROVAL");
         fileRows.push({
           post_id: post.id,
           file_name: fileName,
@@ -221,12 +219,10 @@ export async function updateApproval(formData: FormData) {
 
       const ext = file.name.split(".").pop() || "bin";
       const ts = Date.now();
-      const fileName = `${postId}_${ts}_${i}.${ext}`;
-      const r2Key = `approval/${fileName}`;
+      const keyBase = `approval/${postId}_${ts}_${i}`;
 
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        await uploadToR2(r2Key, buffer, file.name);
+        const { fileName } = await processAndUpload(file, keyBase, ext, "APPROVAL");
         fileRows.push({
           post_id: postId,
           file_name: fileName,

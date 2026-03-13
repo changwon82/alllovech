@@ -3,7 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
-import { uploadToR2, deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2 } from "@/lib/r2";
+import { processAndUpload } from "@/lib/upload";
 import { revalidatePath } from "next/cache";
 
 const R2_PUBLIC = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev";
@@ -35,10 +36,9 @@ export async function createStaff(formData: FormData) {
   let photo_url: string | null = null;
   if (file && file.size > 0) {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const key = `site/staff/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await uploadToR2(key, buffer, file.name);
-    photo_url = `${R2_PUBLIC}/${key}`;
+    const keyBase = `site/staff/${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { r2Key } = await processAndUpload(file, keyBase, ext, "ATTACHMENT");
+    photo_url = `${R2_PUBLIC}/${r2Key}`;
   }
 
   const admin = createAdminClient();
@@ -90,10 +90,9 @@ export async function updateStaff(id: string, formData: FormData) {
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const key = `site/staff/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await uploadToR2(key, buffer, file.name);
-    updates.photo_url = `${R2_PUBLIC}/${key}`;
+    const keyBase = `site/staff/${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const { r2Key } = await processAndUpload(file, keyBase, ext, "ATTACHMENT");
+    updates.photo_url = `${R2_PUBLIC}/${r2Key}`;
   }
 
   const { error: updateError } = await admin

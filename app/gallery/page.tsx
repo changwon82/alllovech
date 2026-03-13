@@ -4,6 +4,7 @@ import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
 import Link from "next/link";
+import ThumbImage from "@/app/components/ui/ThumbImage";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
 
@@ -34,6 +35,7 @@ export default async function GalleryPage({
     .select("id, title, category, content, post_date, hit_count, gallery_images(file_name)", { count: "exact" })
     .eq("gallery_images.sort_order", 0)
     .order("post_date", { ascending: false })
+    .order("id", { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
 
   if (category !== "전체") {
@@ -96,14 +98,19 @@ export default async function GalleryPage({
           {posts.map((post) => {
             const images = post.gallery_images as { file_name: string }[];
             const firstAttach = images?.[0]?.file_name;
-            let thumbUrl: string | undefined;
+            let originalUrl: string | undefined;
 
             if (firstAttach) {
-              thumbUrl = `${R2_BASE}/${firstAttach}`;
+              originalUrl = `${R2_BASE}/${firstAttach}`;
             } else if (post.content) {
               const match = post.content.match(/src=["']+([^"']+\.(?:jpg|jpeg|png|gif|webp))["']+/i);
-              if (match) thumbUrl = match[1];
+              if (match) originalUrl = match[1];
             }
+
+            // 썸네일 URL: gallery/photo.webp → gallery/_thumb/photo.webp
+            const thumbUrl = originalUrl && firstAttach
+              ? `${R2_BASE}/_thumb/${firstAttach}`
+              : originalUrl;
 
             return (
               <Link
@@ -111,13 +118,12 @@ export default async function GalleryPage({
                 href={`/gallery/${post.id}`}
                 className="group relative overflow-hidden bg-neutral-100"
               >
-                {thumbUrl ? (
+                {originalUrl ? (
                   <div className="aspect-square overflow-hidden">
-                    <img
-                      src={thumbUrl}
-                      alt=""
+                    <ThumbImage
+                      src={originalUrl}
+                      thumbSrc={thumbUrl!}
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      loading="lazy"
                     />
                   </div>
                 ) : (

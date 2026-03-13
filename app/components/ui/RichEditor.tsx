@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useState, useEffect } from "react";
 import { uploadEditorImage } from "./upload-image-action";
+import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
 
 type Props = {
   name: string;
@@ -43,7 +44,16 @@ export default function RichEditor({
 
     setIsUploading(true);
 
-    for (const file of Array.from(files)) {
+    const fileArr = Array.from(files);
+    const overFiles = validateFileSize(fileArr, "EDITOR_INLINE");
+    if (overFiles.length > 0) {
+      alert(fileSizeWarning(overFiles, "EDITOR_INLINE"));
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    for (const file of fileArr) {
       const fd = new FormData();
       fd.set("file", file);
       fd.set("folder", folder);

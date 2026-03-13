@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useState, useRef } from "react";
 import { createNewsPost, updateNewsPost } from "./actions";
 import RichEditor from "@/app/components/ui/RichEditor";
+import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
 
 type ExistingFile = {
   file_name: string;
@@ -47,7 +48,14 @@ export default function NewsForm({ mode, post, existingFiles = [] }: Props) {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
-      setNewFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
+      const files = Array.from(e.target.files);
+      const overFiles = validateFileSize(files, "ATTACHMENT");
+      if (overFiles.length > 0) {
+        alert(fileSizeWarning(overFiles, "ATTACHMENT"));
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      setNewFiles((prev) => [...prev, ...files]);
       // input 초기화해서 같은 파일 재선택 가능
       if (fileInputRef.current) fileInputRef.current.value = "";
     }

@@ -27,6 +27,7 @@ export default async function BrothersPage({
     .from("brothers_posts")
     .select("id, title, post_date, hit_count", { count: "exact" })
     .order("post_date", { ascending: false })
+    .order("id", { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
 
   const totalPages = Math.ceil((count || 0) / perPage);

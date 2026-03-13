@@ -6,6 +6,7 @@ import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
+import PostContent from "@/app/components/ui/PostContent";
 
 export default async function BrothersDetailPage({
   params,
@@ -80,9 +81,9 @@ export default async function BrothersDetailPage({
 
       {/* 본문 — 원본 HTML 그대로 렌더링 (텍스트·이미지 순서 유지) */}
       {post.content && (
-        <div
+        <PostContent
+          html={post.content}
           className="brothers-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
-          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       )}
 
@@ -92,6 +93,7 @@ export default async function BrothersDetailPage({
           width: 100%;
           border-radius: 0.5rem;
           margin: 0.5rem 0;
+          cursor: pointer;
         }
         .brothers-content p {
           margin: 0.25rem 0;

@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
-import { uploadToR2, deleteFromR2, deleteContentImages } from "@/lib/r2";
+import { deleteFromR2, deleteContentImages, deleteRemovedContentImages } from "@/lib/r2";
+import { processAndUpload } from "@/lib/upload";
 
 // 관리자 권한 확인
 async function checkAdmin() {
@@ -62,11 +63,8 @@ export async function createJuboPost(
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
       const ext = file.name.split(".").pop() || "";
-      const fileName = `${post.id}_${timestamp}_${i}.${ext}`;
-      const key = `jubo/${fileName}`;
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await uploadToR2(key, buffer, file.name);
+      const keyBase = `jubo/${post.id}_${timestamp}_${i}`;
+      const { fileName } = await processAndUpload(file, keyBase, ext, "ATTACHMENT");
 
       imageRecords.push({
         post_id: post.id,
@@ -102,6 +100,13 @@ export async function updateJuboPost(
   if (!postId) return { error: "잘못된 요청입니다." };
   if (!title?.trim()) return { error: "제목을 입력해주세요." };
 
+  // 구 content 조회 (인라인 이미지 비교용)
+  const { data: oldPost } = await admin
+    .from("jubo_posts")
+    .select("content")
+    .eq("id", postId)
+    .single();
+
   // 게시글 수정
   const { error: updateErr } = await admin
     .from("jubo_posts")
@@ -114,6 +119,9 @@ export async function updateJuboPost(
     .eq("id", postId);
 
   if (updateErr) return { error: updateErr.message };
+
+  // 수정 시 빠진 인라인 이미지 R2 삭제
+  await deleteRemovedContentImages(oldPost?.content, content);
 
   // 삭제할 이미지 처리
   const removedImagesRaw = formData.get("removed_images") as string;
@@ -147,11 +155,8 @@ export async function updateJuboPost(
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
       const ext = file.name.split(".").pop() || "";
-      const fileName = `${postId}_${timestamp}_${i}.${ext}`;
-      const key = `jubo/${fileName}`;
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await uploadToR2(key, buffer, file.name);
+      const keyBase = `jubo/${postId}_${timestamp}_${i}`;
+      const { fileName } = await processAndUpload(file, keyBase, ext, "ATTACHMENT");
 
       imageRecords.push({
         post_id: postId,

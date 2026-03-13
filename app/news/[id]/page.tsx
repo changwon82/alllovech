@@ -6,6 +6,7 @@ import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
+import PostContent from "@/app/components/ui/PostContent";
 const R2_NEWS = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/news";
 
 // 이미지 확장자 판별
@@ -96,9 +97,9 @@ export default async function NewsDetailPage({
 
       {/* 본문 — 원본 HTML 그대로 렌더링 */}
       {post.content && (
-        <div
+        <PostContent
+          html={post.content}
           className="post-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
-          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       )}
 
@@ -107,6 +108,7 @@ export default async function NewsDetailPage({
           width: 100%;
           border-radius: 0.5rem;
           margin: 0.5rem 0;
+          cursor: pointer;
         }
         .post-content iframe {
           width: 100%;

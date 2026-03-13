@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitApproval, updateApproval } from "./actions";
+import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
 
 const DOC_CATEGORIES = ["일반재정청구", "건축재정청구", "예산전용품의", "사전품의", "기타품의"];
 
@@ -260,7 +261,14 @@ export default function ApprovalForm({
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
-      setFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
+      const newFiles = Array.from(e.target.files);
+      const overFiles = validateFileSize(newFiles, "APPROVAL");
+      if (overFiles.length > 0) {
+        alert(fileSizeWarning(overFiles, "APPROVAL"));
+        e.target.value = "";
+        return;
+      }
+      setFiles((prev) => [...prev, ...newFiles]);
     }
   }
   function removeFile(idx: number) {

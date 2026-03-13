@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useState, useRef } from "react";
 import { createGalleryPost, updateGalleryPost } from "./actions";
 import RichEditor from "@/app/components/ui/RichEditor";
+import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
 const CATEGORIES = ["예배", "교회학교", "행사", "건축", "기타"];
@@ -58,6 +59,12 @@ export default function GalleryForm({ mode, post, existingImages = [] }: Props) 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
       const files = Array.from(e.target.files);
+      const overFiles = validateFileSize(files, "ATTACHMENT");
+      if (overFiles.length > 0) {
+        alert(fileSizeWarning(overFiles, "ATTACHMENT"));
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
       setNewFiles((prev) => [...prev, ...files]);
       const newPreviews = files.map((f) => URL.createObjectURL(f));
       setPreviews((prev) => [...prev, ...newPreviews]);

@@ -11,6 +11,7 @@ const topItems: NavItem[] = [
   { href: "/admin", label: "대시보드", icon: "📊" },
   { href: "/admin/settings", label: "설정", icon: "⚙️" },
   { href: "/admin/users", label: "사용자", icon: "👤" },
+  { href: "/admin/r2", label: "파일 관리", icon: "🗂️" },
 ];
 
 export default function AdminSidebar() {

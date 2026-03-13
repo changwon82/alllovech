@@ -2,7 +2,7 @@
 
 import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { uploadToR2 } from "@/lib/r2";
+import { processAndUpload } from "@/lib/upload";
 
 const R2_PUBLIC = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev";
 
@@ -24,16 +24,14 @@ export async function uploadEditorImage(formData: FormData) {
   if (!file || file.size === 0) return { error: "파일이 없습니다." };
 
   const folder = (formData.get("folder") as string) || "editor";
-
   const ext = file.name.split(".").pop() || "jpg";
-  const fileName = `inline_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const r2Key = `${folder}/${fileName}`;
+  const keyBase = `${folder}/inline_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await uploadToR2(r2Key, buffer, file.name);
+    const { r2Key } = await processAndUpload(file, keyBase, ext, "EDITOR_INLINE");
     return { url: `${R2_PUBLIC}/${r2Key}` };
-  } catch {
-    return { error: "업로드 실패" };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "업로드 실패";
+    return { error: msg };
   }
 }

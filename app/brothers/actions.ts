@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
-import { deleteContentImages } from "@/lib/r2";
+import { deleteContentImages, deleteRemovedContentImages } from "@/lib/r2";
 
 // 관리자 권한 확인
 async function checkAdmin() {
@@ -71,6 +71,13 @@ export async function updateBrothersPost(
   if (!postId) return { error: "잘못된 요청입니다." };
   if (!title?.trim()) return { error: "제목을 입력해주세요." };
 
+  // 구 content 조회 (인라인 이미지 비교용)
+  const { data: oldPost } = await admin
+    .from("brothers_posts")
+    .select("content")
+    .eq("id", postId)
+    .single();
+
   const { error: updateErr } = await admin
     .from("brothers_posts")
     .update({
@@ -82,6 +89,9 @@ export async function updateBrothersPost(
     .eq("id", postId);
 
   if (updateErr) return { error: updateErr.message };
+
+  // 수정 시 빠진 인라인 이미지 R2 삭제
+  await deleteRemovedContentImages(oldPost?.content, content);
 
   revalidatePath("/brothers");
   revalidatePath(`/brothers/${postId}`);

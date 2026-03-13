@@ -4,6 +4,7 @@ import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
 import Link from "next/link";
+import ThumbImage from "@/app/components/ui/ThumbImage";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
 
@@ -29,17 +30,21 @@ export default async function JuboPage({
     .from("jubo_posts")
     .select("id, title, content, post_date, hit_count, jubo_images(file_name, sort_order)", { count: "exact" })
     .order("post_date", { ascending: false })
+    .order("id", { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
 
   const totalPages = Math.ceil((count || 0) / perPage);
 
-  function getThumb(post: any): string | undefined {
+  function getThumb(post: any): { url: string; thumbUrl: string } | undefined {
     const images = post.jubo_images as { file_name: string }[];
     const imgFile = images?.find((img) => /\.(jpg|jpeg|png|gif|webp)$/i.test(img.file_name));
-    if (imgFile) return imgFile.file_name;
+    if (imgFile) {
+      const url = `${R2_BASE}/${imgFile.file_name}`;
+      return { url, thumbUrl: `${R2_BASE}/_thumb/${imgFile.file_name}` };
+    }
     if (post.content) {
       const match = post.content.match(/src=["']+([^"']+\.(?:jpg|jpeg|png|gif|webp))["']+/i);
-      if (match) return match[1].split("/").pop();
+      if (match) return { url: match[1], thumbUrl: match[1] };
     }
     return undefined;
   }
@@ -86,11 +91,10 @@ export default async function JuboPage({
               >
                 {thumb ? (
                   <div className="aspect-[3/4] overflow-hidden bg-neutral-100">
-                    <img
-                      src={`${R2_BASE}/${thumb}`}
-                      alt=""
+                    <ThumbImage
+                      src={thumb.url}
+                      thumbSrc={thumb.thumbUrl}
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      loading="lazy"
                     />
                   </div>
                 ) : (

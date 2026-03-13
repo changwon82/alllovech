@@ -7,6 +7,7 @@ import SubpageSidebar from "@/app/components/SubpageSidebar";
 import GalleryImageList from "./GalleryImageList";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
+import PostContent from "@/app/components/ui/PostContent";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
 
@@ -40,25 +41,8 @@ export default async function GalleryDetailPage({
 
   if (!post) notFound();
 
-  // content에서 이미지 URL 추출 (구 게시판 이미지)
-  const contentImageUrls: string[] = [];
-  if (post.content) {
-    // src="...", src='...', src=''...'' 등 다양한 형태 처리
-    const regex = /src=["']+([^"']+)["']+/g;
-    let match;
-    while ((match = regex.exec(post.content)) !== null) {
-      const url = match[1];
-      // 이미지 확장자만 필터
-      if (!/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url)) continue;
-      contentImageUrls.push(url);
-    }
-  }
-
-  // 첨부파일 이미지 (full URL)
+  // 첨부파일 이미지 (full URL) — content 인라인 이미지와 별도
   const attachImageUrls = (images || []).map((img) => `${R2_BASE}/${img.file_name}`);
-
-  // 합치기 (첨부파일 우선, 중복 제거)
-  const allImages = [...new Set([...attachImageUrls, ...contentImageUrls])];
 
   return (
     <>
@@ -113,17 +97,17 @@ export default async function GalleryDetailPage({
 
       {/* 본문 — 원본 HTML 그대로 렌더링 */}
       {post.content && (
-        <div
+        <PostContent
+          html={post.content}
           className="post-content mt-6 px-4 text-sm leading-relaxed text-neutral-600"
-          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       )}
 
       {/* 첨부파일 이미지 */}
-      {allImages.length > 0 && (
-        <div className="mt-6">
+      {attachImageUrls.length > 0 && (
+        <div className="mt-6 px-4">
           <GalleryImageList
-            images={allImages}
+            images={attachImageUrls}
             title={post.title}
           />
         </div>
@@ -144,6 +128,7 @@ export default async function GalleryDetailPage({
           width: 100%;
           border-radius: 0.5rem;
           margin: 0.5rem 0;
+          cursor: pointer;
         }
         .post-content iframe {
           width: 100%;
