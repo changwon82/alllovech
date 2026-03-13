@@ -79,10 +79,10 @@ export default async function SermonPage({
                 )}
 
                 {/* 카테고리 필터 */}
-                <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="mt-4 flex flex-wrap items-center gap-2">
                   <Link
                     href="/sermon"
-                    className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                       category === "전체"
                         ? "bg-navy text-white"
                         : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
@@ -94,7 +94,7 @@ export default async function SermonPage({
                     <Link
                       key={cat}
                       href={`/sermon?category=${encodeURIComponent(cat)}`}
-                      className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                         category === cat
                           ? "bg-navy text-white"
                           : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"

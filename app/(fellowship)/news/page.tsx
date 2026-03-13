@@ -64,7 +64,7 @@ export default async function NewsPage({
                   {new Date(post.post_date).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, "-").replace(".", "")}
                 </td>
                 <td className="py-2.5">
-                  <Link href={`/news/${post.id}`} className="font-semibold text-neutral-800 transition hover:text-navy">
+                  <Link href={`/news/${post.id}`} className="line-clamp-1 font-semibold text-neutral-800 transition hover:text-navy md:line-clamp-none">
                     {post.title}
                   </Link>
                 </td>

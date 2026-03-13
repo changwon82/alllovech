@@ -62,7 +62,7 @@ function ScrollToTopButton() {
   return (
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-24 left-1/2 z-40 hidden h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-all hover:brightness-110 active:scale-95 md:flex"
+      className="fixed bottom-24 left-1/2 z-40 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-all hover:brightness-110 active:scale-95"
       aria-label="위로"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -402,7 +402,7 @@ export default function BiblePageContent({
           showSticky ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-2.5">
+        <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
           <span className={`shrink-0 text-sm font-bold ${isToday ? "text-accent" : "text-neutral-800"}`}>
             Day {day}
           </span>

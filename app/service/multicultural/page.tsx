@@ -14,8 +14,8 @@ export default function MulticulturalPage() {
         <div className="mt-2 h-1 w-12 rounded-full bg-accent" />
 
         {/* 성경구절 */}
-        <div className="mt-6 rounded-2xl bg-neutral-50 p-6">
-          <p className="text-center text-[19px] leading-relaxed italic text-navy/70">
+        <div className="mt-6 rounded-none bg-neutral-50 p-6">
+          <p className="text-center text-base leading-relaxed italic text-navy/70">
             너희의 하나님 여호와는 신 가운데 신이시며 주 가운데 주시요 크고 능하시며 두려우신 하나님이시라 사람을 외모로 보지 아니하시며 뇌물을 받지 아니하시고 고아와 과부를 위하여 정의를 행하시며 나그네를 사랑하여 그에게 떡과 옷을 주시나니 너희는 나그네를 사랑하라 전에 너희도 애굽 땅에서 나그네 되었음이니라
           </p>
           <p className="mt-2 text-center text-sm text-accent">— 신명기 10:17~19</p>
@@ -27,7 +27,7 @@ export default function MulticulturalPage() {
             href="http://www.allloveschool.or.kr"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 rounded-2xl bg-white px-5 py-3 shadow-sm transition hover:shadow-md"
+            className="inline-flex items-center gap-3 rounded-none bg-white px-5 py-3 shadow-sm transition hover:shadow-md"
           >
             <Image
               src={`${R2}/logo.png`}
@@ -41,7 +41,7 @@ export default function MulticulturalPage() {
         </div>
 
         {/* Vimeo 영상 + 안내 */}
-        <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="mt-8 overflow-hidden rounded-none bg-white shadow-sm">
           <div className="relative aspect-video">
             <iframe
               src="https://player.vimeo.com/video/86358008"

@@ -80,7 +80,7 @@ export default async function GalleryPage({
           등록된 사진이 없습니다.
         </p>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4 [&>:nth-child(n+11)]:hidden [&>:nth-child(n+11)]:md:block">
           {posts.map((post) => {
             const images = post.gallery_images as { file_name: string }[];
             const firstAttach = images?.[0]?.file_name;
