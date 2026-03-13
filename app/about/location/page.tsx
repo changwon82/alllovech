@@ -128,7 +128,7 @@ export default function LocationPage() {
                   </p>
                 </div>
               </div>
-              <dl className="mt-3 space-y-1 pl-9 text-base leading-relaxed text-neutral-600">
+              <dl className="mt-3 space-y-1 pl-9 text-sm leading-relaxed text-neutral-600 md:text-base">
                 <div className="flex gap-1">
                   <dt className="shrink-0 font-bold">주차권 구입</dt>
                   <dd>: 교회 사무실, 2시간권 1장 / 1,000원</dd>
