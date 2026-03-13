@@ -339,8 +339,9 @@ export default async function Home() {
                   </a>
                 </div>
               </div>
+              <hr className="my-4 border-neutral-200" />
               <a href="https://mas3.ohjic.com/member/intro/alc" target="_blank" rel="noopener noreferrer"
-                className="mt-3 flex items-center justify-between rounded-2xl bg-[#4a7fb5] p-5 text-white transition hover:brightness-110">
+                className="flex items-center justify-between rounded-2xl bg-[#4a7fb5] p-5 text-white transition hover:brightness-110">
                 <div>
                   <p className="text-base font-bold">온라인 교인센터</p>
                   <p className="mt-1.5 text-sm text-white/70">온라인 교인증, 나의 교적 정보</p>
