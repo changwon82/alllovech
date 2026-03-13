@@ -348,7 +348,7 @@ export default async function Home() {
                 </div>
                 <svg viewBox="0 0 48 48" className="h-14 w-14 shrink-0 text-white/90"><rect x="4" y="8" width="40" height="32" rx="5" fill="currentColor"/><circle cx="18" cy="20" r="5.5" fill="#4a7fb5"/><path d="M8 34c0-4.5 4.5-8 10-8s10 3.5 10 8" fill="#4a7fb5"/><rect x="30" y="16" width="10" height="2.5" rx="1.25" fill="#4a7fb5"/><rect x="30" y="22" width="10" height="2.5" rx="1.25" fill="#4a7fb5"/><rect x="30" y="28" width="7" height="2.5" rx="1.25" fill="#4a7fb5"/></svg>
               </a>
-              <Link href="/spend-report"
+              <Link href="/approval"
                 className="mt-2 flex items-center justify-between bg-[#3d6e9e] p-5 text-white transition hover:brightness-110">
                 <div>
                   <p className="text-base font-bold">교인전용 재정청구</p>
