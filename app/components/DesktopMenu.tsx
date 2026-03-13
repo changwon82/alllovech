@@ -89,7 +89,7 @@ export default function DesktopMenu() {
         <div key={menu.label} className="relative">
           <button
             onClick={() => setOpenIdx(openIdx === i ? null : i)}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1 text-[14px] font-bold transition ${
+            className={`flex shrink-0 whitespace-nowrap items-center gap-1 text-[17px] font-bold transition ${
               openIdx === i ? "text-navy" : "text-neutral-700 hover:text-navy"
             }`}
           >
@@ -209,7 +209,7 @@ export default function DesktopMenu() {
                 {/* 2행: 예배안내 = 2열 (예배시간 | 교육부서) */}
                 <div className="px-4 pt-2">
                   <div className="mb-3 flex items-center gap-2">
-                    <span className="text-[14px] font-semibold text-neutral-800">예배안내</span>
+                    <span className="text-[17px] font-semibold text-neutral-800">예배안내</span>
                     <Link
                       href="/worship"
                       onClick={() => setOpenIdx(null)}
@@ -277,7 +277,7 @@ export default function DesktopMenu() {
                     onClick={() => setOpenIdx(null)}
                     className="group rounded-xl px-5 py-4 transition hover:bg-neutral-50"
                   >
-                    <span className="text-[14px] font-semibold text-neutral-800 group-hover:text-navy">
+                    <span className="text-[17px] font-semibold text-neutral-800 group-hover:text-navy">
                       {child.label}
                     </span>
                   </Link>

@@ -39,6 +39,7 @@ export default async function NewApprovalPage() {
         items={[
           { label: "재정청구", href: "/approval" },
           { label: "재정공지", href: "/approval/notice" },
+          { label: "기부금영수증", href: "/approval/donation" },
         ]}
       />
       <div className="min-w-0 flex-1">

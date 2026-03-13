@@ -51,12 +51,10 @@ function formatAmount(amount: number | null): string {
 function formatDate(postDate: string): string {
   const d = new Date(postDate);
   const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  const y = kst.getUTCFullYear();
+  const y = String(kst.getUTCFullYear() % 100).padStart(2, "0");
   const m = String(kst.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(kst.getUTCDate()).padStart(2, "0");
-  const h = String(kst.getUTCHours()).padStart(2, "0");
-  const mm = String(kst.getUTCMinutes()).padStart(2, "0");
-  return `${y}.${m}.${dd} ${h}:${mm}`;
+  return `${y}/${m}/${dd}`;
 }
 
 export default function ApprovalTable({
@@ -73,21 +71,20 @@ export default function ApprovalTable({
 
   return (
     <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">
-      <table className="w-full min-w-[1200px] text-xs">
+      <table className="w-full min-w-[900px] text-xs">
         <thead>
           <tr className="border-b border-neutral-100 bg-neutral-50 text-neutral-500">
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">번호</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">문서분류</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">계정이름</th>
-            <th className="px-2 py-2.5 text-left font-medium">제목</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">청구자</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">등록일시</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-right font-medium">금액</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">품의</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">결재1</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">결재2</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">재정</th>
-            <th className="whitespace-nowrap px-2 py-2.5 text-center font-medium">지급</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">번호</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">문서분류</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">계정이름</th>
+            <th className="px-1.5 py-1.5 text-left font-medium">제목</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-left font-medium">등록일시</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-right font-medium">금액</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium"><div>품의</div><div className="text-[10px] font-normal text-neutral-400">(청구자)</div></th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">결재1</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">결재2</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">재정</th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">지급</th>
           </tr>
         </thead>
         <tbody>
@@ -103,16 +100,16 @@ export default function ApprovalTable({
                 key={post.id}
                 className="border-b border-neutral-50 transition-colors hover:bg-neutral-50"
               >
-                <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-400">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center text-neutral-400">
                   {post.id}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-500">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center text-neutral-500">
                   {post.doc_category || "-"}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-500">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center text-neutral-500">
                   {post.account_name || "-"}
                 </td>
-                <td className="px-2 py-1.5">
+                <td className="px-1.5 py-1">
                   <Link
                     href={`/approval/${post.id}`}
                     className="inline-flex items-center gap-1.5 font-medium text-neutral-800 hover:text-navy"
@@ -125,33 +122,30 @@ export default function ApprovalTable({
                     )}
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-600">
-                  {requester}
-                </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center text-neutral-400">
+                <td className="whitespace-nowrap px-1.5 py-1 text-left text-neutral-400">
                   {formatDate(post.post_date)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-right font-medium text-neutral-700">
+                <td className="whitespace-nowrap px-1.5 py-1 text-right font-medium text-neutral-700">
                   {formatAmount(post.amount)}
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <div className="text-neutral-600">{requester}</div>
-                  <div className={`text-[10px] ${post.doc_status === "draft" ? "text-amber-600" : "text-neutral-400"}`}>
+                  <div className={`text-[10px] leading-none ${post.doc_status === "draft" ? "text-amber-600" : "text-green-600"}`}>
                     {post.doc_status === "draft" ? "작성중" : "품의"}
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <div className={a1.color}>{getName(post.approver1_mb_id)}</div>
-                  <div className={`text-[10px] ${a1.color}`}>{a1.label}</div>
+                  <div className={`text-[10px] leading-none ${a1.color}`}>{a1.label}</div>
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <div className={a2.color}>{getName(post.approver2_mb_id)}</div>
-                  <div className={`text-[10px] ${a2.color}`}>{a2.label}</div>
+                  <div className={`text-[10px] leading-none ${a2.color}`}>{a2.label}</div>
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <span className={`text-[10px] font-medium ${fin.color}`}>{fin.label}</span>
                 </td>
-                <td className="whitespace-nowrap px-2 py-1.5 text-center">
+                <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <span className={`text-[10px] font-medium ${pay.color}`}>{pay.label}</span>
                 </td>
               </tr>

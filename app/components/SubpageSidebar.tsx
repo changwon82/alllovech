@@ -44,7 +44,13 @@ export default function SubpageSidebar({ title, items }: SubpageSidebarProps) {
     }
     const active = exactMatch
       ? pathname === item.href
-      : pathname.startsWith(item.href + "/");
+      : pathname.startsWith(item.href + "/") &&
+        !internalItems.some(
+          (other) =>
+            other.href !== item.href &&
+            other.href.startsWith(item.href + "/") &&
+            pathname.startsWith(other.href),
+        );
     return (
       <li key={item.href}>
         <Link

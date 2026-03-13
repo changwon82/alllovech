@@ -1,0 +1,61 @@
+import SubpageHeader from "@/app/components/SubpageHeader";
+import SubpageSidebar from "@/app/components/SubpageSidebar";
+import PageHeader from "@/app/components/ui/PageHeader";
+
+const R2 = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/donation";
+
+export default function DonationPage() {
+  return (
+    <>
+      <SubpageHeader
+        title="교회재정"
+        breadcrumbs={[
+          { label: "교회재정", href: "/approval" },
+          { label: "기부금영수증" },
+        ]}
+      />
+      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+        <SubpageSidebar
+          title="교회재정"
+          items={[
+            { label: "재정청구", href: "/approval" },
+            { label: "재정공지", href: "/approval/notice" },
+            { label: "기부금영수증", href: "/approval/donation" },
+          ]}
+        />
+        <div className="min-w-0 flex-1">
+          <PageHeader title="기부금영수증" />
+
+          <div className="mt-6 space-y-8">
+            {/* 상단 안내 이미지 */}
+            <img src={`${R2}/header.png`} alt="기부금영수증 안내" className="w-full rounded-lg" />
+
+            {/* 바로가기 버튼 — 초록 2개(등록교인 50%) / 노랑(미등록교인 50%) */}
+            <div className="grid grid-cols-2 items-start gap-4">
+              <div className="grid grid-cols-2 items-stretch gap-2">
+                <a href="https://mas3.ohjic.com/member/intro/alc" target="_blank" rel="noopener noreferrer" className="block">
+                  <img src={`${R2}/btn_online.png`} alt="온라인교인센터 바로가기" className="h-full w-full object-contain transition hover:brightness-95" />
+                </a>
+                <a href="https://ohjic-help.atlassian.net/wiki/spaces/ONL/pages/2491029" target="_blank" rel="noopener noreferrer" className="block">
+                  <img src={`${R2}/btn_mobile.png`} alt="온라인교인센터 앱 다운" className="h-full w-full object-contain transition hover:brightness-95" />
+                </a>
+              </div>
+              <a href="https://forms.gle/r1k7VRcxUnunJZ7d7" target="_blank" rel="noopener noreferrer">
+                <img src={`${R2}/btn_form.png`} alt="기부금영수증 신청서 작성" className="w-full transition hover:brightness-95" />
+              </a>
+            </div>
+
+            {/* 발급 절차 */}
+            <img src={`${R2}/steps.png`} alt="기부금영수증 발급 절차" className="w-full" />
+
+            {/* 안내사항 */}
+            <img src={`${R2}/info.png`} alt="기부금영수증 안내사항" className="w-full" />
+
+            {/* 공지사항 */}
+            <img src={`${R2}/notice.png`} alt="기부금영수증 공지" className="w-full" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

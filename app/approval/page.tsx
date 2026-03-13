@@ -3,6 +3,7 @@ import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
 import ApprovalTable from "./ApprovalTable";
+import LoginForm from "@/app/login/LoginForm";
 import Link from "next/link";
 
 export default async function ApprovalListPage({
@@ -18,7 +19,7 @@ export default async function ApprovalListPage({
   const dateTo = params.to || "";
   const perPage = 20;
 
-  const { supabase } = await getSessionUser();
+  const { supabase, user } = await getSessionUser();
 
   // 카테고리별 건수 조회 (1000행 제한 우회)
   let catCounts: { doc_category: string | null }[] = [];
@@ -166,17 +167,25 @@ export default async function ApprovalListPage({
 
   return (
     <>
-    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정" }]} />
+    <SubpageHeader title="교회재정" breadcrumbs={[{ label: "교회재정", href: "/approval" }, { label: "재정청구" }]} />
     <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
       <SubpageSidebar
         title="교회재정"
         items={[
           { label: "재정청구", href: "/approval" },
           { label: "재정공지", href: "/approval/notice" },
+          { label: "기부금영수증", href: "/approval/donation" },
         ]}
       />
       <div className="min-w-0 flex-1">
       <PageHeader title="재정청구" />
+
+      {!user ? (
+        <div className="mx-auto mt-12 max-w-sm">
+          <p className="mb-6 text-center text-sm text-neutral-500">재정청구는 교인 전용 서비스입니다.</p>
+          <LoginForm next="/approval" />
+        </div>
+      ) : (<>
 
       {/* 일자 검색 */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -255,25 +264,13 @@ export default async function ApprovalListPage({
               초기화
             </a>
           )}
-        </form>
-
-        <div className="flex items-center gap-3">
           <Link
             href="/approval/new"
             className="rounded-xl bg-accent px-4 py-1.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
           >
             문서작성
           </Link>
-          <div className="text-sm text-neutral-500">
-          자료수: <span className="font-medium text-neutral-700">{displayCount.toLocaleString("ko-KR")}</span>개
-          {totalAmount > 0 && (
-            <>
-              <span className="mx-2">·</span>
-              합계금액: <span className="font-bold text-accent">{totalAmount.toLocaleString("ko-KR")}원</span>
-            </>
-          )}
-          </div>
-        </div>
+        </form>
       </div>
 
       {/* 카테고리 탭 */}
@@ -385,6 +382,7 @@ export default async function ApprovalListPage({
           );
         })()}
 
+    </>)}
     </div>
     </div>
     </>
