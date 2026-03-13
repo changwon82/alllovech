@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
 import Link from "next/link";
 import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
 import PageHeader from "@/app/components/ui/PageHeader";
+import DeleteButton from "./DeleteButton";
 
 export default async function BrothersDetailPage({
   params,
@@ -11,7 +13,14 @@ export default async function BrothersDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase } = await getSessionUser();
+  const { supabase, user } = await getSessionUser();
+
+  // 관리자 확인
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
 
   const { data: post } = await supabase
     .from("brothers_posts")
@@ -42,8 +51,21 @@ export default async function BrothersDetailPage({
       />
       <div className="min-w-0 flex-1">
       <PageHeader title="교우소식" />
+      {/* 관리자 버튼 */}
+      {isAdmin && (
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <Link
+            href={`/brothers/${post.id}/edit`}
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-navy transition-all hover:bg-navy/10 active:scale-95"
+          >
+            수정
+          </Link>
+          <DeleteButton postId={post.id} />
+        </div>
+      )}
+
       {/* 글 헤더 */}
-      <div className="mt-6">
+      <div className={isAdmin ? "mt-2" : "mt-6"}>
         <div className="flex items-center justify-between border-y border-neutral-200 bg-neutral-50 px-5 py-3">
           <h1 className="text-[15px] font-bold text-neutral-800">{post.title}</h1>
           <span className="shrink-0 pl-4 text-xs text-neutral-400">

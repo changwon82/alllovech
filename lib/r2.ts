@@ -51,3 +51,25 @@ export async function deleteFromR2(key: string): Promise<void> {
     }),
   );
 }
+
+const R2_PUBLIC = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev";
+
+/** content HTML에서 R2 이미지 URL을 추출하여 R2에서 삭제 */
+export async function deleteContentImages(content: string | null): Promise<void> {
+  if (!content) return;
+
+  const regex = /src=["']+([^"']+)["']+/g;
+  const keys: string[] = [];
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    const url = match[1];
+    if (!url.startsWith(R2_PUBLIC)) continue;
+    // URL: https://pub-xxx.r2.dev/gallery/inline_xxx.jpg → key: gallery/inline_xxx.jpg
+    const key = url.slice(R2_PUBLIC.length + 1);
+    if (key) keys.push(key);
+  }
+
+  if (keys.length > 0) {
+    await Promise.all(keys.map((k) => deleteFromR2(k)));
+  }
+}

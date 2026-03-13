@@ -1,4 +1,5 @@
 import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
 import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
@@ -15,7 +16,14 @@ export default async function JuboPage({
   const page = parseInt(params.page || "1", 10);
   const perPage = 16;
 
-  const { supabase } = await getSessionUser();
+  const { supabase, user } = await getSessionUser();
+
+  // 관리자 확인
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
 
   const { data: posts, count } = await supabase
     .from("jubo_posts")
@@ -50,7 +58,17 @@ export default async function JuboPage({
         ]}
       />
       <div className="min-w-0 flex-1">
-      <PageHeader title="주보" />
+      <div className="flex items-center justify-between">
+        <PageHeader title="주보" />
+        {isAdmin && (
+          <Link
+            href="/jubo/new"
+            className="rounded-xl bg-navy px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
+          >
+            + 글쓰기
+          </Link>
+        )}
+      </div>
 
       {!posts || posts.length === 0 ? (
         <p className="mt-12 text-center text-sm text-neutral-400">

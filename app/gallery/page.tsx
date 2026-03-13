@@ -1,4 +1,5 @@
 import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
 import PageHeader from "@/app/components/ui/PageHeader";
 import SubpageHeader from "@/app/components/SubpageHeader";
 import SubpageSidebar from "@/app/components/SubpageSidebar";
@@ -16,9 +17,16 @@ export default async function GalleryPage({
   const params = await searchParams;
   const category = params.category || "전체";
   const page = parseInt(params.page || "1", 10);
-  const perPage = 12;
+  const perPage = 16;
 
-  const { supabase } = await getSessionUser();
+  const { supabase, user } = await getSessionUser();
+
+  // 관리자 확인
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
 
   // 게시글 + 첫 번째 이미지 조회
   let query = supabase
@@ -49,7 +57,17 @@ export default async function GalleryPage({
         ]}
       />
       <div className="min-w-0 flex-1">
-      <PageHeader title="사진갤러리" />
+      <div className="flex items-center justify-between">
+        <PageHeader title="다애사진" />
+        {isAdmin && (
+          <Link
+            href="/gallery/new"
+            className="rounded-xl bg-navy px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
+          >
+            + 글쓰기
+          </Link>
+        )}
+      </div>
 
       {/* 카테고리 필터 */}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -74,46 +92,43 @@ export default async function GalleryPage({
           등록된 사진이 없습니다.
         </p>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           {posts.map((post) => {
             const images = post.gallery_images as { file_name: string }[];
-            let thumb = images?.[0]?.file_name;
+            const firstAttach = images?.[0]?.file_name;
+            let thumbUrl: string | undefined;
 
-            // 첨부파일 없으면 content HTML에서 첫 이미지 추출
-            if (!thumb && post.content) {
+            if (firstAttach) {
+              thumbUrl = `${R2_BASE}/${firstAttach}`;
+            } else if (post.content) {
               const match = post.content.match(/src=["']+([^"']+\.(?:jpg|jpeg|png|gif|webp))["']+/i);
-              if (match) thumb = match[1].split("/").pop() || undefined;
+              if (match) thumbUrl = match[1];
             }
 
             return (
               <Link
                 key={post.id}
                 href={`/gallery/${post.id}`}
-                className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-shadow hover:shadow-md"
+                className="group relative overflow-hidden bg-neutral-100"
               >
-                {thumb ? (
-                  <div className="aspect-square overflow-hidden bg-neutral-100">
+                {thumbUrl ? (
+                  <div className="aspect-square overflow-hidden">
                     <img
-                      src={`${R2_BASE}/${thumb}`}
+                      src={thumbUrl}
                       alt=""
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       loading="lazy"
                     />
                   </div>
                 ) : (
-                  <div className="flex aspect-square items-center justify-center bg-neutral-100">
+                  <div className="flex aspect-square items-center justify-center">
                     <span className="text-3xl text-neutral-300">📷</span>
                   </div>
                 )}
-                <div className="p-2.5">
-                  <p className="truncate text-sm font-semibold text-neutral-800">
+                <div className="absolute inset-x-0 bottom-0 bg-black/70 px-2.5 py-2">
+                  <p className="truncate text-xs font-medium text-white">
                     {post.title}
                   </p>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-neutral-400">
-                    <span>{new Date(post.post_date).toLocaleDateString("ko-KR")}</span>
-                    <span>·</span>
-                    <span className="text-accent">{post.category}</span>
-                  </div>
                 </div>
               </Link>
             );
