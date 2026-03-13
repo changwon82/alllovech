@@ -55,20 +55,25 @@ export default function MobileMenu() {
           </MobileSection>
 
           <MobileSection title="예배와 말씀" index={1} openIdx={openIdx} toggle={toggleSection}>
-            <MobileSubLink href="/sermon" onClick={closeMenu}>예배영상</MobileSubLink>
             <MobileSubLink href="/worship" onClick={closeMenu}>예배안내</MobileSubLink>
+            <MobileSubLink href="/sermon" onClick={closeMenu}>예배영상</MobileSubLink>
             <MobileSubLink href="/365bible" onClick={closeMenu}>365 성경읽기</MobileSubLink>
           </MobileSection>
 
           <MobileSection title="양육" index={2} openIdx={openIdx} toggle={toggleSection}>
-            <MobileSubLink href="/365bible" onClick={closeMenu}>365 성경읽기</MobileSubLink>
-            <MobileSubLink href="/365bible/groups" onClick={closeMenu}>함께읽기 그룹</MobileSubLink>
+            <MobileSubLink href="/nurture/1" onClick={closeMenu}>양육메뉴_1</MobileSubLink>
+            <MobileSubLink href="/nurture/2" onClick={closeMenu}>양육메뉴_2</MobileSubLink>
+            <MobileSubLink href="/nurture/3" onClick={closeMenu}>양육메뉴_3</MobileSubLink>
+            <MobileSubLink href="/nurture/4" onClick={closeMenu}>양육메뉴_4</MobileSubLink>
+            <MobileSubLink href="/nurture/5" onClick={closeMenu}>양육메뉴_5</MobileSubLink>
+            <MobileSubLink href="/nurture/6" onClick={closeMenu}>양육메뉴_6</MobileSubLink>
           </MobileSection>
 
           <MobileSection title="다코방" index={3} openIdx={openIdx} toggle={toggleSection}>
-            <MobileSubLink href="/brothers" onClick={closeMenu}>교우소식</MobileSubLink>
-            <MobileSubLink href="/gallery" onClick={closeMenu}>다애사진</MobileSubLink>
-            <MobileSubLink href="/news" onClick={closeMenu}>교회소식</MobileSubLink>
+            <MobileSubLink href="/dacobang/1" onClick={closeMenu}>다코방_1</MobileSubLink>
+            <MobileSubLink href="/dacobang/2" onClick={closeMenu}>다코방_2</MobileSubLink>
+            <MobileSubLink href="/dacobang/3" onClick={closeMenu}>다코방_3</MobileSubLink>
+            <MobileSubLink href="/dacobang/4" onClick={closeMenu}>다코방_4</MobileSubLink>
           </MobileSection>
 
           <MobileSection title="봉사와 선교" index={4} openIdx={openIdx} toggle={toggleSection}>

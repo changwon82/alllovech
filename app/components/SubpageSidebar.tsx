@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,6 +10,7 @@ interface SidebarItem {
   external?: boolean;
   icon?: React.ReactNode;
   group?: string;
+  divider?: boolean;
 }
 
 interface SubpageSidebarProps {
@@ -27,19 +29,23 @@ export default function SubpageSidebar({ title, items }: SubpageSidebarProps) {
   const hasGroups = items.some((i) => i.group);
 
   const renderItem = (item: SidebarItem) => {
+    const dividerEl = item.divider ? <li key={item.href + "-div"} className="my-2 border-t border-neutral-200" /> : null;
     if (item.external) {
       return (
-        <li key={item.href}>
-          <a
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 border-l-2 border-transparent py-2 pl-4 text-[14px] text-neutral-500 transition hover:border-neutral-300 hover:text-neutral-800"
-          >
-            {item.icon}
-            {item.label}
-          </a>
-        </li>
+        <React.Fragment key={item.href}>
+          {dividerEl}
+          <li>
+            <a
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 border-l-2 border-transparent py-2 pl-4 text-[14px] text-neutral-500 transition hover:border-neutral-300 hover:text-neutral-800"
+            >
+              {item.icon}
+              {item.label}
+            </a>
+          </li>
+        </React.Fragment>
       );
     }
     const active = exactMatch
@@ -52,18 +58,21 @@ export default function SubpageSidebar({ title, items }: SubpageSidebarProps) {
             pathname.startsWith(other.href),
         );
     return (
-      <li key={item.href}>
-        <Link
-          href={item.href}
-          className={`block border-l-2 py-2 pl-4 text-[14px] transition ${
-            active
-              ? "border-navy font-semibold text-navy"
-              : "border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-800"
-          }`}
-        >
-          {item.label}
-        </Link>
-      </li>
+      <React.Fragment key={item.href}>
+        {dividerEl}
+        <li>
+          <Link
+            href={item.href}
+            className={`block border-l-2 py-2 pl-4 text-[14px] transition ${
+              active
+                ? "border-navy font-semibold text-navy"
+                : "border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-800"
+            }`}
+          >
+            {item.label}
+          </Link>
+        </li>
+      </React.Fragment>
     );
   };
 

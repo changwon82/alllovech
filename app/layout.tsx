@@ -3,6 +3,7 @@ import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
+import SubpageShell from "./components/SubpageShell";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -66,7 +67,7 @@ export default function RootLayout({
       <body className={`${notoSansKR.variable} ${notoSerifKR.variable} antialiased`}>
         <ServiceWorkerRegister />
         <TopNav />
-        {children}
+        <SubpageShell>{children}</SubpageShell>
         <Footer />
       </body>
     </html>

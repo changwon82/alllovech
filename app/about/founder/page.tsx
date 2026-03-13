@@ -1,29 +1,10 @@
 import Image from "next/image";
-import SubpageHeader from "@/app/components/SubpageHeader";
-import SubpageSidebar from "@/app/components/SubpageSidebar";
 
 export const metadata = { title: "설립목사 | 다애교회" };
 
 export default function FounderPage() {
   return (
     <>
-      <SubpageHeader
-        title="교회소개"
-        breadcrumbs={[{ label: "교회소개", href: "/about" }, { label: "설립목사" }]}
-      />
-
-      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
-        <SubpageSidebar
-          title="교회소개"
-          items={[
-            { label: "인사말씀", href: "/about" },
-            { label: "설립목사", href: "/about/founder" },
-            { label: "교회연혁", href: "/about/history" },
-            { label: "섬기는 사람들", href: "/about/staff" },
-            { label: "오시는 길", href: "/about/location" },
-          ]}
-        />
-        <div className="min-w-0 flex-1">
         <div className="flex flex-col items-start gap-8 md:flex-row">
           {/* 사진 */}
           <div className="w-1/2 shrink-0 overflow-hidden rounded-2xl md:w-64">
@@ -60,8 +41,6 @@ export default function FounderPage() {
             </div>
           </div>
         </div>
-      </div>
-      </div>
     </>
   );
 }
