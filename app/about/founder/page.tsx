@@ -1,8 +1,34 @@
 import Image from "next/image";
+import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getPage } from "@/app/components/editable-page-actions";
+import EditablePage from "@/app/components/EditablePage";
 
 export const metadata = { title: "설립목사 | 다애교회" };
 
-export default function FounderPage() {
+export default async function FounderPage() {
+  const [{ supabase, user }, page] = await Promise.all([
+    getSessionUser(),
+    getPage("about/founder"),
+  ]);
+
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
+
+  return (
+    <EditablePage
+      slug="about/founder"
+      initialContent={page?.content ?? null}
+      isAdmin={isAdmin}
+      fallback={<Fallback />}
+    />
+  );
+}
+
+function Fallback() {
   return (
     <>
         <div className="flex flex-col items-start gap-8 md:flex-row">

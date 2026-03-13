@@ -76,7 +76,16 @@ const MENUS: MenuItem[] = [
 
 export default function DesktopMenu() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  function handleEnter(i: number) {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
+    setOpenIdx(i);
+  }
+  function handleLeave() {
+    closeTimer.current = setTimeout(() => setOpenIdx(null), 150);
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -91,7 +100,7 @@ export default function DesktopMenu() {
   return (
     <div ref={menuRef} className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex lg:gap-8">
       {MENUS.map((menu, i) => (
-        <div key={menu.label} className="relative">
+        <div key={menu.label} className="relative" onMouseEnter={() => handleEnter(i)} onMouseLeave={handleLeave}>
           <button
             onClick={() => setOpenIdx(openIdx === i ? null : i)}
             className={`flex shrink-0 whitespace-nowrap items-center gap-1 text-[17px] font-bold transition ${
@@ -115,8 +124,10 @@ export default function DesktopMenu() {
 
       {/* 메가메뉴 드롭다운 */}
       {openIdx !== null && (
-        <div className="absolute left-1/2 top-full z-50 mt-4 w-[700px] -translate-x-1/2">
-          <div className="rounded-2xl bg-white shadow-xl ring-1 ring-black/5">
+        <div className="absolute left-1/2 top-full z-50 w-[700px] -translate-x-1/2" onMouseEnter={() => { if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; } }} onMouseLeave={handleLeave}>
+          {/* 브릿지: 메뉴 버튼과 패널 사이 간격을 채워 hover 유지 */}
+          <div className="h-4" />
+          <div className="bg-white/80 shadow-xl ring-1 ring-black/5 backdrop-blur-xl">
             {/* 제목 */}
             <div className="border-b border-neutral-100 px-8 py-5">
               <h3 className="text-lg font-bold text-navy">{MENUS[openIdx].label}</h3>
@@ -138,7 +149,7 @@ export default function DesktopMenu() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpenIdx(null)}
-                        className="block rounded-lg px-3 py-1.5 text-[15px] font-semibold text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
+                        className="block rounded-lg px-3 py-2 text-[15px] font-semibold text-neutral-600 transition hover:bg-gradient-to-r hover:from-navy/10 hover:to-transparent hover:text-navy"
                       >
                         {item.label}
                       </Link>
@@ -162,7 +173,7 @@ export default function DesktopMenu() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpenIdx(null)}
-                        className="block rounded-lg px-3 py-1.5 text-[15px] font-semibold text-neutral-600 transition hover:bg-neutral-50 hover:text-navy"
+                        className="block rounded-lg px-3 py-2 text-[15px] font-semibold text-neutral-600 transition hover:bg-gradient-to-r hover:from-navy/10 hover:to-transparent hover:text-navy"
                       >
                         {item.label}
                       </Link>
@@ -242,7 +253,7 @@ export default function DesktopMenu() {
                     <Link
                       href="/sermon"
                       onClick={() => setOpenIdx(null)}
-                      className="group flex items-center gap-3 rounded-xl transition hover:opacity-80"
+                      className="group flex items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-gradient-to-r hover:from-navy/10 hover:to-transparent"
                     >
                       <svg className="h-5 w-5 shrink-0 text-neutral-400 group-hover:text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -264,7 +275,7 @@ export default function DesktopMenu() {
                   <Link
                     href="/365bible"
                     onClick={() => setOpenIdx(null)}
-                    className="group flex items-center gap-3 rounded-xl transition hover:opacity-80"
+                    className="group flex items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-gradient-to-r hover:from-navy/10 hover:to-transparent"
                   >
                     <svg className="h-5 w-5 shrink-0 text-neutral-400 group-hover:text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
@@ -280,9 +291,9 @@ export default function DesktopMenu() {
                     key={child.href}
                     href={child.href}
                     onClick={() => setOpenIdx(null)}
-                    className="group rounded-xl px-5 py-4 transition hover:bg-neutral-50"
+                    className="group rounded-xl px-5 py-2 transition hover:bg-gradient-to-r hover:from-navy/10 hover:to-transparent"
                   >
-                    <span className="text-[17px] font-semibold text-neutral-800 group-hover:text-navy">
+                    <span className="text-[15px] font-semibold text-neutral-800 group-hover:text-navy">
                       {child.label}
                     </span>
                   </Link>

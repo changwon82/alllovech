@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 const STORAGE_KEY = "bible-text-size";
 
 const SIZES = [
-  { label: "작게", className: "text-[11px] leading-relaxed" },
-  { label: "보통", className: "text-xs leading-relaxed" },
-  { label: "크게", className: "text-sm leading-relaxed" },
-  { label: "아주 크게", className: "text-base leading-relaxed" },
+  { label: "작게", className: "text-sm leading-relaxed" },
+  { label: "보통", className: "text-base leading-relaxed" },
+  { label: "크게", className: "text-lg leading-loose" },
+  { label: "아주 크게", className: "text-xl leading-loose" },
 ];
 
 function getSavedSize(): number {

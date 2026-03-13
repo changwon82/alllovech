@@ -1,3 +1,8 @@
+import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getPage } from "@/app/components/editable-page-actions";
+import EditablePage from "@/app/components/EditablePage";
+
 export const metadata = { title: "교회연혁 | 다애교회" };
 
 const history = [
@@ -160,7 +165,29 @@ const history = [
   },
 ];
 
-export default function HistoryPage() {
+export default async function HistoryPage() {
+  const [{ supabase, user }, page] = await Promise.all([
+    getSessionUser(),
+    getPage("about/history"),
+  ]);
+
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
+
+  return (
+    <EditablePage
+      slug="about/history"
+      initialContent={page?.content ?? null}
+      isAdmin={isAdmin}
+      fallback={<Fallback />}
+    />
+  );
+}
+
+function Fallback() {
   return (
     <>
         <h2 className="text-xl font-bold text-navy md:text-2xl">

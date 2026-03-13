@@ -1,10 +1,36 @@
 import Image from "next/image";
+import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
+import { getPage } from "@/app/components/editable-page-actions";
+import EditablePage from "@/app/components/EditablePage";
 
 export const metadata = { title: "에즈마이야 Ezemiah | 다애교회" };
 
 const R2 = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/service/ezemiah";
 
-export default function EzemaiahPage() {
+export default async function EzemaiahPage() {
+  const [{ supabase, user }, page] = await Promise.all([
+    getSessionUser(),
+    getPage("service/ezemiah"),
+  ]);
+
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
+
+  return (
+    <EditablePage
+      slug="service/ezemiah"
+      initialContent={page?.content ?? null}
+      isAdmin={isAdmin}
+      fallback={<Fallback />}
+    />
+  );
+}
+
+function Fallback() {
   return (
     <>
         {/* 제목 */}

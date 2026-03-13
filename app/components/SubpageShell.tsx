@@ -109,6 +109,18 @@ const SECTIONS: SectionConfig[] = [
       { label: "기부금영수증", href: "/approval/donation" },
     ],
   },
+  {
+    title: "회원",
+    breadcrumbLink: "/login",
+    breadcrumbs: {
+      "/login": "로그인",
+      "/signup": "회원가입",
+    },
+    items: [
+      { label: "로그인", href: "/login" },
+      { label: "회원가입", href: "/signup" },
+    ],
+  },
 ];
 
 function getSection(pathname: string): SectionConfig | null {
