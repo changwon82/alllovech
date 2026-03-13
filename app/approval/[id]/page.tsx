@@ -152,7 +152,6 @@ export default async function ApprovalDetailPage({
         <div className="mt-3 text-lg font-bold text-navy">
           {formatAmount(post.amount)}
         </div>
-      </div>
 
       {/* 결재 흐름 (결재요청 후에만 표시) */}
       {post.doc_status === "submitted" && <div className="mt-6 px-4">
