@@ -49,7 +49,18 @@ export default async function JuboPage({
     }
     if (post.content) {
       const match = post.content.match(/src=["']+([^"']+\.(?:jpg|jpeg|png|gif|webp))["']+/i);
-      if (match) return { url: match[1], thumbUrl: match[1] };
+      if (match) {
+        const url = match[1];
+        // R2 URL이면 썸네일 경로 생성
+        if (url.startsWith(R2_BASE + "/")) {
+          const r2Key = url.slice(R2_BASE.length + 1);
+          const parts = r2Key.split("/");
+          const fn = parts.pop()!;
+          const thumbPath = [...parts, "_thumb", fn].join("/");
+          return { url, thumbUrl: `${R2_BASE}/${thumbPath}` };
+        }
+        return { url, thumbUrl: url };
+      }
     }
     return undefined;
   }

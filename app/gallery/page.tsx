@@ -107,13 +107,17 @@ export default async function GalleryPage({
               if (match) originalUrl = match[1];
             }
 
-            // 썸네일 URL: gallery/2507/photo.webp → gallery/2507/_thumb/photo.webp
+            // 썸네일 URL: _thumb을 파일명 바로 앞에 삽입
             let thumbUrl = originalUrl;
-            if (originalUrl && firstAttach) {
-              const parts = firstAttach.split("/");
-              const fileName = parts.pop()!;
-              const thumbPath = [...parts, "_thumb", fileName].join("/");
-              thumbUrl = `${R2_BASE}/${thumbPath}`;
+            if (originalUrl) {
+              // R2 키 추출 (첨부파일 또는 content에서 추출한 URL)
+              const r2Key = firstAttach || (originalUrl.startsWith(R2_BASE + "/") ? originalUrl.slice(R2_BASE.length + 1) : null);
+              if (r2Key) {
+                const parts = r2Key.split("/");
+                const fileName = parts.pop()!;
+                const thumbPath = [...parts, "_thumb", fileName].join("/");
+                thumbUrl = `${R2_BASE}/${thumbPath}`;
+              }
             }
 
             return (
