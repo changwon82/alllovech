@@ -56,7 +56,7 @@ export default function SermonContent({
   const [current, setCurrent] = useState<Sermon | null>(featured);
   const [playing, setPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { play: playGlobal, setInlineVisible } = useVideoPlayer();
+  const { play: playGlobal, stop: stopGlobal, setInlineVisible } = useVideoPlayer();
   const listRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 
@@ -69,10 +69,12 @@ export default function SermonContent({
     return () => mql.removeEventListener("change", handler);
   }, []);
 
-  // 컴포넌트 언마운트 시 (페이지 이동) → 전역 플레이어로 전환
+  // 마운트 시 전역 플레이어 정리 (페이지 새로 진입 시 초기 상태)
+  // 언마운트 시 (페이지 이동) → 전역 플레이어로 전환
   useEffect(() => {
+    stopGlobal();
     return () => setInlineVisible(false);
-  }, [setInlineVisible]);
+  }, [stopGlobal, setInlineVisible]);
 
   // 페이지네이션으로 sermons 변경 시 → 목록 시작 위치로 스크롤
   useEffect(() => {

@@ -1,15 +1,25 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useVideoPlayer } from "./VideoPlayerContext";
 
 export default function StickyVideoPlayer() {
   const { video, stop, inlineVisible } = useVideoPlayer();
+  const [isMobile, setIsMobile] = useState(false);
 
-  // 인라인 플레이어가 보이는 중이면 전역 플레이어 숨김
-  if (!video || inlineVisible) return null;
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  // 데스크톱이거나 비디오 없거나 인라인 플레이어 활성 → 렌더링 안 함
+  if (!video || inlineVisible || !isMobile) return null;
 
   return (
-    <div className="sticky top-14 z-40 md:hidden">
+    <div className="sticky top-14 z-40">
       <div className="relative w-full bg-black">
         <div className="relative w-full pt-[56.25%]">
           <iframe
