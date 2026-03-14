@@ -55,9 +55,19 @@ export default function SermonContent({
 }) {
   const [current, setCurrent] = useState<Sermon | null>(featured);
   const [playing, setPlaying] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { play: playGlobal, setInlineVisible } = useVideoPlayer();
   const listRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+
+  // 뷰포트 크기 감지 (iframe 중복 렌더링 방지)
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
 
   // 컴포넌트 언마운트 시 (페이지 이동) → 전역 플레이어로 전환
   useEffect(() => {
@@ -70,10 +80,10 @@ export default function SermonContent({
       isFirstRender.current = false;
       return;
     }
-    if (listRef.current && window.innerWidth < 768) {
+    if (listRef.current && isMobile) {
       listRef.current.scrollIntoView({ behavior: "instant" });
     }
-  }, [sermons]);
+  }, [sermons, isMobile]);
 
   const startPlay = useCallback((sermon: Sermon) => {
     const vid = getYouTubeId(sermon.youtube_url);
@@ -101,7 +111,7 @@ export default function SermonContent({
   const mobileHero = current && (
     <div className={`md:hidden ${playing ? "sticky top-14 z-20" : ""}`}>
       <div className="bg-black">
-        {playing && videoId ? (
+        {playing && videoId && isMobile ? (
           <div className="relative w-full pt-[56.25%]">
             <iframe
               key={current.id}
@@ -144,7 +154,7 @@ export default function SermonContent({
       {current && (
         <div className="hidden scroll-mt-16 overflow-hidden bg-neutral-800 md:flex md:flex-row">
           <div className="relative w-[420px] shrink-0 overflow-hidden">
-            {playing && videoId ? (
+            {playing && videoId && !isMobile ? (
               <div className="relative w-full overflow-hidden pt-[56.25%]">
                 <iframe key={current.id} className="absolute inset-0 h-full w-full" src={`https://www.youtube.com/embed/${videoId}?autoplay=1`} title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
               </div>
