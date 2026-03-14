@@ -69,12 +69,15 @@ export default function SermonContent({
     return () => mql.removeEventListener("change", handler);
   }, []);
 
-  // featured 변경 시 (네비게이션으로 재진입) → 초기 상태로 리셋
+  // featured ID 변경 시 (네비게이션으로 재진입) → 초기 상태로 리셋
+  // 페이지네이션은 featured ID가 동일하므로 트리거 안 됨
+  const featuredId = featured?.id ?? null;
   useEffect(() => {
     setCurrent(featured);
     setPlaying(false);
     stopGlobal();
-  }, [featured, stopGlobal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [featuredId, stopGlobal]);
 
   // 언마운트 시 (페이지 이동) → 전역 플레이어로 전환
   useEffect(() => {
