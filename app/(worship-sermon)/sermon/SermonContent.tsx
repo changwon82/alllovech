@@ -107,10 +107,11 @@ export default function SermonContent({
   const selectVideo = useCallback((sermon: Sermon) => {
     setCurrent(sermon);
     setPlaying(false);
+    stopGlobal();
     if (typeof window !== "undefined" && window.innerWidth >= 768) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, []);
+  }, [stopGlobal]);
 
   const handleHeroPlay = useCallback(() => {
     if (current) startPlay(current);
