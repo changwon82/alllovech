@@ -82,11 +82,11 @@ export default function SermonForm({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+      onClick={onClose}
     >
       <div
         className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        onClick={(e) => { e.stopPropagation(); }}
       >
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-lg font-bold text-neutral-800">

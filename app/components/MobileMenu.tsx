@@ -97,8 +97,8 @@ export default function MobileMenu() {
           <div className="my-2 mx-3 h-px bg-white/10" />
 
           <MobileSection title="교회재정" index={6} openIdx={openIdx} toggle={toggleSection}>
-            <MobileSubLink href="/approval" onClick={closeMenu}>재정청구</MobileSubLink>
-            <MobileSubLink href="/approval/notice" onClick={closeMenu}>재정공지</MobileSubLink>
+            <a href="https://alllovechurch.cafe24.com/bbs/board.php?bo_table=approval1" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="block rounded-lg px-3 py-2 text-[13px] text-white/60 transition hover:bg-white/5 hover:text-white">재정청구</a>
+            <a href="https://alllovechurch.cafe24.com/bbs/board.php?bo_table=approval_notice" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="block rounded-lg px-3 py-2 text-[13px] text-white/60 transition hover:bg-white/5 hover:text-white">재정공지</a>
             <MobileSubLink href="/approval/donation" onClick={closeMenu}>기부금영수증</MobileSubLink>
           </MobileSection>
         </div>
