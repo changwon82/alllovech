@@ -128,67 +128,68 @@ export default async function SermonPage({
                 )}
               </>
             }
-          />
+          >
+            {/* 페이지네이션 */}
+            {totalPages > 1 && (() => {
+              const p_params = new URLSearchParams();
+              if (category !== "전체") p_params.set("category", category);
+              if (q) p_params.set("q", q);
+              const baseParams = p_params.toString();
+              const pageUrl = (p: number) => {
+                const sep = baseParams ? `${baseParams}&` : "";
+                return `/sermon?${sep}page=${p}`;
+              };
+              const maxVisible = 5;
+              let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+              const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+              if (endPage - startPage + 1 < maxVisible) startPage = Math.max(1, endPage - maxVisible + 1);
+              const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
-          {/* 페이지네이션 */}
-          {totalPages > 1 && (() => {
-            const p_params = new URLSearchParams();
-            if (category !== "전체") p_params.set("category", category);
-            if (q) p_params.set("q", q);
-            const baseParams = p_params.toString();
-            const pageUrl = (p: number) => {
-              const sep = baseParams ? `${baseParams}&` : "";
-              return `/sermon?${sep}page=${p}`;
-            };
-            const maxVisible = 5;
-            let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
-            const endPage = Math.min(totalPages, startPage + maxVisible - 1);
-            if (endPage - startPage + 1 < maxVisible) startPage = Math.max(1, endPage - maxVisible + 1);
-            const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+              return (
+                <div className="mt-8 flex items-center justify-center gap-1">
+                  {page > 1 && (
+                    <Link href={pageUrl(page - 1)} scroll={false} className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-100">
+                      ‹
+                    </Link>
+                  )}
+                  {startPage > 1 && (
+                    <>
+                      <Link href={pageUrl(1)} scroll={false} className="rounded-lg px-3 py-2 text-sm text-neutral-500 transition hover:bg-neutral-100">1</Link>
+                      {startPage > 2 && <span className="px-1 text-neutral-300">…</span>}
+                    </>
+                  )}
+                  {pages.map((p) => (
+                    <Link
+                      key={p}
+                      href={pageUrl(p)}
+                      scroll={false}
+                      className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                        p === page
+                          ? "bg-navy text-white"
+                          : "text-neutral-500 hover:bg-neutral-100"
+                      }`}
+                    >
+                      {p}
+                    </Link>
+                  ))}
+                  {endPage < totalPages && (
+                    <>
+                      {endPage < totalPages - 1 && <span className="px-1 text-neutral-300">…</span>}
+                      <Link href={pageUrl(totalPages)} scroll={false} className="rounded-lg px-3 py-2 text-sm text-neutral-500 transition hover:bg-neutral-100">{totalPages}</Link>
+                    </>
+                  )}
+                  {page < totalPages && (
+                    <Link href={pageUrl(page + 1)} scroll={false} className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-100">
+                      ›
+                    </Link>
+                  )}
+                </div>
+              );
+            })()}
 
-            return (
-              <div className="mt-8 flex items-center justify-center gap-1">
-                {page > 1 && (
-                  <Link href={pageUrl(page - 1)} className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-100">
-                    ‹
-                  </Link>
-                )}
-                {startPage > 1 && (
-                  <>
-                    <Link href={pageUrl(1)} className="rounded-lg px-3 py-2 text-sm text-neutral-500 transition hover:bg-neutral-100">1</Link>
-                    {startPage > 2 && <span className="px-1 text-neutral-300">…</span>}
-                  </>
-                )}
-                {pages.map((p) => (
-                  <Link
-                    key={p}
-                    href={pageUrl(p)}
-                    className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-                      p === page
-                        ? "bg-navy text-white"
-                        : "text-neutral-500 hover:bg-neutral-100"
-                    }`}
-                  >
-                    {p}
-                  </Link>
-                ))}
-                {endPage < totalPages && (
-                  <>
-                    {endPage < totalPages - 1 && <span className="px-1 text-neutral-300">…</span>}
-                    <Link href={pageUrl(totalPages)} className="rounded-lg px-3 py-2 text-sm text-neutral-500 transition hover:bg-neutral-100">{totalPages}</Link>
-                  </>
-                )}
-                {page < totalPages && (
-                  <Link href={pageUrl(page + 1)} className="rounded-lg px-3 py-2 text-sm text-neutral-400 transition hover:bg-neutral-100">
-                    ›
-                  </Link>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* 검색 */}
-          <SearchBar category={category} defaultValue={q} />
+            {/* 검색 */}
+            <SearchBar category={category} defaultValue={q} />
+          </SermonContent>
     </>
   );
 }
