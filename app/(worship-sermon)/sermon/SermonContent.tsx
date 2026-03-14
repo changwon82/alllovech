@@ -84,17 +84,13 @@ export default function SermonContent({
     return () => stopGlobal();
   }, [stopGlobal]);
 
-  // 페이지네이션으로 sermons 변경 시 → 목록 시작 위치로 스크롤
-  const isMobileRef = useRef(false);
-  isMobileRef.current = isMobile;
+  // 페이지네이션으로 sermons 변경 시 → 맨 위로 스크롤
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
-    if (listRef.current && isMobileRef.current) {
-      listRef.current.scrollIntoView({ behavior: "instant" });
-    }
+    window.scrollTo({ top: 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sermons]);
 

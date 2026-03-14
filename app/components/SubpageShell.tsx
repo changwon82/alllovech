@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SubpageSidebar from "./SubpageSidebar";
@@ -151,6 +152,17 @@ export default function SubpageShell({
 }) {
   const pathname = usePathname();
   const section = getSection(pathname);
+  const prevSectionRef = useRef<string | null>(null);
+
+  // 섹션 진입 시 (홈→서브페이지) 배너 렌더 후 스크롤 보정
+  useEffect(() => {
+    const curKey = section?.title ?? null;
+    const prevKey = prevSectionRef.current;
+    prevSectionRef.current = curKey;
+    if (curKey && prevKey !== curKey) {
+      window.scrollTo({ top: 0 });
+    }
+  }, [section]);
 
   if (!section) return <>{children}</>;
 
