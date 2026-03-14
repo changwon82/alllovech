@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import PageHeader from "@/app/components/ui/PageHeader";
+import BoardSearch from "@/app/components/ui/BoardSearch";
 import Link from "next/link";
 import ThumbImage from "@/app/components/ui/ThumbImage";
 
@@ -11,11 +12,13 @@ const CATEGORIES = ["전체", "예배", "교회학교", "행사", "건축", "기
 export default async function GalleryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; page?: string; q?: string; sf?: string }>;
 }) {
   const params = await searchParams;
   const category = params.category || "전체";
   const page = parseInt(params.page || "1", 10);
+  const q = params.q?.trim() || "";
+  const sf = params.sf || "both";
   const perPage = 16;
 
   const { supabase, user } = await getSessionUser();
@@ -38,6 +41,13 @@ export default async function GalleryPage({
 
   if (category !== "전체") {
     query = query.eq("category", category);
+  }
+
+  if (q) {
+    const term = `%${q}%`;
+    if (sf === "title") query = query.ilike("title", term);
+    else if (sf === "content") query = query.ilike("content", term);
+    else query = query.or(`title.ilike.${term},content.ilike.${term}`);
   }
 
   const { data: posts, count } = await query;
@@ -74,10 +84,17 @@ export default async function GalleryPage({
         ))}
       </div>
 
+      {q && (
+        <div className="mt-4 flex items-center gap-2 text-sm text-neutral-500">
+          <span>&ldquo;{q}&rdquo; 검색결과 {count || 0}건</span>
+          <a href={category === "전체" ? "/gallery" : `/gallery?category=${encodeURIComponent(category)}`} className="rounded-lg px-2 py-1 text-xs font-medium text-navy transition hover:bg-navy/10">초기화</a>
+        </div>
+      )}
+
       {/* 갤러리 그리드 */}
       {!posts || posts.length === 0 ? (
         <p className="mt-12 text-center text-sm text-neutral-400">
-          등록된 사진이 없습니다.
+          {q ? "검색 결과가 없습니다." : "등록된 사진이 없습니다."}
         </p>
       ) : (
         <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4 [&>:nth-child(n+11)]:hidden [&>:nth-child(n+11)]:md:block">
@@ -109,7 +126,7 @@ export default async function GalleryPage({
             return (
               <Link
                 key={post.id}
-                href={`/gallery/${post.id}`}
+                href={q ? `/gallery/${post.id}?q=${encodeURIComponent(q)}` : `/gallery/${post.id}`}
                 className="group relative overflow-hidden bg-neutral-100"
               >
                 {originalUrl ? (
@@ -138,8 +155,10 @@ export default async function GalleryPage({
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (() => {
-        const baseHref = (p: number) =>
-          `/gallery?category=${encodeURIComponent(category)}&page=${p}`;
+        const sp = new URLSearchParams();
+        if (category !== "전체") sp.set("category", category);
+        if (q) { sp.set("q", q); sp.set("sf", sf); }
+        const baseHref = (p: number) => { sp.set("page", String(p)); return `/gallery?${sp.toString()}`; };
 
         // 현재 페이지 기준 앞뒤 2페이지씩 표시
         const pages: number[] = [];
@@ -201,6 +220,14 @@ export default async function GalleryPage({
           </div>
         );
       })()}
+
+      <BoardSearch
+        table="gallery_posts"
+        basePath="/gallery"
+        extraParams={category !== "전체" ? { category } : undefined}
+        defaultValue={q}
+        defaultField={sf as any}
+      />
     </>
   );
 }

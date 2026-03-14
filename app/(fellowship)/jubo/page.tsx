@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import PageHeader from "@/app/components/ui/PageHeader";
+import BoardSearch from "@/app/components/ui/BoardSearch";
 import Link from "next/link";
 import ThumbImage from "@/app/components/ui/ThumbImage";
 
@@ -9,10 +10,11 @@ const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
 export default async function JuboPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
+  const q = params.q?.trim() || "";
   const perPage = 16;
 
   const { supabase, user } = await getSessionUser();
@@ -24,12 +26,15 @@ export default async function JuboPage({
     isAdmin = isAdminRole(roles);
   }
 
-  const { data: posts, count } = await supabase
+  let dbQuery = supabase
     .from("jubo_posts")
     .select("id, title, content, post_date, hit_count, jubo_images(file_name, sort_order)", { count: "exact" })
     .order("post_date", { ascending: false })
-    .order("id", { ascending: false })
-    .range((page - 1) * perPage, page * perPage - 1);
+    .order("id", { ascending: false });
+
+  if (q) dbQuery = dbQuery.ilike("title", `%${q}%`);
+
+  const { data: posts, count } = await dbQuery.range((page - 1) * perPage, page * perPage - 1);
 
   const totalPages = Math.ceil((count || 0) / perPage);
 
@@ -77,9 +82,16 @@ export default async function JuboPage({
         )}
       </div>
 
+      {q && (
+        <div className="mt-4 flex items-center gap-2 text-sm text-neutral-500">
+          <span>&ldquo;{q}&rdquo; 검색결과 {count || 0}건</span>
+          <a href="/jubo" className="rounded-lg px-2 py-1 text-xs font-medium text-navy transition hover:bg-navy/10">초기화</a>
+        </div>
+      )}
+
       {!posts || posts.length === 0 ? (
         <p className="mt-12 text-center text-sm text-neutral-400">
-          등록된 주보가 없습니다.
+          {q ? "검색 결과가 없습니다." : "등록된 주보가 없습니다."}
         </p>
       ) : (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 [&>:nth-child(n+11)]:hidden [&>:nth-child(n+11)]:md:block">
@@ -88,7 +100,7 @@ export default async function JuboPage({
             return (
               <Link
                 key={post.id}
-                href={`/jubo/${post.id}`}
+                href={q ? `/jubo/${post.id}?q=${encodeURIComponent(q)}` : `/jubo/${post.id}`}
                 className="group relative overflow-hidden bg-white shadow-sm transition-shadow hover:shadow-md"
               >
                 {thumb ? (
@@ -117,7 +129,9 @@ export default async function JuboPage({
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (() => {
-        const baseHref = (p: number) => `/jubo?page=${p}`;
+        const sp = new URLSearchParams();
+        if (q) sp.set("q", q);
+        const baseHref = (p: number) => { sp.set("page", String(p)); return `/jubo?${sp.toString()}`; };
         const pages: number[] = [];
         const start = Math.max(1, page - 2);
         const end = Math.min(totalPages, page + 2);
@@ -162,6 +176,8 @@ export default async function JuboPage({
           </div>
         );
       })()}
+
+      <BoardSearch table="jubo_posts" basePath="/jubo" fields={["title"]} defaultField="title" defaultValue={q} />
     </>
   );
 }

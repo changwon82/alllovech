@@ -5,13 +5,18 @@ import Link from "next/link";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
 import PostContent from "@/app/components/ui/PostContent";
+import HighlightText from "@/app/components/ui/HighlightText";
 
 export default async function BrothersDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { id } = await params;
+  const { q } = await searchParams;
+  const highlight = q?.trim() || "";
   const { supabase, user } = await getSessionUser();
 
   // 관리자 확인
@@ -48,7 +53,7 @@ export default async function BrothersDetailPage({
       {/* 글 헤더 */}
       <div className={isAdmin ? "mt-2" : "mt-6"}>
         <div className="flex items-center justify-between border-y border-neutral-200 bg-neutral-50 px-5 py-3">
-          <h1 className="text-[15px] font-bold text-neutral-800">{post.title}</h1>
+          <h1 className="text-[15px] font-bold text-neutral-800"><HighlightText text={post.title} highlight={highlight} /></h1>
           <span className="shrink-0 pl-4 text-xs text-neutral-400">
             {new Date(post.post_date).toLocaleDateString("ko-KR")}
           </span>
@@ -64,6 +69,7 @@ export default async function BrothersDetailPage({
         <PostContent
           html={post.content}
           className="brothers-content mt-4 px-4 text-sm leading-relaxed text-neutral-600"
+          highlight={highlight}
         />
       )}
 

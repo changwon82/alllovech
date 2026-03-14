@@ -6,15 +6,20 @@ import GalleryImageList from "./GalleryImageList";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
 import PostContent from "@/app/components/ui/PostContent";
+import HighlightText from "@/app/components/ui/HighlightText";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
 
 export default async function GalleryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { id } = await params;
+  const { q } = await searchParams;
+  const highlight = q?.trim() || "";
   const { supabase, user } = await getSessionUser();
 
   // 관리자 확인
@@ -64,7 +69,7 @@ export default async function GalleryDetailPage({
           <span className="shrink-0 rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-medium text-navy">
             {post.category}
           </span>
-          <h1 className="flex-1 text-[15px] font-bold text-neutral-800">{post.title}</h1>
+          <h1 className="flex-1 text-[15px] font-bold text-neutral-800"><HighlightText text={post.title} highlight={highlight} /></h1>
           <span className="shrink-0 text-xs text-neutral-400">
             {new Date(post.post_date).toLocaleDateString("ko-KR")}
           </span>
@@ -80,6 +85,7 @@ export default async function GalleryDetailPage({
         <PostContent
           html={post.content}
           className="post-content mt-6 px-4 text-sm leading-relaxed text-neutral-600"
+          highlight={highlight}
         />
       )}
 

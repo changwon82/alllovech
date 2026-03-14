@@ -6,15 +6,20 @@ import JuboImageList from "./JuboImageList";
 import PageHeader from "@/app/components/ui/PageHeader";
 import DeleteButton from "./DeleteButton";
 import PostContent from "@/app/components/ui/PostContent";
+import HighlightText from "@/app/components/ui/HighlightText";
 
 const R2_JUBO = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/jubo";
 
 export default async function JuboDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { id } = await params;
+  const { q } = await searchParams;
+  const highlight = q?.trim() || "";
   const { supabase, user } = await getSessionUser();
 
   // 관리자 확인
@@ -61,7 +66,7 @@ export default async function JuboDetailPage({
       {/* 제목 바 */}
       <div className={isAdmin ? "mt-2" : "mt-6"}>
         <div className="flex items-center justify-between border-y border-neutral-200 bg-neutral-50 px-5 py-3">
-          <h1 className="text-[15px] font-bold text-neutral-800">{post.title}</h1>
+          <h1 className="text-[15px] font-bold text-neutral-800"><HighlightText text={post.title} highlight={highlight} /></h1>
           <span className="shrink-0 text-xs text-neutral-400">
             {new Date(post.post_date).toLocaleDateString("ko-KR")}
           </span>
@@ -75,7 +80,7 @@ export default async function JuboDetailPage({
       {/* 인라인 이미지 (content) */}
       {post.content && (
         <div className="mt-6">
-          <PostContent html={post.content} className="[&_img]:w-full" />
+          <PostContent html={post.content} className="[&_img]:w-full" highlight={highlight} />
         </div>
       )}
 
