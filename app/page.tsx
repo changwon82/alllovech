@@ -348,14 +348,14 @@ export default async function Home() {
                 </div>
                 <svg viewBox="0 0 48 48" className="h-14 w-14 shrink-0 text-white/90"><rect x="4" y="8" width="40" height="32" rx="5" fill="currentColor"/><circle cx="18" cy="20" r="5.5" fill="#4a7fb5"/><path d="M8 34c0-4.5 4.5-8 10-8s10 3.5 10 8" fill="#4a7fb5"/><rect x="30" y="16" width="10" height="2.5" rx="1.25" fill="#4a7fb5"/><rect x="30" y="22" width="10" height="2.5" rx="1.25" fill="#4a7fb5"/><rect x="30" y="28" width="7" height="2.5" rx="1.25" fill="#4a7fb5"/></svg>
               </a>
-              <Link href="/approval"
+              <a href="https://alllovechurch.cafe24.com/bbs/board.php?bo_table=approval1" target="_blank" rel="noopener noreferrer"
                 className="mt-2 flex items-center justify-between bg-[#3d6e9e] p-5 text-white transition hover:brightness-110">
                 <div>
                   <p className="text-base font-bold">교인전용 재정청구</p>
                   <p className="mt-1.5 text-sm text-white/70">영수증 제출, 청구 내역 관리</p>
                 </div>
                 <svg viewBox="0 0 48 48" className="h-14 w-14 shrink-0 text-white/90"><rect x="6" y="4" width="36" height="40" rx="4" fill="currentColor"/><path d="M14 14h20M14 21h20M14 28h14" stroke="#3d6e9e" strokeWidth="2.5" strokeLinecap="round"/><circle cx="34" cy="34" r="8" fill="#f0c040"/><path d="M31 34h6M34 31v6" stroke="#3d6e9e" strokeWidth="2" strokeLinecap="round"/></svg>
-              </Link>
+              </a>
             </div>
 
             {/* 찾아오시는 길 — 3/5 너비, 왼쪽 구분선 포함 */}
