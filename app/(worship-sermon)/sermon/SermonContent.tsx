@@ -69,12 +69,17 @@ export default function SermonContent({
     return () => mql.removeEventListener("change", handler);
   }, []);
 
-  // 마운트 시 전역 플레이어 정리 (페이지 새로 진입 시 초기 상태)
+  // featured 변경 시 (네비게이션으로 재진입) → 초기 상태로 리셋
+  useEffect(() => {
+    setCurrent(featured);
+    setPlaying(false);
+    stopGlobal();
+  }, [featured, stopGlobal]);
+
   // 언마운트 시 (페이지 이동) → 전역 플레이어로 전환
   useEffect(() => {
-    stopGlobal();
     return () => setInlineVisible(false);
-  }, [stopGlobal, setInlineVisible]);
+  }, [setInlineVisible]);
 
   // 페이지네이션으로 sermons 변경 시 → 목록 시작 위치로 스크롤
   useEffect(() => {
