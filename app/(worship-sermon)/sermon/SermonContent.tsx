@@ -94,11 +94,13 @@ export default function SermonContent({
     setInlineVisible(true);
   }, [playGlobal, setInlineVisible]);
 
-  const playVideo = useCallback((sermon: Sermon) => {
-    startPlay(sermon);
-    if (typeof window !== "undefined" && window.innerWidth < 768) return; // 모바일: 스크롤 안함
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [startPlay]);
+  const selectVideo = useCallback((sermon: Sermon) => {
+    setCurrent(sermon);
+    setPlaying(false);
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
 
   const handleHeroPlay = useCallback(() => {
     if (current) startPlay(current);
@@ -203,7 +205,7 @@ export default function SermonContent({
               {sermons.slice(0, 10).map((sermon) => {
                 const thumbnail = getThumbnail(sermon.youtube_url);
                 return (
-                  <button key={sermon.id} onClick={() => playVideo(sermon)} className="group flex items-start gap-3 text-left">
+                  <button key={sermon.id} onClick={() => selectVideo(sermon)} className="group flex items-start gap-3 text-left">
                     <div className="relative aspect-video w-[30%] shrink-0 overflow-hidden bg-neutral-100">
                       {thumbnail ? (
                         <img src={thumbnail} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -243,7 +245,7 @@ export default function SermonContent({
               {sermons.map((sermon) => {
                 const thumbnail = getThumbnail(sermon.youtube_url);
                 return (
-                  <button key={sermon.id} onClick={() => playVideo(sermon)} className="group relative text-left">
+                  <button key={sermon.id} onClick={() => selectVideo(sermon)} className="group relative text-left">
                     <div className="relative aspect-video w-full overflow-hidden bg-neutral-100">
                       {thumbnail ? (
                         <img src={thumbnail} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
