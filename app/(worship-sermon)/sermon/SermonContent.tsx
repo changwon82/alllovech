@@ -85,15 +85,18 @@ export default function SermonContent({
   }, [stopGlobal]);
 
   // 페이지네이션으로 sermons 변경 시 → 목록 시작 위치로 스크롤
+  const isMobileRef = useRef(false);
+  isMobileRef.current = isMobile;
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
-    if (listRef.current && isMobile) {
+    if (listRef.current && isMobileRef.current) {
       listRef.current.scrollIntoView({ behavior: "instant" });
     }
-  }, [sermons, isMobile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sermons]);
 
   const startPlay = useCallback((sermon: Sermon) => {
     const vid = getYouTubeId(sermon.youtube_url);
@@ -108,11 +111,7 @@ export default function SermonContent({
     setCurrent(sermon);
     setPlaying(false);
     stopGlobal();
-    if (listRef.current && window.innerWidth < 768) {
-      listRef.current.scrollIntoView({ behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [stopGlobal]);
 
   const handleHeroPlay = useCallback(() => {
@@ -125,40 +124,42 @@ export default function SermonContent({
   /* ── 모바일 영상 + 정보 (함께 sticky) ── */
   const mobileHero = current && (
     <div className={`md:hidden ${playing ? "sticky top-14 z-20" : ""}`}>
-      <div className="bg-black">
-        {playing && videoId && isMobile ? (
-          <div className="relative w-full pt-[56.25%]">
-            <iframe
-              key={current.id}
-              className="absolute inset-0 h-full w-full"
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1`}
-              title={current.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        ) : thumb ? (
-          <button onClick={handleHeroPlay} className="relative block w-full overflow-hidden pt-[56.25%]">
-            <Image src={thumb} alt="" fill className="object-cover" />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-600 shadow-lg">
-                <svg viewBox="0 0 24 24" fill="white" className="ml-1 h-7 w-7"><path d="M8 5v14l11-7z" /></svg>
-              </div>
+      <div className="overflow-hidden rounded-xl">
+        <div className="bg-black">
+          {playing && videoId && isMobile ? (
+            <div className="relative w-full pt-[56.25%]">
+              <iframe
+                key={current.id}
+                className="absolute inset-0 h-full w-full"
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1`}
+                title={current.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
-          </button>
-        ) : (
-          <div className="relative w-full pt-[56.25%]">
-            <div className="absolute inset-0 flex items-center justify-center bg-neutral-700 text-4xl text-neutral-500">🎙️</div>
-          </div>
-        )}
-      </div>
-      <div className="bg-neutral-800 px-6 py-5">
-        <p className="text-sm text-neutral-400">[{formatDate(current.sermon_date)}] {current.category}</p>
-        <div className="mt-2 h-px bg-neutral-600" />
-        <h2 className="mt-4 text-xl font-bold text-white">{current.title}</h2>
-        <p className="mt-2 text-base text-neutral-300">
-          {current.scripture && `${current.scripture} / `}{current.preacher}
-        </p>
+          ) : thumb ? (
+            <button onClick={handleHeroPlay} className="relative block w-full overflow-hidden pt-[56.25%]">
+              <Image src={thumb} alt="" fill className="object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-600 shadow-lg">
+                  <svg viewBox="0 0 24 24" fill="white" className="ml-1 h-7 w-7"><path d="M8 5v14l11-7z" /></svg>
+                </div>
+              </div>
+            </button>
+          ) : (
+            <div className="relative w-full pt-[56.25%]">
+              <div className="absolute inset-0 flex items-center justify-center bg-neutral-700 text-4xl text-neutral-500">🎙️</div>
+            </div>
+          )}
+        </div>
+        <div className="bg-neutral-800 px-6 py-5">
+          <p className="text-sm text-neutral-400">[{formatDate(current.sermon_date)}] {current.category}</p>
+          <div className="mt-2 h-px bg-neutral-600" />
+          <h2 className="mt-4 text-xl font-bold text-white">{current.title}</h2>
+          <p className="mt-2 text-base text-neutral-300">
+            {current.scripture && `${current.scripture} / `}{current.preacher}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -167,7 +168,7 @@ export default function SermonContent({
     <>
       {/* ── 데스크톱 히어로 (sticky 불필요) ── */}
       {current && (
-        <div className="hidden scroll-mt-16 overflow-hidden bg-neutral-800 md:flex md:flex-row">
+        <div className="hidden scroll-mt-16 overflow-hidden rounded-xl bg-neutral-800 md:flex md:flex-row">
           <div className="relative w-[420px] shrink-0 overflow-hidden">
             {playing && videoId && !isMobile ? (
               <div className="relative w-full overflow-hidden pt-[56.25%]">
