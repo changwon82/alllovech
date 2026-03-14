@@ -79,10 +79,10 @@ export default function SermonContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featuredId, stopGlobal]);
 
-  // 언마운트 시 (페이지 이동) → 전역 플레이어로 전환
+  // 언마운트 시 (페이지 이동) → 영상 정지
   useEffect(() => {
-    return () => setInlineVisible(false);
-  }, [setInlineVisible]);
+    return () => stopGlobal();
+  }, [stopGlobal]);
 
   // 페이지네이션으로 sermons 변경 시 → 목록 시작 위치로 스크롤
   useEffect(() => {
