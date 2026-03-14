@@ -4,6 +4,8 @@ import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
 import SubpageShell from "./components/SubpageShell";
+import { VideoPlayerProvider } from "./components/VideoPlayerContext";
+import StickyVideoPlayer from "./components/StickyVideoPlayer";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -65,10 +67,13 @@ export default function RootLayout({
     <html lang="ko">
       <head />
       <body className={`${notoSansKR.variable} ${notoSerifKR.variable} antialiased`}>
-        <ServiceWorkerRegister />
-        <TopNav />
-        <SubpageShell>{children}</SubpageShell>
-        <Footer />
+        <VideoPlayerProvider>
+          <ServiceWorkerRegister />
+          <TopNav />
+          <StickyVideoPlayer />
+          <SubpageShell>{children}</SubpageShell>
+          <Footer />
+        </VideoPlayerProvider>
       </body>
     </html>
   );
