@@ -81,7 +81,7 @@ export default function HeroSlider({
             <iframe
               src={`https://www.youtube.com/embed/${s.videoId}?autoplay=${i === current ? 1 : 0}&mute=1&loop=1&playlist=${s.videoId}&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1`}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              style={{ border: 0, pointerEvents: "none", width: "calc(max(100%, 177.78vh) + 4px)", height: "calc(max(100%, 56.25vw) + 4px)" }}
+              style={{ border: 0, pointerEvents: "none", width: "calc(max(100%, 177.78vh) * 1.05)", height: "calc(max(100%, 56.25vw) * 1.05)" }}
               allow="autoplay; encrypted-media"
               tabIndex={-1}
             />
