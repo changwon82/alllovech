@@ -123,8 +123,8 @@ export default function SermonContent({
 
   /* ── 모바일 영상 + 정보 (함께 sticky) ── */
   const mobileHero = current && (
-    <div className={`md:hidden ${playing ? "sticky top-14 z-20" : ""}`}>
-      <div className="overflow-hidden rounded-xl">
+    <div className="md:hidden">
+      <div className="overflow-hidden">
         <div className="bg-black">
           {playing && videoId && isMobile ? (
             <div className="relative w-full pt-[56.25%]">
@@ -168,7 +168,7 @@ export default function SermonContent({
     <>
       {/* ── 데스크톱 히어로 (sticky 불필요) ── */}
       {current && (
-        <div className="hidden scroll-mt-16 overflow-hidden rounded-xl bg-neutral-800 md:flex md:flex-row">
+        <div className="hidden scroll-mt-16 overflow-hidden bg-neutral-800 md:flex md:flex-row">
           <div className="relative w-[420px] shrink-0 overflow-hidden">
             {playing && videoId && !isMobile ? (
               <div className="relative w-full overflow-hidden pt-[56.25%]">
