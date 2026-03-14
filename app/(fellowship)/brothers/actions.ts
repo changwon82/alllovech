@@ -40,8 +40,8 @@ export async function createBrothersPost(
   const { data: post, error: insertErr } = await admin
     .from("brothers_posts")
     .insert({
-      title: title.trim(),
-      content: content || "",
+      title: title.trim().normalize("NFC"),
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
       author,
     })
@@ -81,8 +81,8 @@ export async function updateBrothersPost(
   const { error: updateErr } = await admin
     .from("brothers_posts")
     .update({
-      title: title.trim(),
-      content: content || "",
+      title: title.trim().normalize("NFC"),
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
       author,
     })

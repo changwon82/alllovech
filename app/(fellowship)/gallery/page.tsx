@@ -45,9 +45,10 @@ export default async function GalleryPage({
 
   if (q) {
     const term = `%${q}%`;
+    const re = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     if (sf === "title") query = query.ilike("title", term);
     else if (sf === "content") query = query.ilike("content", term);
-    else query = query.or(`title.ilike.${term},content.ilike.${term}`);
+    else query = query.or(`title.imatch.${re},content.imatch.${re}`);
   }
 
   const { data: posts, count } = await query;

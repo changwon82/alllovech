@@ -42,8 +42,8 @@ export async function createJuboPost(
   const { data: post, error: insertErr } = await admin
     .from("jubo_posts")
     .insert({
-      title: title.trim(),
-      content: content || "",
+      title: title.trim().normalize("NFC"),
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
       author,
     })
@@ -111,8 +111,8 @@ export async function updateJuboPost(
   const { error: updateErr } = await admin
     .from("jubo_posts")
     .update({
-      title: title.trim(),
-      content: content || "",
+      title: title.trim().normalize("NFC"),
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
       author,
     })

@@ -43,9 +43,9 @@ export async function createGalleryPost(
   const { data: post, error: insertErr } = await admin
     .from("gallery_posts")
     .insert({
-      title: title.trim(),
+      title: title.trim().normalize("NFC"),
       category,
-      content: content || "",
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
     })
     .select("id")
@@ -113,9 +113,9 @@ export async function updateGalleryPost(
   const { error: updateErr } = await admin
     .from("gallery_posts")
     .update({
-      title: title.trim(),
+      title: title.trim().normalize("NFC"),
       category,
-      content: content || "",
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
     })
     .eq("id", postId);

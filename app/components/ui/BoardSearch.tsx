@@ -26,8 +26,7 @@ export default function BoardSearch({
   const [field, setField] = useState<SearchField>(defaultField);
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const countTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const navTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const fieldLabels: Record<SearchField, string> = {
     title: "제목",
@@ -35,39 +34,15 @@ export default function BoardSearch({
     both: "제목+내용",
   };
 
-  function buildUrl(q: string, sf: SearchField) {
-    const params = new URLSearchParams();
-    if (extraParams) {
-      for (const [key, val] of Object.entries(extraParams)) {
-        if (val && val !== "전체") params.set(key, val);
-      }
-    }
-    if (q) {
-      params.set("q", q);
-      params.set("sf", sf);
-    }
-    const qs = params.toString();
-    return qs ? `${basePath}?${qs}` : basePath;
-  }
-
-  // 실시간 건수 조회 + 자동 검색 (debounce 400ms)
+  // 실시간 건수 조회만 (debounce 400ms)
   useEffect(() => {
-    const trimmed = query.trim();
-
-    if (!trimmed) {
+    if (!query.trim()) {
       setCount(null);
-      // 검색어 지우면 바로 초기화
-      clearTimeout(navTimer.current);
-      navTimer.current = setTimeout(() => {
-        router.replace(buildUrl("", field));
-      }, 300);
-      return () => clearTimeout(navTimer.current);
+      return;
     }
 
-    clearTimeout(countTimer.current);
-    clearTimeout(navTimer.current);
-
-    countTimer.current = setTimeout(async () => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
       setLoading(true);
       try {
         const supabase = createClient();
@@ -79,13 +54,14 @@ export default function BoardSearch({
           }
         }
 
-        const term = `%${trimmed}%`;
+        const term = `%${query.trim()}%`;
+        const re = query.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         if (field === "title") {
           q = q.ilike("title", term);
         } else if (field === "content") {
           q = q.ilike("content", term);
         } else {
-          q = q.or(`title.ilike.${term},content.ilike.${term}`);
+          q = q.or(`title.imatch.${re},content.imatch.${re}`);
         }
 
         const { count: c } = await q;
@@ -95,22 +71,23 @@ export default function BoardSearch({
       } finally {
         setLoading(false);
       }
-
-      // 건수 조회 후 페이지 결과도 갱신
-      router.replace(buildUrl(trimmed, field));
     }, 400);
 
-    return () => {
-      clearTimeout(countTimer.current);
-      clearTimeout(navTimer.current);
-    };
-  }, [query, field, table, extraParams, basePath, router]);
+    return () => clearTimeout(timerRef.current);
+  }, [query, field, table, extraParams]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    clearTimeout(countTimer.current);
-    clearTimeout(navTimer.current);
-    router.replace(buildUrl(query.trim(), field));
+    if (!query.trim()) return;
+    const params = new URLSearchParams();
+    if (extraParams) {
+      for (const [key, val] of Object.entries(extraParams)) {
+        if (val && val !== "전체") params.set(key, val);
+      }
+    }
+    params.set("q", query.trim());
+    params.set("sf", field);
+    router.push(`${basePath}?${params.toString()}`);
   }
 
   return (
@@ -137,6 +114,11 @@ export default function BoardSearch({
           placeholder="검색어를 입력하세요..."
           className="min-w-0 flex-1 bg-transparent text-sm text-neutral-700 placeholder:text-neutral-400 outline-none"
         />
+        {query.trim() && (
+          <span className="shrink-0 text-xs text-neutral-400">
+            {loading ? "..." : count !== null ? `${count}건` : ""}
+          </span>
+        )}
         <button
           type="submit"
           className="shrink-0 rounded-full bg-navy px-5 py-2 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"

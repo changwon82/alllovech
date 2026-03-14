@@ -35,10 +35,10 @@ export async function createSermon(input: SermonInput): Promise<Result> {
 
   const admin = createAdminClient();
   const { error } = await admin.from("sermons").insert({
-    title: input.title,
-    preacher: input.preacher,
+    title: input.title.normalize("NFC"),
+    preacher: input.preacher.normalize("NFC"),
     sermon_date: input.sermon_date,
-    scripture: input.scripture || null,
+    scripture: input.scripture?.normalize("NFC") || null,
     category: input.category,
     youtube_url: input.youtube_url || null,
   });
@@ -59,10 +59,10 @@ export async function updateSermon(
   const { error } = await admin
     .from("sermons")
     .update({
-      title: input.title,
-      preacher: input.preacher,
+      title: input.title.normalize("NFC"),
+      preacher: input.preacher.normalize("NFC"),
       sermon_date: input.sermon_date,
-      scripture: input.scripture || null,
+      scripture: input.scripture?.normalize("NFC") || null,
       category: input.category,
       youtube_url: input.youtube_url || null,
     })

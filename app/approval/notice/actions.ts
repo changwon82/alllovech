@@ -53,8 +53,8 @@ export async function createNoticePost(
   const { data: post, error: insertErr } = await admin
     .from("approval_notice_posts")
     .insert({
-      title: title.trim(),
-      content: content || "",
+      title: title.trim().normalize("NFC"),
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
       author,
       is_notice: isNotice,
@@ -131,8 +131,8 @@ export async function updateNoticePost(
   const { error: updateErr } = await admin
     .from("approval_notice_posts")
     .update({
-      title: title.trim(),
-      content: content || "",
+      title: title.trim().normalize("NFC"),
+      content: (content || "").normalize("NFC"),
       post_date: postDate || new Date().toISOString().slice(0, 10),
       author,
       is_notice: isNotice,

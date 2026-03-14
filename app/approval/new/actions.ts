@@ -37,8 +37,8 @@ export async function submitApproval(formData: FormData) {
   const { data: post, error: postError } = await admin
     .from("approval_posts")
     .insert({
-      title,
-      content: content || null,
+      title: title.normalize("NFC"),
+      content: content ? content.normalize("NFC") : null,
       doc_category: docCategory,
       author_name: profile?.name || user.email,
       author_mb_id: user.id,
@@ -151,8 +151,8 @@ export async function updateApproval(formData: FormData) {
   const { error: updateError } = await admin
     .from("approval_posts")
     .update({
-      title,
-      content: content || null,
+      title: title.normalize("NFC"),
+      content: content ? content.normalize("NFC") : null,
       doc_category: docCategory,
       approver1_mb_id: approver1MbId,
       approver2_mb_id: approver2MbId,
