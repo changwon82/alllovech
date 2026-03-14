@@ -108,7 +108,9 @@ export default function SermonContent({
     setCurrent(sermon);
     setPlaying(false);
     stopGlobal();
-    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+    if (listRef.current && window.innerWidth < 768) {
+      listRef.current.scrollIntoView({ behavior: "smooth" });
+    } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [stopGlobal]);
