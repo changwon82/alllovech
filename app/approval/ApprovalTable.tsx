@@ -70,8 +70,8 @@ export default function ApprovalTable({
   }
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">
-      <table className="w-full min-w-[900px] text-xs">
+    <div className="mt-4 overflow-x-auto bg-white shadow-sm">
+      <table className="w-full min-w-[900px] text-sm">
         <thead>
           <tr className="border-b border-neutral-100 bg-neutral-50 text-neutral-500">
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">번호</th>
@@ -80,7 +80,7 @@ export default function ApprovalTable({
             <th className="px-1.5 py-1.5 text-left font-medium">제목</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-left font-medium">등록일시</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-right font-medium">금액</th>
-            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium"><div>품의</div><div className="text-[10px] font-normal text-neutral-400">(청구자)</div></th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium"><div>품의</div><div className="text-xs font-normal text-neutral-400">(청구자)</div></th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">결재1</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">결재2</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">재정</th>
@@ -116,7 +116,7 @@ export default function ApprovalTable({
                   >
                     <span className="line-clamp-1">{post.title}</span>
                     {post.doc_status === "draft" && (
-                      <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                      <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
                         임시저장
                       </span>
                     )}
@@ -130,23 +130,23 @@ export default function ApprovalTable({
                 </td>
                 <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <div className="text-neutral-600">{requester}</div>
-                  <div className={`text-[10px] leading-none ${post.doc_status === "draft" ? "text-amber-600" : "text-green-600"}`}>
+                  <div className={`text-xs leading-none ${post.doc_status === "draft" ? "text-amber-600" : "text-green-600"}`}>
                     {post.doc_status === "draft" ? "작성중" : "품의"}
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <div className={a1.color}>{getName(post.approver1_mb_id)}</div>
-                  <div className={`text-[10px] leading-none ${a1.color}`}>{a1.label}</div>
+                  <div className={`text-xs leading-none ${a1.color}`}>{a1.label}</div>
                 </td>
                 <td className="whitespace-nowrap px-1.5 py-1 text-center">
                   <div className={a2.color}>{getName(post.approver2_mb_id)}</div>
-                  <div className={`text-[10px] leading-none ${a2.color}`}>{a2.label}</div>
+                  <div className={`text-xs leading-none ${a2.color}`}>{a2.label}</div>
                 </td>
                 <td className="whitespace-nowrap px-1.5 py-1 text-center">
-                  <span className={`text-[10px] font-medium ${fin.color}`}>{fin.label}</span>
+                  <span className={`text-xs font-medium ${fin.color}`}>{fin.label}</span>
                 </td>
                 <td className="whitespace-nowrap px-1.5 py-1 text-center">
-                  <span className={`text-[10px] font-medium ${pay.color}`}>{pay.label}</span>
+                  <span className={`text-xs font-medium ${pay.color}`}>{pay.label}</span>
                 </td>
               </tr>
             );

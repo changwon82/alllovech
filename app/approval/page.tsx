@@ -174,7 +174,7 @@ export default async function ApprovalListPage({
 
       {/* 일자 검색 */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-neutral-500">일자</span>
+        <span className="text-sm font-medium text-neutral-500">일자</span>
         <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
           {category && <input type="hidden" name="cat" value={category} />}
           {search && <input type="hidden" name="q" value={search} />}
@@ -182,18 +182,18 @@ export default async function ApprovalListPage({
             type="date"
             name="from"
             defaultValue={dateFrom}
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-xs focus:border-navy focus:outline-none"
+            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm focus:border-navy focus:outline-none"
           />
-          <span className="text-xs text-neutral-400">~</span>
+          <span className="text-sm text-neutral-400">~</span>
           <input
             type="date"
             name="to"
             defaultValue={dateTo}
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-xs focus:border-navy focus:outline-none"
+            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm focus:border-navy focus:outline-none"
           />
           <button
             type="submit"
-            className="rounded-lg bg-navy px-3 py-1 text-xs font-medium text-white transition-all hover:brightness-110 active:scale-95"
+            className="rounded-lg bg-navy px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
           >
             검색
           </button>
@@ -201,7 +201,7 @@ export default async function ApprovalListPage({
         {(dateFrom || dateTo) && (
           <a
             href={buildHref(1, search, category)}
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-xs text-neutral-500 hover:bg-neutral-100"
+            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100"
           >
             새로고침
           </a>
@@ -213,7 +213,7 @@ export default async function ApprovalListPage({
             <a
               key={preset.key}
               href={buildHref(1, search, category, range.from, range.to)}
-              className={`rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-lg border px-2 py-1 text-sm font-medium transition-colors ${
                 isActive
                   ? "border-navy bg-navy text-white"
                   : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
@@ -245,7 +245,7 @@ export default async function ApprovalListPage({
             검색
           </button>
           {(search || category || dateFrom || dateTo) && (
-            <a href="/approval" className="text-xs text-neutral-400 hover:text-neutral-600">
+            <a href="/approval" className="text-sm text-neutral-400 hover:text-neutral-600">
               초기화
             </a>
           )}
@@ -278,7 +278,7 @@ export default async function ApprovalListPage({
       <div className="mt-3 flex flex-wrap gap-1.5">
         <a
           href={buildHref(1, search, undefined, dateFrom, dateTo)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+          className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
             !category ? "bg-navy text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
           }`}
         >
@@ -288,7 +288,7 @@ export default async function ApprovalListPage({
           <a
             key={cat}
             href={buildHref(1, search, cat, dateFrom, dateTo)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
               category === cat ? "bg-navy text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
             }`}
           >
@@ -317,7 +317,7 @@ export default async function ApprovalListPage({
           const linkClass =
             "flex h-8 w-8 items-center justify-center rounded-lg text-sm text-neutral-500 hover:bg-neutral-100";
           const navClass =
-            "rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:bg-neutral-100";
+            "rounded-lg px-2 py-1.5 text-sm text-neutral-400 hover:bg-neutral-100";
 
           return (
             <div className="mt-6 flex flex-col items-center gap-2">
@@ -325,7 +325,7 @@ export default async function ApprovalListPage({
                 {pages[0] > 1 && (
                   <>
                     <a href={buildHref(1, search, category, dateFrom, dateTo)} className={linkClass}>1</a>
-                    {pages[0] > 2 && <span className="px-1 text-xs text-neutral-300">···</span>}
+                    {pages[0] > 2 && <span className="px-1 text-sm text-neutral-300">···</span>}
                   </>
                 )}
                 {pages.map((p) => (
@@ -344,7 +344,7 @@ export default async function ApprovalListPage({
                 {pages[pages.length - 1] < totalPages && (
                   <>
                     {pages[pages.length - 1] < totalPages - 1 && (
-                      <span className="px-1 text-xs text-neutral-300">···</span>
+                      <span className="px-1 text-sm text-neutral-300">···</span>
                     )}
                     <a href={buildHref(totalPages, search, category, dateFrom, dateTo)} className={linkClass}>{totalPages}</a>
                   </>
@@ -376,7 +376,7 @@ export default async function ApprovalListPage({
                   마지막 »
                 </a>
               </div>
-              <div className="text-xs text-neutral-400">
+              <div className="text-sm text-neutral-400">
                 페이지 {page} / {totalPages} · 보기 {(page - 1) * perPage + 1} - {Math.min(page * perPage, displayCount)} / {displayCount}
               </div>
             </div>
