@@ -173,9 +173,9 @@ export default async function ApprovalListPage({
       ) : (<>
 
       {/* 검색 툴바 */}
-      <div className="mt-2 overflow-hidden rounded-lg border border-neutral-200">
+      <div className="mt-2 overflow-hidden rounded-lg border border-neutral-300">
         {/* 일자 행 */}
-        <div className="flex items-center border-b border-neutral-200 bg-neutral-50">
+        <div className="flex items-center border-b border-neutral-300 bg-neutral-50">
           <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">일자</span>
           <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
             <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
