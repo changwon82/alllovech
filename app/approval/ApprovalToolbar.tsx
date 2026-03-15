@@ -66,7 +66,7 @@ function buildHref(opts: {
   if (opts.cat) sp.set("cat", opts.cat);
   if (opts.from) sp.set("from", opts.from);
   if (opts.to) sp.set("to", opts.to);
-  if (opts.size && opts.size !== "12") sp.set("size", opts.size);
+  if (opts.size && opts.size !== "10") sp.set("size", opts.size);
   const qs = sp.toString();
   return `/approval${qs ? `?${qs}` : ""}`;
 }
@@ -89,7 +89,7 @@ export default function ApprovalToolbar({
   const category = params.get("cat") || "";
   const dateFrom = params.get("from") || "";
   const dateTo = params.get("to") || "";
-  const size = params.get("size") || "12";
+  const size = params.get("size") || "10";
 
   const dateFromRef = useRef<HTMLInputElement>(null);
   const dateToRef = useRef<HTMLInputElement>(null);
@@ -258,7 +258,6 @@ export default function ApprovalToolbar({
           onChange={(e) => navigate(buildHref({ page: 1, q: search, sf: searchField, cat: category, from: dateFrom, to: dateTo, size: e.target.value }))}
           className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
         >
-          <option value="12">보기 (12개씩)</option>
           <option value="10">보기 (10개씩)</option>
           <option value="20">보기 (20개씩)</option>
           <option value="50">보기 (50개씩)</option>

@@ -17,9 +17,9 @@ export default async function ApprovalListPage({
   const category = params.cat || "";
   const dateFrom = params.from || "";
   const dateTo = params.to || "";
-  const sizeParam = params.size || "12";
+  const sizeParam = params.size || "10";
   const isInfinite = sizeParam === "all";
-  const perPage = isInfinite ? 100 : parseInt(sizeParam, 10) || 12;
+  const perPage = isInfinite ? 100 : parseInt(sizeParam, 10) || 10;
 
   const { supabase, user } = await getSessionUser();
 
@@ -142,7 +142,7 @@ export default async function ApprovalListPage({
     if (from) sp.set("from", from);
     if (to) sp.set("to", to);
     const s = size || sizeParam;
-    if (s && s !== "12") sp.set("size", s);
+    if (s && s !== "10") sp.set("size", s);
     const qs = sp.toString();
     return `/approval${qs ? `?${qs}` : ""}`;
   }
