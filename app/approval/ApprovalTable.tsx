@@ -80,7 +80,7 @@ export default function ApprovalTable({
             <th className="px-1.5 py-1.5 text-left font-medium">제목</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-left font-medium">등록일시</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-right font-medium">금액</th>
-            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium"><div>품의</div><div className="text-xs font-normal text-neutral-400">(청구자)</div></th>
+            <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">품의</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">결재1</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">결재2</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">재정</th>
