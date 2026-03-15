@@ -225,7 +225,7 @@ export default function SubpageShell({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`-mb-px border-b-2 px-5 py-2.5 text-sm font-medium transition ${
+                    className={`-mb-px border-b-2 px-5 py-3 text-base font-bold transition ${
                       isActive
                         ? "border-navy text-navy"
                         : "border-transparent text-neutral-400 hover:text-neutral-600"

@@ -1,6 +1,5 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
-import PageHeader from "@/app/components/ui/PageHeader";
 import Link from "next/link";
 import LoginForm from "@/app/login/LoginForm";
 
@@ -46,8 +45,6 @@ export default async function ApprovalNoticePage({
 
   return (
     <>
-      <PageHeader title="재정공지" />
-
       {!user ? (
         <div className="mx-auto mt-12 max-w-sm">
           <p className="mb-6 text-center text-sm text-neutral-500">재정공지는 교인 전용 서비스입니다.</p>

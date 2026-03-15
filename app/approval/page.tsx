@@ -1,6 +1,5 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
-import PageHeader from "@/app/components/ui/PageHeader";
 import ApprovalTable from "./ApprovalTable";
 import LoginForm from "@/app/login/LoginForm";
 import Link from "next/link";
@@ -166,8 +165,6 @@ export default async function ApprovalListPage({
 
   return (
     <>
-      <PageHeader title="재정청구" />
-
       {!user ? (
         <div className="mx-auto mt-12 max-w-sm">
           <p className="mb-6 text-center text-sm text-neutral-500">재정청구는 교인 전용 서비스입니다.</p>

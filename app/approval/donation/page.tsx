@@ -1,13 +1,9 @@
-import PageHeader from "@/app/components/ui/PageHeader";
-
 const R2 = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/donation";
 
 export default function DonationPage() {
   return (
     <>
-      <PageHeader title="기부금영수증" />
-
-      <div className="mt-6 space-y-8">
+      <div className="mt-2 space-y-8">
             {/* 상단 안내 이미지 */}
             <img src={`${R2}/header.png`} alt="기부금영수증 안내" className="w-full rounded-lg" />
 
