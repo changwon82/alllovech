@@ -8,7 +8,7 @@ import Link from "next/link";
 export default async function ApprovalListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string; sf?: string; cat?: string; from?: string; to?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; sf?: string; cat?: string; from?: string; to?: string; size?: string }>;
 }) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
@@ -17,7 +17,8 @@ export default async function ApprovalListPage({
   const category = params.cat || "";
   const dateFrom = params.from || "";
   const dateTo = params.to || "";
-  const perPage = 20;
+  const sizeParam = params.size || "20";
+  const perPage = sizeParam === "all" ? 99999 : parseInt(sizeParam, 10) || 20;
 
   const { supabase, user } = await getSessionUser();
 
@@ -131,7 +132,7 @@ export default async function ApprovalListPage({
   }
 
   // 검색 URL 빌더
-  function buildHref(p: number, q?: string, cat?: string, from?: string, to?: string, sf?: string) {
+  function buildHref(p: number, q?: string, cat?: string, from?: string, to?: string, sf?: string, size?: string) {
     const sp = new URLSearchParams();
     if (p > 1) sp.set("page", String(p));
     if (q) sp.set("q", q);
@@ -139,6 +140,8 @@ export default async function ApprovalListPage({
     if (cat) sp.set("cat", cat);
     if (from) sp.set("from", from);
     if (to) sp.set("to", to);
+    const s = size || sizeParam;
+    if (s && s !== "20") sp.set("size", s);
     const qs = sp.toString();
     return `/approval${qs ? `?${qs}` : ""}`;
   }
@@ -162,7 +165,23 @@ export default async function ApprovalListPage({
         </p>
       ) : (<>
         <ApprovalTable posts={posts} nameMap={nameMap} />
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-neutral-500">보기</span>
+            {["20", "50", "100", "all"].map((s) => (
+              <Link
+                key={s}
+                href={buildHref(1, search, category, dateFrom, dateTo, searchField, s)}
+                className={`rounded border px-2 py-0.5 text-sm font-medium transition-colors ${
+                  sizeParam === s
+                    ? "border-navy bg-navy text-white"
+                    : "border-neutral-300 text-neutral-500 hover:bg-neutral-100"
+                }`}
+              >
+                {s === "all" ? "전체" : s}
+              </Link>
+            ))}
+          </div>
           <span className="text-sm font-medium text-neutral-500">
             합계금액 : <span className="font-bold text-navy">{totalAmount.toLocaleString("ko-KR")}원</span>
           </span>

@@ -57,6 +57,7 @@ function buildHref(opts: {
   cat?: string;
   from?: string;
   to?: string;
+  size?: string;
 }) {
   const sp = new URLSearchParams();
   if (opts.page && opts.page > 1) sp.set("page", String(opts.page));
@@ -65,6 +66,7 @@ function buildHref(opts: {
   if (opts.cat) sp.set("cat", opts.cat);
   if (opts.from) sp.set("from", opts.from);
   if (opts.to) sp.set("to", opts.to);
+  if (opts.size && opts.size !== "20") sp.set("size", opts.size);
   const qs = sp.toString();
   return `/approval${qs ? `?${qs}` : ""}`;
 }
@@ -85,6 +87,7 @@ export default function ApprovalToolbar({
   const category = params.get("cat") || "";
   const dateFrom = params.get("from") || "";
   const dateTo = params.get("to") || "";
+  const size = params.get("size") || "20";
 
   const dateFromRef = useRef<HTMLInputElement>(null);
   const dateToRef = useRef<HTMLInputElement>(null);
@@ -101,14 +104,14 @@ export default function ApprovalToolbar({
     e.preventDefault();
     const from = dateFromRef.current?.value || "";
     const to = dateToRef.current?.value || "";
-    navigate(buildHref({ q: search, sf: searchField, cat: category, from, to }));
+    navigate(buildHref({ q: search, sf: searchField, cat: category, from, to, size }));
   }
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
     const sf = sfRef.current?.value || "title";
     const q = qRef.current?.value || "";
-    navigate(buildHref({ q, sf, cat: category, from: dateFrom, to: dateTo }));
+    navigate(buildHref({ q, sf, cat: category, from: dateFrom, to: dateTo, size }));
   }
 
   const hasFilters = search || category || dateFrom || dateTo;
@@ -148,7 +151,7 @@ export default function ApprovalToolbar({
               return (
                 <button
                   key={preset.key}
-                  onClick={() => navigate(buildHref({ q: search, sf: searchField, cat: category, from: range.from, to: range.to }))}
+                  onClick={() => navigate(buildHref({ q: search, sf: searchField, cat: category, from: range.from, to: range.to, size }))}
                   className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-navy text-white"
@@ -228,7 +231,7 @@ export default function ApprovalToolbar({
       {/* 카테고리 탭 */}
       <div className="mt-3 flex flex-wrap gap-1.5">
         <button
-          onClick={() => navigate(buildHref({ q: search, sf: searchField, from: dateFrom, to: dateTo }))}
+          onClick={() => navigate(buildHref({ q: search, sf: searchField, from: dateFrom, to: dateTo, size }))}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
             !category ? "bg-navy text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
           }`}
@@ -238,7 +241,7 @@ export default function ApprovalToolbar({
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
-            onClick={() => navigate(buildHref({ q: search, sf: searchField, cat, from: dateFrom, to: dateTo }))}
+            onClick={() => navigate(buildHref({ q: search, sf: searchField, cat, from: dateFrom, to: dateTo, size }))}
             className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
               category === cat ? "bg-navy text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
             }`}
