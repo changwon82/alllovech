@@ -240,7 +240,7 @@ export default async function ApprovalListPage({
                 </Link>
               </div>
               <div className="text-sm text-neutral-400">
-                페이지 {page} / {totalPages}
+                페이지 {page} / {totalPages} · 보기 {(page - 1) * perPage + 1} - {Math.min(page * perPage, displayCount)} / {displayCount}
               </div>
             </div>
           );
