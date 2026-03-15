@@ -274,8 +274,10 @@ export default async function ApprovalListPage({
         </form>
       </div>
 
+      <hr className="mt-3 border-neutral-200" />
+
       {/* 카테고리 탭 */}
-      <div className="mt-2 flex flex-wrap gap-1.5">
+      <div className="mt-3 flex flex-wrap gap-1.5">
         <a
           href={buildHref(1, search, undefined, dateFrom, dateTo)}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
