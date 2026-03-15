@@ -40,7 +40,7 @@ export default async function BrothersPage({
 
   let query = supabase
     .from("brothers_posts")
-    .select("id, title, post_date, hit_count, content", { count: "exact" })
+    .select("id, title, post_date, hit_count, content, author", { count: "exact" })
     .order("post_date", { ascending: false })
     .order("id", { ascending: false });
 
@@ -86,28 +86,34 @@ export default async function BrothersPage({
         <table className="mt-4 w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200 text-neutral-500">
-              <th className="w-28 whitespace-nowrap py-3 pr-4 text-left font-medium">날짜</th>
-              <th className="py-3 text-left font-medium">제목</th>
+              <th className="hidden w-16 py-3 pr-4 text-center font-medium md:table-cell">번호</th>
+              <th className="py-3 text-center font-medium">제목</th>
+              <th className="hidden w-24 whitespace-nowrap py-3 px-4 text-center font-medium md:table-cell">글쓴이</th>
+              <th className="w-28 whitespace-nowrap py-3 pl-4 text-center font-medium">날짜</th>
             </tr>
           </thead>
           <tbody>
-            {posts.map((post) => (
-              <tr key={post.id} className="border-b border-neutral-100">
-                <td className="whitespace-nowrap py-2.5 pr-4 align-top text-neutral-400">
-                  {new Date(post.post_date).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, "-").replace(".", "")}
-                </td>
-                <td className="py-2.5">
-                  <Link href={q ? `/brothers/${post.id}?q=${encodeURIComponent(q)}` : `/brothers/${post.id}`} className="line-clamp-1 font-semibold text-neutral-800 transition hover:text-navy md:line-clamp-none">
-                    {q ? <HighlightText text={post.title} highlight={q} /> : post.title}
-                  </Link>
-                  {q && post.content && (
-                    <p className="mt-0.5 line-clamp-2 text-xs text-neutral-400">
-                      <HighlightText text={excerpt(post.content, q)} highlight={q} />
-                    </p>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {posts.map((post, i) => {
+              const rowNum = (count || 0) - ((page - 1) * perPage + i);
+              const dateStr = new Date(post.post_date).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, "-").replace(".", "");
+              return (
+                <tr key={post.id} className="border-b border-neutral-100">
+                  <td className="hidden whitespace-nowrap py-2.5 pr-4 text-center text-neutral-400 md:table-cell">{rowNum}</td>
+                  <td className="py-2.5">
+                    <Link href={q ? `/brothers/${post.id}?q=${encodeURIComponent(q)}` : `/brothers/${post.id}`} className="line-clamp-1 font-semibold text-neutral-800 transition hover:text-navy md:line-clamp-none">
+                      {q ? <HighlightText text={post.title} highlight={q} /> : post.title}
+                    </Link>
+                    {q && post.content && (
+                      <p className="mt-0.5 line-clamp-2 text-xs text-neutral-400">
+                        <HighlightText text={excerpt(post.content, q)} highlight={q} />
+                      </p>
+                    )}
+                  </td>
+                  <td className="hidden whitespace-nowrap py-2.5 px-4 text-center align-top text-neutral-400 md:table-cell">{post.author || "다애교회"}</td>
+                  <td className="whitespace-nowrap py-2.5 pl-4 text-right align-top text-neutral-400">{dateStr}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
