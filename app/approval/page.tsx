@@ -1,4 +1,5 @@
 import { getSessionUser } from "@/lib/supabase/server";
+import { getUserRoles, isAdminRole } from "@/lib/admin";
 import PageHeader from "@/app/components/ui/PageHeader";
 import ApprovalTable from "./ApprovalTable";
 import LoginForm from "@/app/login/LoginForm";
@@ -18,6 +19,13 @@ export default async function ApprovalListPage({
   const perPage = 20;
 
   const { supabase, user } = await getSessionUser();
+
+  // 관리자 확인
+  let isAdmin = false;
+  if (user) {
+    const roles = await getUserRoles(supabase, user.id);
+    isAdmin = isAdminRole(roles);
+  }
 
   // 카테고리별 건수 조회 (병렬 count 쿼리)
   const categories = ["일반재정청구", "건축재정청구", "예산전용품의", "사전품의", "기타품의"];
@@ -250,6 +258,16 @@ export default async function ApprovalListPage({
           >
             문서작성
           </Link>
+          {isAdmin && (
+            <>
+              <Link
+                href="/approval/members"
+                className="rounded-lg border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+              >
+                사용자
+              </Link>
+            </>
+          )}
         </form>
       </div>
 
