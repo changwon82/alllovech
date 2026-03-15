@@ -253,19 +253,16 @@ export default function ApprovalToolbar({
         ))}
 
         <span className="mx-1 text-neutral-300">|</span>
-        {["50", "100", "all"].map((s) => (
-          <button
-            key={s}
-            onClick={() => navigate(buildHref({ page: 1, q: search, sf: searchField, cat: category, from: dateFrom, to: dateTo, size: s }))}
-            className={`rounded border px-2 py-0.5 text-sm font-medium transition-colors ${
-              size === s
-                ? "border-navy bg-navy text-white"
-                : "border-neutral-300 text-neutral-500 hover:bg-neutral-100"
-            }`}
-          >
-            {s === "all" ? "전체" : s}
-          </button>
-        ))}
+        <select
+          value={size}
+          onChange={(e) => navigate(buildHref({ page: 1, q: search, sf: searchField, cat: category, from: dateFrom, to: dateTo, size: e.target.value }))}
+          className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
+        >
+          <option value="12">보기옵션 (12개씩)</option>
+          <option value="50">보기옵션 (50개씩)</option>
+          <option value="100">보기옵션 (100개씩)</option>
+          <option value="all">보기옵션 (전체)</option>
+        </select>
 
         <span className="ml-auto text-sm font-medium text-neutral-500">
           합계금액 : <span className="font-bold text-navy">{totalAmount.toLocaleString("ko-KR")}원</span>
