@@ -258,10 +258,12 @@ export default function ApprovalToolbar({
           onChange={(e) => navigate(buildHref({ page: 1, q: search, sf: searchField, cat: category, from: dateFrom, to: dateTo, size: e.target.value }))}
           className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
         >
-          <option value="12">보기옵션 (12개씩)</option>
-          <option value="50">보기옵션 (50개씩)</option>
-          <option value="100">보기옵션 (100개씩)</option>
-          <option value="all">보기옵션 (전체)</option>
+          <option value="12">보기 (12개씩)</option>
+          <option value="10">보기 (10개씩)</option>
+          <option value="20">보기 (20개씩)</option>
+          <option value="50">보기 (50개씩)</option>
+          <option value="100">보기 (100개씩)</option>
+          <option value="all">보기 (전체)</option>
         </select>
 
         <span className="ml-auto text-sm font-medium text-neutral-500">
