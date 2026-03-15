@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SubpageSidebar from "./SubpageSidebar";
@@ -9,7 +9,6 @@ type SectionConfig = {
   title: string;
   breadcrumbLink: string;
   breadcrumbs: Record<string, string>;
-  collapsible?: boolean;
   items: {
     label: string;
     href: string;
@@ -100,7 +99,6 @@ const SECTIONS: SectionConfig[] = [
   {
     title: "교회재정",
     breadcrumbLink: "/approval",
-    collapsible: true,
     breadcrumbs: {
       "/approval": "재정청구",
       "/approval/notice": "재정공지",
@@ -155,7 +153,6 @@ export default function SubpageShell({
   const pathname = usePathname();
   const section = getSection(pathname);
   const prevSectionRef = useRef<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   // 섹션 진입 시 (홈→서브페이지) 배너 렌더 후 스크롤 보정
   useEffect(() => {
@@ -210,44 +207,8 @@ export default function SubpageShell({
       </div>
 
       {/* 사이드바 + 콘텐츠 */}
-      <div className={`mx-auto flex px-4 pt-6 pb-20 md:px-8 ${
-        section.collapsible ? "max-w-7xl gap-4" : "max-w-5xl gap-10"
-      }`}>
-        {section.collapsible ? (
-          <div className="hidden shrink-0 md:block">
-            {sidebarCollapsed ? (
-              <div className="w-12">
-                <button
-                  onClick={() => setSidebarCollapsed(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition hover:bg-neutral-100 hover:text-navy"
-                  title="메뉴 열기"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-                    <path fillRule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-            ) : (
-              <div className="w-48">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-navy">{section.title}</h2>
-                  <button
-                    onClick={() => setSidebarCollapsed(true)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 transition hover:bg-neutral-100 hover:text-navy"
-                    title="메뉴 접기"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                      <path fillRule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-                <SubpageSidebar title="" items={section.items} />
-              </div>
-            )}
-          </div>
-        ) : (
-          <SubpageSidebar title={section.title} items={section.items} />
-        )}
+      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+        <SubpageSidebar title={section.title} items={section.items} />
         <div className="min-w-0 flex-1">{children}</div>
       </div>
     </>

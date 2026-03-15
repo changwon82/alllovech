@@ -91,7 +91,7 @@ export default function SubpageSidebar({ title, items }: SubpageSidebarProps) {
 
     return (
       <nav className="hidden shrink-0 md:block md:w-48">
-        {title && <h2 className="text-lg font-bold text-navy">{title}</h2>}
+        <h2 className="text-lg font-bold text-navy">{title}</h2>
         {groups.map((group) => (
           <div key={group.name} className="mt-4">
             {group.name && (
@@ -108,8 +108,8 @@ export default function SubpageSidebar({ title, items }: SubpageSidebarProps) {
 
   return (
     <nav className="hidden shrink-0 md:block md:w-48">
-      {title && <h2 className="text-lg font-bold text-navy">{title}</h2>}
-      <ul className={`space-y-0.5 ${title ? "mt-3" : "mt-1"}`}>
+      <h2 className="text-lg font-bold text-navy">{title}</h2>
+      <ul className="mt-3 space-y-0.5">
         {items.map(renderItem)}
       </ul>
     </nav>
