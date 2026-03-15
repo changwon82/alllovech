@@ -73,7 +73,7 @@ export default function ApprovalTable({
     <div className="mt-4 overflow-x-auto bg-white shadow-sm">
       <table className="w-full min-w-[900px] text-sm">
         <thead>
-          <tr className="border-b border-neutral-300 bg-neutral-50 text-neutral-500">
+          <tr className="border-b border-neutral-400 bg-neutral-200 text-neutral-600">
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">번호</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">문서분류</th>
             <th className="w-0 whitespace-nowrap px-1.5 py-1.5 text-center font-medium">계정이름</th>
@@ -98,7 +98,7 @@ export default function ApprovalTable({
             return (
               <tr
                 key={post.id}
-                className="border-b border-neutral-200 transition-colors hover:bg-neutral-50"
+                className="border-b border-neutral-300 transition-colors hover:bg-neutral-50"
               >
                 <td className="whitespace-nowrap px-1.5 py-1 text-center text-neutral-400">
                   {post.id}

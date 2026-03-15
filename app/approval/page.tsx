@@ -173,9 +173,9 @@ export default async function ApprovalListPage({
       ) : (<>
 
       {/* 검색 툴바 */}
-      <div className="mt-2 overflow-hidden rounded-lg border border-neutral-300">
+      <div className="mt-2 overflow-hidden border border-neutral-400">
         {/* 일자 행 */}
-        <div className="flex items-center border-b border-neutral-300 bg-neutral-50">
+        <div className="flex items-center border-b border-neutral-400 bg-neutral-100">
           <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">일자</span>
           <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
             <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
@@ -221,7 +221,7 @@ export default async function ApprovalListPage({
           </div>
         </div>
         {/* 검색 행 */}
-        <div className="flex items-center bg-neutral-50">
+        <div className="flex items-center bg-neutral-100">
           <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">검색</span>
           <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
             <form action="/approval" method="get" className="flex items-center gap-2">
@@ -278,7 +278,7 @@ export default async function ApprovalListPage({
         <a
           href={buildHref(1, search, undefined, dateFrom, dateTo)}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-            !category ? "bg-navy text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+            !category ? "bg-navy text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
           }`}
         >
           전체
@@ -288,7 +288,7 @@ export default async function ApprovalListPage({
             key={cat}
             href={buildHref(1, search, cat, dateFrom, dateTo)}
             className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-              category === cat ? "bg-navy text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+              category === cat ? "bg-navy text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
             }`}
           >
             {cat} ({catCountMap[cat] || 0})

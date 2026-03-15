@@ -214,7 +214,7 @@ export default function SubpageShell({
         <>
           {/* 가로 탭 */}
           <div className="mx-auto max-w-7xl px-4 pt-3 md:px-8">
-            <div className="flex gap-1 border-b border-neutral-200">
+            <div className="flex gap-1 border-b-2 border-neutral-400">
               {section.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + "/");
                 const isExact = section.items.some((other) =>
