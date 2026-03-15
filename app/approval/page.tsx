@@ -172,109 +172,106 @@ export default async function ApprovalListPage({
         </div>
       ) : (<>
 
-      {/* 일자 검색 */}
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-neutral-500">일자</span>
-        <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
-          {category && <input type="hidden" name="cat" value={category} />}
-          {search && <input type="hidden" name="q" value={search} />}
-          <input
-            type="date"
-            name="from"
-            defaultValue={dateFrom}
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm focus:border-navy focus:outline-none"
-          />
-          <span className="text-sm text-neutral-400">~</span>
-          <input
-            type="date"
-            name="to"
-            defaultValue={dateTo}
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm focus:border-navy focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-navy px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
-          >
-            검색
-          </button>
-        </form>
-        {(dateFrom || dateTo) && (
-          <a
-            href={buildHref(1, search, category)}
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100"
-          >
-            새로고침
-          </a>
-        )}
-        {datePresets.map((preset) => {
-          const range = getDateRange(preset.key);
-          const isActive = dateFrom === range.from && dateTo === range.to;
-          return (
-            <a
-              key={preset.key}
-              href={buildHref(1, search, category, range.from, range.to)}
-              className={`rounded-lg border px-2 py-1 text-sm font-medium transition-colors ${
-                isActive
-                  ? "border-navy bg-navy text-white"
-                  : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-              }`}
+      {/* 검색 툴바 */}
+      <div className="mt-2 overflow-hidden rounded-lg border border-neutral-200">
+        {/* 일자 행 */}
+        <div className="flex items-center border-b border-neutral-200 bg-neutral-50">
+          <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">일자</span>
+          <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
+            <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
+              {category && <input type="hidden" name="cat" value={category} />}
+              {search && <input type="hidden" name="q" value={search} />}
+              <input
+                type="date"
+                name="from"
+                defaultValue={dateFrom}
+                className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
+              />
+              <span className="text-sm text-neutral-400">~</span>
+              <input
+                type="date"
+                name="to"
+                defaultValue={dateTo}
+                className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded bg-neutral-600 px-3 py-1 text-sm font-medium text-white transition-all hover:bg-neutral-700 active:scale-95"
+              >
+                새로고침
+              </button>
+            </form>
+            {datePresets.map((preset) => {
+              const range = getDateRange(preset.key);
+              const isActive = dateFrom === range.from && dateTo === range.to;
+              return (
+                <a
+                  key={preset.key}
+                  href={buildHref(1, search, category, range.from, range.to)}
+                  className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-navy text-white"
+                      : "bg-neutral-500 text-white hover:bg-neutral-600"
+                  }`}
+                >
+                  {preset.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+        {/* 검색 행 */}
+        <div className="flex items-center bg-neutral-50">
+          <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">검색</span>
+          <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
+            <form action="/approval" method="get" className="flex items-center gap-2">
+              {category && <input type="hidden" name="cat" value={category} />}
+              {dateFrom && <input type="hidden" name="from" value={dateFrom} />}
+              {dateTo && <input type="hidden" name="to" value={dateTo} />}
+              <input
+                type="text"
+                name="q"
+                defaultValue={search}
+                placeholder="제목 검색"
+                className="w-48 rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded bg-navy px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
+              >
+                검색
+              </button>
+            </form>
+            <Link
+              href="/approval/new"
+              className="rounded bg-accent px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
             >
-              {preset.label}
-            </a>
-          );
-        })}
+              문서작성
+            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  href="/approval/members"
+                  className="rounded border border-neutral-300 bg-white px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+                >
+                  사용자
+                </Link>
+                <Link
+                  href="/approval/budgets"
+                  className="rounded border border-neutral-300 bg-white px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+                >
+                  예산관리
+                </Link>
+              </>
+            )}
+            {(search || category || dateFrom || dateTo) && (
+              <a href="/approval" className="text-sm text-neutral-400 hover:text-neutral-600">
+                초기화
+              </a>
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* 검색 + 합계 */}
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-        <form action="/approval" method="get" className="flex items-center gap-2">
-          {category && <input type="hidden" name="cat" value={category} />}
-          {dateFrom && <input type="hidden" name="from" value={dateFrom} />}
-          {dateTo && <input type="hidden" name="to" value={dateTo} />}
-          <input
-            type="text"
-            name="q"
-            defaultValue={search}
-            placeholder="제목 검색"
-            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm focus:border-navy focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-navy px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
-          >
-            검색
-          </button>
-          {(search || category || dateFrom || dateTo) && (
-            <a href="/approval" className="text-sm text-neutral-400 hover:text-neutral-600">
-              초기화
-            </a>
-          )}
-          <Link
-            href="/approval/new"
-            className="rounded-lg bg-accent px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
-          >
-            문서작성
-          </Link>
-          {isAdmin && (
-            <>
-              <Link
-                href="/approval/members"
-                className="rounded-lg border border-neutral-300 px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
-              >
-                사용자
-              </Link>
-              <Link
-                href="/approval/budgets"
-                className="rounded-lg border border-neutral-300 px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
-              >
-                예산관리
-              </Link>
-            </>
-          )}
-        </form>
-      </div>
-
-      <hr className="mt-3 border-neutral-200" />
 
       {/* 카테고리 탭 */}
       <div className="mt-3 flex flex-wrap gap-1.5">
