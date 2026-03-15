@@ -68,9 +68,9 @@ function PostRow({ post, getName }: { post: Post; getName: (mbId: string | null,
 
   return (
     <tr className="border-b border-neutral-300 transition-colors hover:bg-neutral-50">
-      <td className="whitespace-nowrap px-2 py-2 text-center text-neutral-400">{post.id}</td>
-      <td className="whitespace-nowrap px-2 py-2 text-center text-neutral-500">{post.doc_category || "-"}</td>
-      <td className="w-20 truncate px-2 py-2 text-center text-neutral-500" title={post.account_name || "-"}>{post.account_name || "-"}</td>
+      <td className="px-2 py-2 text-center text-neutral-400">{post.id}</td>
+      <td className="px-2 py-2 text-center text-neutral-500">{post.doc_category || "-"}</td>
+      <td className="truncate px-2 py-2 text-center text-neutral-500" title={post.account_name || "-"}>{post.account_name || "-"}</td>
       <td className="px-2 py-2">
         <Link href={`/approval/${post.id}`} className="inline-flex items-center gap-1.5 font-medium text-neutral-800 hover:text-navy">
           <span className="line-clamp-1">{post.title}</span>
@@ -79,26 +79,26 @@ function PostRow({ post, getName }: { post: Post; getName: (mbId: string | null,
           )}
         </Link>
       </td>
-      <td className="whitespace-nowrap px-2 py-2 text-left text-neutral-400">{formatDate(post.post_date)}</td>
-      <td className="whitespace-nowrap px-2 py-2 text-right font-medium text-neutral-700">{formatAmount(post.amount)}</td>
-      <td className="whitespace-nowrap px-2 py-2 text-center">
+      <td className="px-2 py-2 text-center text-neutral-400">{formatDate(post.post_date)}</td>
+      <td className="px-2 py-2 text-right font-medium text-neutral-700">{formatAmount(post.amount)}</td>
+      <td className="px-2 py-2 text-center">
         <div className="text-neutral-600">{requester}</div>
         <div className={`text-xs leading-none ${post.doc_status === "draft" ? "text-amber-600" : "text-green-600"}`}>
           {post.doc_status === "draft" ? "작성중" : "품의"}
         </div>
       </td>
-      <td className="whitespace-nowrap px-2 py-2 text-center">
+      <td className="px-2 py-2 text-center">
         <div className={a1.color}>{getName(post.approver1_mb_id)}</div>
         <div className={`text-xs leading-none ${a1.color}`}>{a1.label}</div>
       </td>
-      <td className="whitespace-nowrap px-2 py-2 text-center">
+      <td className="px-2 py-2 text-center">
         <div className={a2.color}>{getName(post.approver2_mb_id)}</div>
         <div className={`text-xs leading-none ${a2.color}`}>{a2.label}</div>
       </td>
-      <td className="whitespace-nowrap px-2 py-2 text-center">
+      <td className="px-2 py-2 text-center">
         <span className={`text-xs font-medium ${fin.color}`}>{fin.label}</span>
       </td>
-      <td className="whitespace-nowrap px-2 py-2 text-center">
+      <td className="px-2 py-2 text-center">
         <span className={`text-xs font-medium ${pay.color}`}>{pay.label}</span>
       </td>
     </tr>
@@ -182,20 +182,33 @@ export default function ApprovalTable({
   return (
     <>
       <div className="mt-4 overflow-x-auto bg-white shadow-sm">
-        <table className="w-full min-w-[900px] text-sm">
+        <table className="w-full min-w-[960px] table-fixed text-sm">
+          <colgroup>
+            <col className="w-16" />       {/* 번호 */}
+            <col className="w-28" />       {/* 문서분류 */}
+            <col className="w-24" />       {/* 계정이름 */}
+            <col />                         {/* 제목 (나머지) */}
+            <col className="w-22" />       {/* 등록일시 */}
+            <col className="w-24" />       {/* 금액 */}
+            <col className="w-16" />       {/* 품의 */}
+            <col className="w-16" />       {/* 결재1 */}
+            <col className="w-16" />       {/* 결재2 */}
+            <col className="w-14" />       {/* 재정 */}
+            <col className="w-14" />       {/* 지급 */}
+          </colgroup>
           <thead>
             <tr className="border-b border-neutral-400 bg-neutral-200 text-neutral-600">
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">번호</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">문서분류</th>
-              <th className="w-20 whitespace-nowrap px-2 py-2 text-center font-medium">계정이름</th>
+              <th className="px-2 py-2 text-center font-medium">번호</th>
+              <th className="px-2 py-2 text-center font-medium">문서분류</th>
+              <th className="px-2 py-2 text-center font-medium">계정이름</th>
               <th className="px-2 py-2 text-center font-medium">제목</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">등록일시</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-right font-medium">금액</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">품의</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">결재1</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">결재2</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">재정</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">지급</th>
+              <th className="px-2 py-2 text-center font-medium">등록일시</th>
+              <th className="px-2 py-2 text-right font-medium">금액</th>
+              <th className="px-2 py-2 text-center font-medium">품의</th>
+              <th className="px-2 py-2 text-center font-medium">결재1</th>
+              <th className="px-2 py-2 text-center font-medium">결재2</th>
+              <th className="px-2 py-2 text-center font-medium">재정</th>
+              <th className="px-2 py-2 text-center font-medium">지급</th>
             </tr>
           </thead>
           <tbody>
