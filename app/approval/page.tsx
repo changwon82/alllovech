@@ -160,9 +160,14 @@ export default async function ApprovalListPage({
         <p className="mt-12 text-center text-sm text-neutral-400">
           {search ? `"${search}" 검색 결과가 없습니다.` : "등록된 결재 문서가 없습니다."}
         </p>
-      ) : (
+      ) : (<>
         <ApprovalTable posts={posts} nameMap={nameMap} />
-      )}
+        <div className="mt-2 flex justify-end">
+          <span className="text-sm font-medium text-neutral-500">
+            합계금액 : <span className="font-bold text-navy">{totalAmount.toLocaleString("ko-KR")}원</span>
+          </span>
+        </div>
+      </>)}
 
       {/* 페이지네이션 */}
       {totalPages > 1 &&
@@ -235,7 +240,7 @@ export default async function ApprovalListPage({
                 </Link>
               </div>
               <div className="text-sm text-neutral-400">
-                페이지 {page} / {totalPages} · 보기 {(page - 1) * perPage + 1} - {Math.min(page * perPage, displayCount)} / {displayCount}
+                페이지 {page} / {totalPages}
               </div>
             </div>
           );
