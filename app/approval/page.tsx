@@ -266,6 +266,12 @@ export default async function ApprovalListPage({
               >
                 사용자
               </Link>
+              <Link
+                href="/approval/budgets"
+                className="rounded-lg border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+              >
+                예산관리
+              </Link>
             </>
           )}
         </form>
