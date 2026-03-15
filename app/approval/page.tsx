@@ -173,7 +173,7 @@ export default async function ApprovalListPage({
       ) : (<>
 
       {/* 일자 검색 */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-neutral-500">일자</span>
         <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
           {category && <input type="hidden" name="cat" value={category} />}
@@ -226,7 +226,7 @@ export default async function ApprovalListPage({
       </div>
 
       {/* 검색 + 합계 */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <form action="/approval" method="get" className="flex items-center gap-2">
           {category && <input type="hidden" name="cat" value={category} />}
           {dateFrom && <input type="hidden" name="from" value={dateFrom} />}
@@ -275,7 +275,7 @@ export default async function ApprovalListPage({
       </div>
 
       {/* 카테고리 탭 */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
+      <div className="mt-2 flex flex-wrap gap-1.5">
         <a
           href={buildHref(1, search, undefined, dateFrom, dateTo)}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${

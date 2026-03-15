@@ -213,7 +213,7 @@ export default function SubpageShell({
       {section.tabLayout ? (
         <>
           {/* 가로 탭 */}
-          <div className="mx-auto max-w-7xl px-4 pt-4 md:px-8">
+          <div className="mx-auto max-w-7xl px-4 pt-3 md:px-8">
             <div className="flex gap-1 border-b border-neutral-200">
               {section.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -238,7 +238,7 @@ export default function SubpageShell({
             </div>
           </div>
           {/* 콘텐츠 */}
-          <div className="mx-auto max-w-7xl px-4 pt-4 pb-20 md:px-8">
+          <div className="mx-auto max-w-7xl px-4 pt-2 pb-20 md:px-8">
             {children}
           </div>
         </>
