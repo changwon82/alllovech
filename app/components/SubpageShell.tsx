@@ -9,6 +9,7 @@ type SectionConfig = {
   title: string;
   breadcrumbLink: string;
   breadcrumbs: Record<string, string>;
+  tabLayout?: boolean;
   items: {
     label: string;
     href: string;
@@ -99,6 +100,7 @@ const SECTIONS: SectionConfig[] = [
   {
     title: "교회재정",
     breadcrumbLink: "/approval",
+    tabLayout: true,
     breadcrumbs: {
       "/approval": "재정청구",
       "/approval/notice": "재정공지",
@@ -206,11 +208,45 @@ export default function SubpageShell({
         </div>
       </div>
 
-      {/* 사이드바 + 콘텐츠 */}
-      <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
-        <SubpageSidebar title={section.title} items={section.items} />
-        <div className="min-w-0 flex-1">{children}</div>
-      </div>
+      {section.tabLayout ? (
+        <>
+          {/* 가로 탭 */}
+          <div className="mx-auto max-w-7xl px-4 pt-4 md:px-8">
+            <div className="flex gap-1">
+              {section.items.map((item) => {
+                const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                const isExact = section.items.some((other) =>
+                  other.href !== item.href && pathname.startsWith(other.href) && other.href.startsWith(item.href)
+                );
+                const isActive = isExact ? pathname === item.href : active;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-t-lg px-5 py-2 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-navy text-white"
+                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+          {/* 콘텐츠 */}
+          <div className="mx-auto max-w-7xl px-4 pt-4 pb-20 md:px-8">
+            {children}
+          </div>
+        </>
+      ) : (
+        /* 사이드바 + 콘텐츠 */
+        <div className="mx-auto flex max-w-5xl gap-10 px-4 pt-6 pb-20 md:px-8">
+          <SubpageSidebar title={section.title} items={section.items} />
+          <div className="min-w-0 flex-1">{children}</div>
+        </div>
+      )}
     </>
   );
 }
