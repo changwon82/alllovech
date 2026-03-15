@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import ApprovalTable from "./ApprovalTable";
+import ApprovalToolbar from "./ApprovalToolbar";
 import LoginForm from "@/app/login/LoginForm";
 import Link from "next/link";
 
@@ -142,50 +143,6 @@ export default async function ApprovalListPage({
     return `/approval${qs ? `?${qs}` : ""}`;
   }
 
-  // 빠른 일자 필터 계산
-  function getDateRange(preset: string): { from: string; to: string } {
-    const today = new Date();
-    const fmt = (d: Date) => d.toISOString().slice(0, 10);
-    const dayOfWeek = today.getDay(); // 0=일 1=월 ...
-    switch (preset) {
-      case "today":
-        return { from: fmt(today), to: fmt(today) };
-      case "this-week": {
-        const mon = new Date(today);
-        mon.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-        const sun = new Date(mon);
-        sun.setDate(mon.getDate() + 6);
-        return { from: fmt(mon), to: fmt(sun) };
-      }
-      case "last-week": {
-        const mon = new Date(today);
-        mon.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) - 7);
-        const sun = new Date(mon);
-        sun.setDate(mon.getDate() + 6);
-        return { from: fmt(mon), to: fmt(sun) };
-      }
-      case "this-month": {
-        const first = new Date(today.getFullYear(), today.getMonth(), 1);
-        const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        return { from: fmt(first), to: fmt(last) };
-      }
-      case "last-month": {
-        const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const last = new Date(today.getFullYear(), today.getMonth(), 0);
-        return { from: fmt(first), to: fmt(last) };
-      }
-      default:
-        return { from: "", to: "" };
-    }
-  }
-
-  const datePresets = [
-    { key: "today", label: "오늘" },
-    { key: "this-week", label: "이번주" },
-    { key: "last-week", label: "지난주" },
-    { key: "this-month", label: "당월" },
-    { key: "last-month", label: "전월" },
-  ];
 
   return (
     <>
@@ -196,140 +153,7 @@ export default async function ApprovalListPage({
         </div>
       ) : (<>
 
-      {/* 검색 툴바 */}
-      <div className="mt-2 overflow-hidden border border-neutral-400">
-        {/* 일자 행 */}
-        <div className="flex items-center border-b border-neutral-400 bg-neutral-100">
-          <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">일자</span>
-          <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
-            <form action="/approval" method="get" className="flex flex-wrap items-center gap-2">
-              {category && <input type="hidden" name="cat" value={category} />}
-              {search && <input type="hidden" name="q" value={search} />}
-              <input
-                type="date"
-                name="from"
-                defaultValue={dateFrom}
-                className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
-              />
-              <span className="text-sm text-neutral-400">~</span>
-              <input
-                type="date"
-                name="to"
-                defaultValue={dateTo}
-                className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded bg-neutral-600 px-3 py-1 text-sm font-medium text-white transition-all hover:bg-neutral-700 active:scale-95"
-              >
-                새로고침
-              </button>
-            </form>
-            {datePresets.map((preset) => {
-              const range = getDateRange(preset.key);
-              const isActive = dateFrom === range.from && dateTo === range.to;
-              return (
-                <a
-                  key={preset.key}
-                  href={buildHref(1, search, category, range.from, range.to)}
-                  className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-navy text-white"
-                      : "bg-neutral-500 text-white hover:bg-neutral-600"
-                  }`}
-                >
-                  {preset.label}
-                </a>
-              );
-            })}
-          </div>
-        </div>
-        {/* 검색 행 */}
-        <div className="flex items-center bg-neutral-100">
-          <span className="w-14 shrink-0 px-3 py-2 text-sm font-bold text-neutral-700">검색</span>
-          <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
-            <form action="/approval" method="get" className="flex items-center gap-2">
-              {category && <input type="hidden" name="cat" value={category} />}
-              {dateFrom && <input type="hidden" name="from" value={dateFrom} />}
-              {dateTo && <input type="hidden" name="to" value={dateTo} />}
-              <select
-                name="sf"
-                defaultValue={searchField}
-                className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
-              >
-                <option value="title">문서제목</option>
-                <option value="id">문서번호</option>
-                <option value="author">작성자명</option>
-                <option value="account">계정이름</option>
-                <option value="content">본문내용</option>
-              </select>
-              <input
-                type="text"
-                name="q"
-                defaultValue={search}
-                placeholder="검색어 입력"
-                className="w-48 rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded bg-navy px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
-              >
-                검색
-              </button>
-            </form>
-            <Link
-              href="/approval/new"
-              className="rounded bg-accent px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
-            >
-              문서작성
-            </Link>
-            {isAdmin && (
-              <>
-                <Link
-                  href="/approval/members"
-                  className="rounded border border-neutral-300 bg-white px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
-                >
-                  사용자
-                </Link>
-                <Link
-                  href="/approval/budgets"
-                  className="rounded border border-neutral-300 bg-white px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
-                >
-                  예산관리
-                </Link>
-              </>
-            )}
-            {(search || category || dateFrom || dateTo) && (
-              <a href="/approval" className="text-sm text-neutral-400 hover:text-neutral-600">
-                초기화
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 카테고리 탭 */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        <a
-          href={buildHref(1, search, undefined, dateFrom, dateTo)}
-          className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-            !category ? "bg-navy text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
-          }`}
-        >
-          전체
-        </a>
-        {categories.map((cat) => (
-          <a
-            key={cat}
-            href={buildHref(1, search, cat, dateFrom, dateTo)}
-            className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-              category === cat ? "bg-navy text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
-            }`}
-          >
-            {cat} ({catCountMap[cat] || 0})
-          </a>
-        ))}
-      </div>
+      <ApprovalToolbar isAdmin={isAdmin} catCountMap={catCountMap} />
 
       {/* 테이블 */}
       {!posts || posts.length === 0 ? (
@@ -358,12 +182,12 @@ export default async function ApprovalListPage({
               <div className="flex items-center gap-1">
                 {pages[0] > 1 && (
                   <>
-                    <a href={buildHref(1, search, category, dateFrom, dateTo)} className={linkClass}>1</a>
+                    <Link href={buildHref(1, search, category, dateFrom, dateTo)} className={linkClass}>1</Link>
                     {pages[0] > 2 && <span className="px-1 text-sm text-neutral-300">···</span>}
                   </>
                 )}
                 {pages.map((p) => (
-                  <a
+                  <Link
                     key={p}
                     href={buildHref(p, search, category, dateFrom, dateTo)}
                     className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm ${
@@ -373,42 +197,42 @@ export default async function ApprovalListPage({
                     }`}
                   >
                     {p}
-                  </a>
+                  </Link>
                 ))}
                 {pages[pages.length - 1] < totalPages && (
                   <>
                     {pages[pages.length - 1] < totalPages - 1 && (
                       <span className="px-1 text-sm text-neutral-300">···</span>
                     )}
-                    <a href={buildHref(totalPages, search, category, dateFrom, dateTo)} className={linkClass}>{totalPages}</a>
+                    <Link href={buildHref(totalPages, search, category, dateFrom, dateTo)} className={linkClass}>{totalPages}</Link>
                   </>
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <a
+                <Link
                   href={buildHref(1, search, category, dateFrom, dateTo)}
                   className={`${navClass} ${page === 1 ? "pointer-events-none opacity-30" : ""}`}
                 >
                   « 처음
-                </a>
-                <a
+                </Link>
+                <Link
                   href={buildHref(Math.max(1, page - 1), search, category, dateFrom, dateTo)}
                   className={`${navClass} ${page === 1 ? "pointer-events-none opacity-30" : ""}`}
                 >
                   ‹ 이전
-                </a>
-                <a
+                </Link>
+                <Link
                   href={buildHref(Math.min(totalPages, page + 1), search, category, dateFrom, dateTo)}
                   className={`${navClass} ${page === totalPages ? "pointer-events-none opacity-30" : ""}`}
                 >
                   다음 ›
-                </a>
-                <a
+                </Link>
+                <Link
                   href={buildHref(totalPages, search, category, dateFrom, dateTo)}
                   className={`${navClass} ${page === totalPages ? "pointer-events-none opacity-30" : ""}`}
                 >
                   마지막 »
-                </a>
+                </Link>
               </div>
               <div className="text-sm text-neutral-400">
                 페이지 {page} / {totalPages} · 보기 {(page - 1) * perPage + 1} - {Math.min(page * perPage, displayCount)} / {displayCount}
