@@ -282,7 +282,7 @@ export default async function ApprovalListPage({
             !category ? "bg-navy text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
           }`}
         >
-          전체 ({totalCount})
+          전체
         </a>
         {categories.map((cat) => (
           <a
