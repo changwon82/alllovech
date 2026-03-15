@@ -17,9 +17,9 @@ export default async function ApprovalListPage({
   const category = params.cat || "";
   const dateFrom = params.from || "";
   const dateTo = params.to || "";
-  const sizeParam = params.size || "20";
+  const sizeParam = params.size || "12";
   const isInfinite = sizeParam === "all";
-  const perPage = isInfinite ? 100 : parseInt(sizeParam, 10) || 20;
+  const perPage = isInfinite ? 100 : parseInt(sizeParam, 10) || 12;
 
   const { supabase, user } = await getSessionUser();
 
@@ -142,7 +142,7 @@ export default async function ApprovalListPage({
     if (from) sp.set("from", from);
     if (to) sp.set("to", to);
     const s = size || sizeParam;
-    if (s && s !== "20") sp.set("size", s);
+    if (s && s !== "12") sp.set("size", s);
     const qs = sp.toString();
     return `/approval${qs ? `?${qs}` : ""}`;
   }
@@ -157,37 +157,16 @@ export default async function ApprovalListPage({
         </div>
       ) : (<>
 
-      <ApprovalToolbar isAdmin={isAdmin} catCountMap={catCountMap} />
+      <ApprovalToolbar isAdmin={isAdmin} catCountMap={catCountMap} totalAmount={totalAmount} />
 
       {/* 테이블 */}
       {!posts || posts.length === 0 ? (
         <p className="mt-12 text-center text-sm text-neutral-400">
           {search ? `"${search}" 검색 결과가 없습니다.` : "등록된 결재 문서가 없습니다."}
         </p>
-      ) : (<>
+      ) : (
         <ApprovalTable posts={posts} nameMap={nameMap} totalCount={displayCount} infiniteScroll={isInfinite} />
-        <div className="mt-2 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-neutral-500">보기</span>
-            {["20", "50", "100", "all"].map((s) => (
-              <Link
-                key={s}
-                href={buildHref(1, search, category, dateFrom, dateTo, searchField, s)}
-                className={`rounded border px-2 py-0.5 text-sm font-medium transition-colors ${
-                  sizeParam === s
-                    ? "border-navy bg-navy text-white"
-                    : "border-neutral-300 text-neutral-500 hover:bg-neutral-100"
-                }`}
-              >
-                {s === "all" ? "전체" : s}
-              </Link>
-            ))}
-          </div>
-          <span className="text-sm font-medium text-neutral-500">
-            합계금액 : <span className="font-bold text-navy">{totalAmount.toLocaleString("ko-KR")}원</span>
-          </span>
-        </div>
-      </>)}
+      )}
 
       {/* 페이지네이션 */}
       {!isInfinite && totalPages > 1 &&

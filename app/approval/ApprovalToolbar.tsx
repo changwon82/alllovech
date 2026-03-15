@@ -66,7 +66,7 @@ function buildHref(opts: {
   if (opts.cat) sp.set("cat", opts.cat);
   if (opts.from) sp.set("from", opts.from);
   if (opts.to) sp.set("to", opts.to);
-  if (opts.size && opts.size !== "20") sp.set("size", opts.size);
+  if (opts.size && opts.size !== "12") sp.set("size", opts.size);
   const qs = sp.toString();
   return `/approval${qs ? `?${qs}` : ""}`;
 }
@@ -74,9 +74,11 @@ function buildHref(opts: {
 export default function ApprovalToolbar({
   isAdmin,
   catCountMap,
+  totalAmount,
 }: {
   isAdmin: boolean;
   catCountMap: Record<string, number>;
+  totalAmount: number;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -87,7 +89,7 @@ export default function ApprovalToolbar({
   const category = params.get("cat") || "";
   const dateFrom = params.get("from") || "";
   const dateTo = params.get("to") || "";
-  const size = params.get("size") || "20";
+  const size = params.get("size") || "12";
 
   const dateFromRef = useRef<HTMLInputElement>(null);
   const dateToRef = useRef<HTMLInputElement>(null);
@@ -228,8 +230,8 @@ export default function ApprovalToolbar({
         </div>
       </div>
 
-      {/* 카테고리 탭 */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
+      {/* 카테고리 탭 + 보기 선택 + 합계금액 */}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
         <button
           onClick={() => navigate(buildHref({ q: search, sf: searchField, from: dateFrom, to: dateTo, size }))}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
@@ -249,6 +251,25 @@ export default function ApprovalToolbar({
             {cat} ({catCountMap[cat] || 0})
           </button>
         ))}
+
+        <span className="mx-1 text-neutral-300">|</span>
+        {["50", "100", "all"].map((s) => (
+          <button
+            key={s}
+            onClick={() => navigate(buildHref({ page: 1, q: search, sf: searchField, cat: category, from: dateFrom, to: dateTo, size: s }))}
+            className={`rounded border px-2 py-0.5 text-sm font-medium transition-colors ${
+              size === s
+                ? "border-navy bg-navy text-white"
+                : "border-neutral-300 text-neutral-500 hover:bg-neutral-100"
+            }`}
+          >
+            {s === "all" ? "전체" : s}
+          </button>
+        ))}
+
+        <span className="ml-auto text-sm font-medium text-neutral-500">
+          합계금액 : <span className="font-bold text-navy">{totalAmount.toLocaleString("ko-KR")}원</span>
+        </span>
       </div>
     </>
   );
