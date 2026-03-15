@@ -186,33 +186,35 @@ export default function SubpageShell({
             </h1>
           </div>
         </div>
-        {/* 브레드크럼 */}
-        <div className="border-b border-neutral-200 bg-neutral-50">
-          <nav className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 text-sm md:px-8">
-            <Link href="/" className="text-neutral-400 transition hover:text-navy">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                <path fillRule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" clipRule="evenodd" />
+        {/* 브레드크럼 (tabLayout이면 숨김) */}
+        {!section.tabLayout && (
+          <div className="border-b border-neutral-200 bg-neutral-50">
+            <nav className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 text-sm md:px-8">
+              <Link href="/" className="text-neutral-400 transition hover:text-navy">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                  <path fillRule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" clipRule="evenodd" />
+                </svg>
+              </Link>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-neutral-300">
+                <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
               </svg>
-            </Link>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-neutral-300">
-              <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-            </svg>
-            <Link href={section.breadcrumbLink} className="text-neutral-500 transition hover:text-navy">
-              {section.title}
-            </Link>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-neutral-300">
-              <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-            </svg>
-            <span className="font-medium text-neutral-700">{breadcrumbLabel}</span>
-          </nav>
-        </div>
+              <Link href={section.breadcrumbLink} className="text-neutral-500 transition hover:text-navy">
+                {section.title}
+              </Link>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-neutral-300">
+                <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium text-neutral-700">{breadcrumbLabel}</span>
+            </nav>
+          </div>
+        )}
       </div>
 
       {section.tabLayout ? (
         <>
           {/* 가로 탭 */}
           <div className="mx-auto max-w-7xl px-4 pt-4 md:px-8">
-            <div className="flex gap-1">
+            <div className="flex gap-1 border-b border-neutral-200">
               {section.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + "/");
                 const isExact = section.items.some((other) =>
@@ -223,10 +225,10 @@ export default function SubpageShell({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`rounded-t-lg px-5 py-2 text-sm font-medium transition ${
+                    className={`-mb-px border-b-2 px-5 py-2.5 text-sm font-medium transition ${
                       isActive
-                        ? "bg-navy text-white"
-                        : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        ? "border-navy text-navy"
+                        : "border-transparent text-neutral-400 hover:text-neutral-600"
                     }`}
                   >
                     {item.label}
