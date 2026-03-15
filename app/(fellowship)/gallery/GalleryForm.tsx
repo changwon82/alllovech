@@ -5,6 +5,7 @@ import { useTransition, useState, useRef } from "react";
 import { createGalleryPost, updateGalleryPost } from "./actions";
 import RichEditor from "@/app/components/ui/RichEditor";
 import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
+import { todayKST } from "@/lib/date";
 
 const R2_BASE = "https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/gallery";
 const CATEGORIES = ["예배", "교회학교", "행사", "건축", "기타"];
@@ -103,7 +104,7 @@ export default function GalleryForm({ mode, post, existingImages = [] }: Props) 
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKST();
   const dateValue = post?.post_date ? post.post_date.slice(0, 10) : today;
 
   return (

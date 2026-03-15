@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
 import { deleteFromR2, deleteContentImages, deleteRemovedContentImages } from "@/lib/r2";
 import { processAndUpload } from "@/lib/upload";
+import { todayKST } from "@/lib/date";
 
 // 관리자 권한 확인
 async function checkAdmin() {
@@ -44,7 +45,7 @@ export async function createJuboPost(
     .insert({
       title: title.trim().normalize("NFC"),
       content: (content || "").normalize("NFC"),
-      post_date: postDate || new Date().toISOString().slice(0, 10),
+      post_date: postDate || todayKST(),
       author,
     })
     .select("id")
@@ -113,7 +114,7 @@ export async function updateJuboPost(
     .update({
       title: title.trim().normalize("NFC"),
       content: (content || "").normalize("NFC"),
-      post_date: postDate || new Date().toISOString().slice(0, 10),
+      post_date: postDate || todayKST(),
       author,
     })
     .eq("id", postId);

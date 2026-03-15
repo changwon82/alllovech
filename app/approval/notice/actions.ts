@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
 import { deleteFromR2, deleteContentImages, deleteRemovedContentImages } from "@/lib/r2";
 import { processAndUpload } from "@/lib/upload";
+import { todayKST } from "@/lib/date";
 
 async function getNextNoticeOrder(admin: ReturnType<typeof createAdminClient>) {
   const { data } = await admin
@@ -55,7 +56,7 @@ export async function createNoticePost(
     .insert({
       title: title.trim().normalize("NFC"),
       content: (content || "").normalize("NFC"),
-      post_date: postDate || new Date().toISOString().slice(0, 10),
+      post_date: postDate || todayKST(),
       author,
       is_notice: isNotice,
       notice_order: noticeOrder,
@@ -133,7 +134,7 @@ export async function updateNoticePost(
     .update({
       title: title.trim().normalize("NFC"),
       content: (content || "").normalize("NFC"),
-      post_date: postDate || new Date().toISOString().slice(0, 10),
+      post_date: postDate || todayKST(),
       author,
       is_notice: isNotice,
       notice_order: noticeOrder,

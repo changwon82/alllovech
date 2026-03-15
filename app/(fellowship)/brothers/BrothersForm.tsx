@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 import { createBrothersPost, updateBrothersPost } from "./actions";
 import RichEditor from "@/app/components/ui/RichEditor";
+import { todayKST } from "@/lib/date";
 
 type Props = {
   mode: "create" | "edit";
@@ -40,7 +41,7 @@ export default function BrothersForm({ mode, post }: Props) {
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKST();
   const dateValue = post?.post_date ? post.post_date.slice(0, 10) : today;
 
   return (

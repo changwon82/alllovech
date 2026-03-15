@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
 import { deleteContentImages, deleteRemovedContentImages } from "@/lib/r2";
+import { todayKST } from "@/lib/date";
 
 // 관리자 권한 확인
 async function checkAdmin() {
@@ -42,7 +43,7 @@ export async function createBrothersPost(
     .insert({
       title: title.trim().normalize("NFC"),
       content: (content || "").normalize("NFC"),
-      post_date: postDate || new Date().toISOString().slice(0, 10),
+      post_date: postDate || todayKST(),
       author,
     })
     .select("id")
@@ -83,7 +84,7 @@ export async function updateBrothersPost(
     .update({
       title: title.trim().normalize("NFC"),
       content: (content || "").normalize("NFC"),
-      post_date: postDate || new Date().toISOString().slice(0, 10),
+      post_date: postDate || todayKST(),
       author,
     })
     .eq("id", postId);

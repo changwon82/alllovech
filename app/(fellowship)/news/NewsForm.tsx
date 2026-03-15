@@ -5,6 +5,7 @@ import { useTransition, useState, useRef } from "react";
 import { createNewsPost, updateNewsPost } from "./actions";
 import RichEditor from "@/app/components/ui/RichEditor";
 import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
+import { todayKST } from "@/lib/date";
 
 type ExistingFile = {
   file_name: string;
@@ -92,7 +93,7 @@ export default function NewsForm({ mode, post, existingFiles = [] }: Props) {
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKST();
   const dateValue = post?.post_date ? post.post_date.slice(0, 10) : today;
 
   return (
