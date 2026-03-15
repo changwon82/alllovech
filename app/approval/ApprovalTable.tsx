@@ -70,7 +70,7 @@ function PostRow({ post, getName }: { post: Post; getName: (mbId: string | null,
     <tr className="border-b border-neutral-300 transition-colors hover:bg-neutral-50">
       <td className="whitespace-nowrap px-2 py-2 text-center text-neutral-400">{post.id}</td>
       <td className="whitespace-nowrap px-2 py-2 text-center text-neutral-500">{post.doc_category || "-"}</td>
-      <td className="whitespace-nowrap px-2 py-2 text-center text-neutral-500">{post.account_name || "-"}</td>
+      <td className="w-20 truncate px-2 py-2 text-center text-neutral-500" title={post.account_name || "-"}>{post.account_name || "-"}</td>
       <td className="px-2 py-2">
         <Link href={`/approval/${post.id}`} className="inline-flex items-center gap-1.5 font-medium text-neutral-800 hover:text-navy">
           <span className="line-clamp-1">{post.title}</span>
@@ -187,7 +187,7 @@ export default function ApprovalTable({
             <tr className="border-b border-neutral-400 bg-neutral-200 text-neutral-600">
               <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">번호</th>
               <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">문서분류</th>
-              <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">계정이름</th>
+              <th className="w-20 whitespace-nowrap px-2 py-2 text-center font-medium">계정이름</th>
               <th className="px-2 py-2 text-center font-medium">제목</th>
               <th className="w-0 whitespace-nowrap px-2 py-2 text-center font-medium">등록일시</th>
               <th className="w-0 whitespace-nowrap px-2 py-2 text-right font-medium">금액</th>
