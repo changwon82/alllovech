@@ -18,7 +18,8 @@ export default async function ApprovalListPage({
   const dateFrom = params.from || "";
   const dateTo = params.to || "";
   const sizeParam = params.size || "20";
-  const perPage = sizeParam === "all" ? 99999 : parseInt(sizeParam, 10) || 20;
+  const isInfinite = sizeParam === "all";
+  const perPage = isInfinite ? 100 : parseInt(sizeParam, 10) || 20;
 
   const { supabase, user } = await getSessionUser();
 
@@ -164,7 +165,7 @@ export default async function ApprovalListPage({
           {search ? `"${search}" 검색 결과가 없습니다.` : "등록된 결재 문서가 없습니다."}
         </p>
       ) : (<>
-        <ApprovalTable posts={posts} nameMap={nameMap} />
+        <ApprovalTable posts={posts} nameMap={nameMap} totalCount={displayCount} infiniteScroll={isInfinite} />
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <span className="text-sm text-neutral-500">보기</span>
@@ -189,7 +190,7 @@ export default async function ApprovalListPage({
       </>)}
 
       {/* 페이지네이션 */}
-      {totalPages > 1 &&
+      {!isInfinite && totalPages > 1 &&
         (() => {
           const pages: number[] = [];
           const start = Math.max(1, page - 7);
