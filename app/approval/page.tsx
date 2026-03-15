@@ -7,11 +7,12 @@ import Link from "next/link";
 export default async function ApprovalListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string; cat?: string; from?: string; to?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; sf?: string; cat?: string; from?: string; to?: string }>;
 }) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
   const search = params.q || "";
+  const searchField = params.sf || "title";
   const category = params.cat || "";
   const dateFrom = params.from || "";
   const dateTo = params.to || "";
@@ -49,7 +50,20 @@ export default async function ApprovalListPage({
     .order("id", { ascending: false });
 
   if (search) {
-    query = query.ilike("title", `%${search}%`);
+    const fieldMap: Record<string, string> = {
+      title: "title",
+      id: "id",
+      author: "author_name",
+      account: "account_name",
+      content: "content",
+    };
+    const col = fieldMap[searchField] || "title";
+    if (searchField === "id") {
+      const numVal = parseInt(search, 10);
+      if (!isNaN(numVal)) query = query.eq("id", numVal);
+    } else {
+      query = query.ilike(col, `%${search}%`);
+    }
   }
   if (dateFrom) {
     query = query.gte("post_date", `${dateFrom}T00:00:00`);
@@ -74,7 +88,16 @@ export default async function ApprovalListPage({
   let countQuery = supabase
     .from("approval_posts")
     .select("id", { count: "exact", head: true });
-  if (search) countQuery = countQuery.ilike("title", `%${search}%`);
+  if (search) {
+    const fieldMap: Record<string, string> = { title: "title", id: "id", author: "author_name", account: "account_name", content: "content" };
+    const col = fieldMap[searchField] || "title";
+    if (searchField === "id") {
+      const numVal = parseInt(search, 10);
+      if (!isNaN(numVal)) countQuery = countQuery.eq("id", numVal);
+    } else {
+      countQuery = countQuery.ilike(col, `%${search}%`);
+    }
+  }
   if (dateFrom) countQuery = countQuery.gte("post_date", `${dateFrom}T00:00:00`);
   if (dateTo) countQuery = countQuery.lte("post_date", `${dateTo}T23:59:59`);
   if (category) {
@@ -107,10 +130,11 @@ export default async function ApprovalListPage({
   }
 
   // 검색 URL 빌더
-  function buildHref(p: number, q?: string, cat?: string, from?: string, to?: string) {
+  function buildHref(p: number, q?: string, cat?: string, from?: string, to?: string, sf?: string) {
     const sp = new URLSearchParams();
     if (p > 1) sp.set("page", String(p));
     if (q) sp.set("q", q);
+    if (sf && sf !== "title") sp.set("sf", sf);
     if (cat) sp.set("cat", cat);
     if (from) sp.set("from", from);
     if (to) sp.set("to", to);
@@ -228,11 +252,22 @@ export default async function ApprovalListPage({
               {category && <input type="hidden" name="cat" value={category} />}
               {dateFrom && <input type="hidden" name="from" value={dateFrom} />}
               {dateTo && <input type="hidden" name="to" value={dateTo} />}
+              <select
+                name="sf"
+                defaultValue={searchField}
+                className="rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
+              >
+                <option value="title">문서제목</option>
+                <option value="id">문서번호</option>
+                <option value="author">작성자명</option>
+                <option value="account">계정이름</option>
+                <option value="content">본문내용</option>
+              </select>
               <input
                 type="text"
                 name="q"
                 defaultValue={search}
-                placeholder="제목 검색"
+                placeholder="검색어 입력"
                 className="w-48 rounded border border-neutral-300 bg-white px-2 py-1 text-sm focus:border-navy focus:outline-none"
               />
               <button
