@@ -236,11 +236,11 @@ export default async function ApprovalListPage({
             name="q"
             defaultValue={search}
             placeholder="제목 검색"
-            className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:border-navy focus:outline-none"
+            className="rounded-lg border border-neutral-200 px-2 py-1 text-sm focus:border-navy focus:outline-none"
           />
           <button
             type="submit"
-            className="rounded-lg bg-navy px-4 py-1.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
+            className="rounded-lg bg-navy px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
           >
             검색
           </button>
@@ -251,7 +251,7 @@ export default async function ApprovalListPage({
           )}
           <Link
             href="/approval/new"
-            className="rounded-xl bg-accent px-4 py-1.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
+            className="rounded-lg bg-accent px-3 py-1 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
           >
             문서작성
           </Link>
@@ -259,13 +259,13 @@ export default async function ApprovalListPage({
             <>
               <Link
                 href="/approval/members"
-                className="rounded-lg border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+                className="rounded-lg border border-neutral-300 px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
               >
                 사용자
               </Link>
               <Link
                 href="/approval/budgets"
-                className="rounded-lg border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+                className="rounded-lg border border-neutral-300 px-3 py-1 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
               >
                 예산관리
               </Link>
