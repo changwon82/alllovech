@@ -42,12 +42,12 @@ export default async function LocationPage() {
             </div>
           </dl>
           <div className="mt-4 flex gap-2">
-            <a href="https://map.kakao.com/link/search/서울 서초구 탑성말길 37" target="_blank" rel="noopener noreferrer"
+            <a href="https://map.kakao.com/link/to/다애교회,37.4553,127.0583" target="_blank" rel="noopener noreferrer"
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
               <svg viewBox="0 0 24 24" className="h-4 w-4"><circle cx="12" cy="12" r="12" fill="#FEE500"/><path d="M12 6.5c-3.31 0-6 2.015-6 4.5 0 1.594 1.06 2.993 2.656 3.785l-.67 2.465c-.05.186.163.334.32.222l2.94-1.96c.244.025.494.038.754.038 3.31 0 6-2.015 6-4.5S15.31 6.5 12 6.5z" fill="#3C1E1E"/></svg>
               카카오맵
             </a>
-            <a href="https://map.naver.com/p/entry/place/1469260990" target="_blank" rel="noopener noreferrer"
+            <a href="https://map.naver.com/p/directions/-/37.4553,127.0583,다애교회/car" target="_blank" rel="noopener noreferrer"
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
               <svg viewBox="0 0 24 24" className="h-4 w-4"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M8 7.5h2.4l3.6 4.5V7.5H16v9h-2.4L10 12v4.5H8v-9z" fill="#fff"/></svg>
               네이버맵
@@ -140,12 +140,12 @@ export default async function LocationPage() {
               </dl>
               <ParkingMap src="https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/site/about/parking.jpg" alt="내곡SH플라자 주차장 약도" />
               <div className="mt-3 ml-9 flex gap-2">
-                <a href="https://map.kakao.com/link/search/서울 서초구 내곡동 391" target="_blank" rel="noopener noreferrer"
+                <a href="https://map.kakao.com/link/to/내곡SH플라자,37.4553,127.0583" target="_blank" rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
                   <svg viewBox="0 0 24 24" className="h-4 w-4"><circle cx="12" cy="12" r="12" fill="#FEE500"/><path d="M12 6.5c-3.31 0-6 2.015-6 4.5 0 1.594 1.06 2.993 2.656 3.785l-.67 2.465c-.05.186.163.334.32.222l2.94-1.96c.244.025.494.038.754.038 3.31 0 6-2.015 6-4.5S15.31 6.5 12 6.5z" fill="#3C1E1E"/></svg>
                   카카오맵
                 </a>
-                <a href="https://map.naver.com/p/search/내곡SH플라자" target="_blank" rel="noopener noreferrer"
+                <a href="https://map.naver.com/p/directions/-/37.4553,127.0583,내곡SH플라자/car" target="_blank" rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
                   <svg viewBox="0 0 24 24" className="h-4 w-4"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M8 7.5h2.4l3.6 4.5V7.5H16v9h-2.4L10 12v4.5H8v-9z" fill="#fff"/></svg>
                   네이버맵
@@ -175,12 +175,12 @@ export default async function LocationPage() {
               </ul>
               <ParkingMap src="https://pub-8b16770935a84226a2ce21554c7466de.r2.dev/site/about/parking-nonghyup.png" alt="강남농협 영농자재센터 약도" />
               <div className="mt-3 ml-9 flex gap-2">
-                <a href="https://map.kakao.com/link/search/서울 서초구 내곡동 335" target="_blank" rel="noopener noreferrer"
+                <a href="https://map.kakao.com/link/to/강남농협 영농자재센터,37.4570,127.0590" target="_blank" rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
                   <svg viewBox="0 0 24 24" className="h-4 w-4"><circle cx="12" cy="12" r="12" fill="#FEE500"/><path d="M12 6.5c-3.31 0-6 2.015-6 4.5 0 1.594 1.06 2.993 2.656 3.785l-.67 2.465c-.05.186.163.334.32.222l2.94-1.96c.244.025.494.038.754.038 3.31 0 6-2.015 6-4.5S15.31 6.5 12 6.5z" fill="#3C1E1E"/></svg>
                   카카오맵
                 </a>
-                <a href="https://map.naver.com/p/search/강남농협 영농자재센터 내곡" target="_blank" rel="noopener noreferrer"
+                <a href="https://map.naver.com/p/directions/-/37.4570,127.0590,강남농협 영농자재센터/car" target="_blank" rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
                   <svg viewBox="0 0 24 24" className="h-4 w-4"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M8 7.5h2.4l3.6 4.5V7.5H16v9h-2.4L10 12v4.5H8v-9z" fill="#fff"/></svg>
                   네이버맵

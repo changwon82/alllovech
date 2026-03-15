@@ -366,12 +366,12 @@ export default async function Home() {
               </div>
               <p className="mt-3 text-sm text-neutral-600">서울 서초구 탑성말길 37 (신원동 561)</p>
               <div className="mt-2 flex gap-2">
-                <a href="https://map.kakao.com/link/search/서울 서초구 탑성말길 37" target="_blank" rel="noopener noreferrer"
+                <a href="https://map.kakao.com/link/to/다애교회,37.4553,127.0583" target="_blank" rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
                   <svg viewBox="0 0 24 24" className="h-4 w-4"><circle cx="12" cy="12" r="12" fill="#FEE500"/><path d="M12 6.5c-3.31 0-6 2.015-6 4.5 0 1.594 1.06 2.993 2.656 3.785l-.67 2.465c-.05.186.163.334.32.222l2.94-1.96c.244.025.494.038.754.038 3.31 0 6-2.015 6-4.5S15.31 6.5 12 6.5z" fill="#3C1E1E"/></svg>
                   카카오맵
                 </a>
-                <a href="https://map.naver.com/p/entry/place/1469260990" target="_blank" rel="noopener noreferrer"
+                <a href="https://map.naver.com/p/directions/-/37.4553,127.0583,다애교회/car" target="_blank" rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-xs font-medium text-navy transition hover:border-navy/30">
                   <svg viewBox="0 0 24 24" className="h-4 w-4"><rect width="24" height="24" rx="4" fill="#03C75A"/><path d="M8 7.5h2.4l3.6 4.5V7.5H16v9h-2.4L10 12v4.5H8v-9z" fill="#fff"/></svg>
                   네이버맵
