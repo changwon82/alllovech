@@ -25,7 +25,7 @@ export default function DeleteButton({ postId }: { postId: number }) {
     <button
       onClick={handleDelete}
       disabled={isPending}
-      className="rounded-xl border border-red-300 px-6 py-2 text-sm font-medium text-red-500 transition-all hover:bg-red-50 active:scale-95 disabled:opacity-50"
+      className="rounded border border-red-300 px-4 py-1.5 text-sm font-medium text-red-500 transition hover:bg-red-50 active:scale-95 disabled:opacity-50"
     >
       {isPending ? "삭제 중..." : "문서 삭제"}
     </button>

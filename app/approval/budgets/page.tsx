@@ -1,8 +1,7 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { redirect } from "next/navigation";
-import PageHeader from "@/app/components/ui/PageHeader";
-import BudgetTable from "./BudgetTable";
+import BudgetClientWrapper from "./BudgetClientWrapper";
 import Link from "next/link";
 
 export default async function BudgetsPage({
@@ -27,7 +26,7 @@ export default async function BudgetsPage({
     .from("approval_budgets")
     .select("year")
     .order("year", { ascending: false });
-  const years = [...new Set((yearRows || []).map((r) => r.year))];
+  const years = [...new Set([currentYear, ...(yearRows || []).map((r) => r.year)])].sort((a, b) => b.localeCompare(a));
 
   // 조직명 목록 (선택된 년도 기준)
   let committeeQuery = supabase
@@ -58,103 +57,36 @@ export default async function BudgetsPage({
 
   const { data: budgets } = await query;
 
-  function buildHref(year?: string, committee?: string, account?: string) {
-    const sp = new URLSearchParams();
-    if (year) sp.set("year", year);
-    if (committee) sp.set("committee", committee);
-    if (account) sp.set("account", account);
-    const qs = sp.toString();
-    return `/approval/budgets${qs ? `?${qs}` : ""}`;
-  }
-
   return (
     <>
-      <div className="flex items-center justify-between">
-        <PageHeader title="예산관리" />
+      {/* 타이틀 + 돌아가기 */}
+      <div className="mt-2 flex items-center justify-between">
+        <div>
+          <h2 className="flex items-center gap-2 text-xl font-bold text-navy">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6">
+              <path fillRule="evenodd" d="M10 2a.75.75 0 0 1 .75.75v.258a33.186 33.186 0 0 1 6.668.83.75.75 0 0 1-.336 1.461 31.28 31.28 0 0 0-1.103-.232l1.702 7.545a.75.75 0 0 1-.387.832A4.981 4.981 0 0 1 15 14c-.825 0-1.606-.2-2.294-.556a.75.75 0 0 1-.387-.832l1.77-7.849a31.743 31.743 0 0 0-3.339-.254v11.505a20.01 20.01 0 0 1 3.78.501.75.75 0 1 1-.339 1.462A18.558 18.558 0 0 0 10 17.5c-1.442 0-2.845.165-4.191.477a.75.75 0 0 1-.338-1.462 20.01 20.01 0 0 1 3.779-.501V4.509c-1.129.026-2.243.112-3.34.254l1.771 7.85a.75.75 0 0 1-.387.83A4.981 4.981 0 0 1 5 14a4.981 4.981 0 0 1-2.294-.556.75.75 0 0 1-.387-.832L4.02 5.067c-.374.07-.745.15-1.103.232a.75.75 0 0 1-.336-1.462 33.186 33.186 0 0 1 6.668-.829V2.75A.75.75 0 0 1 10 2ZM5 12.662l-1.395-6.185a31.88 31.88 0 0 0-1.378.354L3.68 12.67c.42.15.87.262 1.32.329v-.338Zm6.768-6.185L10.373 12.7c.42.149.87.261 1.32.328v-.337l1.395-6.185a31.88 31.88 0 0 0-1.378-.354l.058-.015Z" clipRule="evenodd" />
+            </svg>
+            예산관리
+          </h2>
+          <div className="mt-1.5 h-1 w-12 rounded-full bg-accent" />
+        </div>
         <Link
           href="/approval"
-          className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+          className="rounded border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
         >
           목록으로 돌아가기
         </Link>
       </div>
 
-      {/* 필터 */}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        {/* 년도 */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-neutral-500">년도</span>
-          <a
-            href={buildHref("전체", committeeFilter, accountFilter)}
-            className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-              yearFilter === "전체" ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-            }`}
-          >
-            전체
-          </a>
-          {years.map((y) => (
-            <a
-              key={y}
-              href={buildHref(y, committeeFilter, accountFilter)}
-              className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-                yearFilter === y ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-              }`}
-            >
-              {y}
-            </a>
-          ))}
-        </div>
-
-        {/* 조직명 */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-neutral-500">조직명</span>
-          <a
-            href={buildHref(yearFilter, "", accountFilter)}
-            className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-              !committeeFilter ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-            }`}
-          >
-            #전체
-          </a>
-          {committees.map((c) => (
-            <a
-              key={c}
-              href={buildHref(yearFilter, c, "")}
-              className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-                committeeFilter === c ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-              }`}
-            >
-              {c}
-            </a>
-          ))}
-        </div>
-
-        {/* 계정이름 */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-neutral-500">계정이름</span>
-          <a
-            href={buildHref(yearFilter, committeeFilter, "")}
-            className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-              !accountFilter ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-            }`}
-          >
-            #전체
-          </a>
-          {accounts.map((a) => (
-            <a
-              key={a}
-              href={buildHref(yearFilter, committeeFilter, a)}
-              className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-                accountFilter === a ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-              }`}
-            >
-              {a}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <BudgetTable budgets={budgets || []} />
+      <BudgetClientWrapper
+        budgets={budgets || []}
+        yearFilter={yearFilter}
+        committeeFilter={committeeFilter}
+        accountFilter={accountFilter}
+        years={years}
+        committees={committees}
+        accounts={accounts}
+      />
     </>
   );
 }

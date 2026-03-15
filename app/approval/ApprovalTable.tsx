@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 export type Post = {
   id: number;
+  doc_number: number | null;
   title: string;
   author_name: string | null;
   requester_mb_id: string | null;
@@ -19,6 +20,8 @@ export type Post = {
   approver2_status: string | null;
   finance_status: string | null;
   payment_status: string | null;
+  ref_department: string | null;
+  ref_members: string | null;
   post_date: string;
   hit_count: number;
 };
@@ -59,7 +62,24 @@ function formatDate(postDate: string): string {
   return `${y}/${m}/${dd}`;
 }
 
-function PostRow({ post, getName }: { post: Post; getName: (mbId: string | null, fallback?: string | null) => string }) {
+function Highlight({ text, keyword }: { text: string; keyword: string }) {
+  if (!keyword || !text) return <>{text}</>;
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === keyword.toLowerCase() ? (
+          <mark key={i} className="rounded bg-yellow-200 px-0.5 text-inherit">{part}</mark>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+function PostRow({ post, getName, search, searchField, currentUserMbId, isAdmin, currentUserDepts }: { post: Post; getName: (mbId: string | null, fallback?: string | null) => string; search: string; searchField: string; currentUserMbId: string | null; isAdmin: boolean; currentUserDepts: string[] }) {
   const a1 = parseStatus(post.approver1_status);
   const a2 = parseStatus(post.approver2_status);
   const fin = parseFinance(post.finance_status);
@@ -68,38 +88,67 @@ function PostRow({ post, getName }: { post: Post; getName: (mbId: string | null,
 
   return (
     <tr className="border-b border-neutral-300 transition-colors hover:bg-neutral-50">
-      <td className="px-2 py-2 text-center text-neutral-400">{post.id}</td>
-      <td className="px-2 py-2 text-center text-neutral-500">{post.doc_category || "-"}</td>
-      <td className="truncate px-2 py-2 text-center text-neutral-500" title={post.account_name || "-"}>{post.account_name || "-"}</td>
-      <td className="px-2 py-2">
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center text-neutral-400">
+        {searchField === "id" ? <Highlight text={String(post.doc_number || post.id)} keyword={search} /> : (post.doc_number || "-")}
+      </td>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center text-neutral-500">{post.doc_category || "-"}</td>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center text-neutral-500">
+        {searchField === "account" ? <Highlight text={post.account_name || "-"} keyword={search} /> : (post.account_name || "-")}
+      </td>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2">
         <Link href={`/approval/${post.id}`} className="inline-flex items-center gap-1.5 font-medium text-neutral-800 hover:text-navy">
-          <span className="line-clamp-1">{post.title}</span>
+          <span className="overflow-hidden whitespace-nowrap">
+            {searchField === "title" || searchField === "content" ? <Highlight text={post.title} keyword={search} /> : post.title}
+          </span>
           {post.doc_status === "draft" && (
             <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">임시저장</span>
           )}
         </Link>
       </td>
-      <td className="px-2 py-2 text-center text-neutral-400">{formatDate(post.post_date)}</td>
-      <td className="px-2 py-2 text-right font-medium text-neutral-700">{formatAmount(post.amount)}</td>
-      <td className="px-2 py-2 text-center">
-        <div className="text-neutral-600">{requester}</div>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center text-neutral-400">{formatDate(post.post_date)}</td>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-right font-medium text-neutral-700">{formatAmount(post.amount)}</td>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center">
+        <div className="text-neutral-600">
+          {searchField === "author" ? <Highlight text={requester} keyword={search} /> : requester}
+        </div>
         <div className={`text-xs leading-none ${post.doc_status === "draft" ? "text-amber-600" : "text-green-600"}`}>
           {post.doc_status === "draft" ? "작성중" : "품의"}
         </div>
       </td>
-      <td className="px-2 py-2 text-center">
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center">
         <div className={a1.color}>{getName(post.approver1_mb_id)}</div>
         <div className={`text-xs leading-none ${a1.color}`}>{a1.label}</div>
       </td>
-      <td className="px-2 py-2 text-center">
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center">
         <div className={a2.color}>{getName(post.approver2_mb_id)}</div>
         <div className={`text-xs leading-none ${a2.color}`}>{a2.label}</div>
       </td>
-      <td className="px-2 py-2 text-center">
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center">
         <span className={`text-xs font-medium ${fin.color}`}>{fin.label}</span>
       </td>
-      <td className="px-2 py-2 text-center">
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center">
         <span className={`text-xs font-medium ${pay.color}`}>{pay.label}</span>
+      </td>
+      <td className="overflow-hidden whitespace-nowrap px-2 py-2 text-center">
+        {(() => {
+          if (!currentUserMbId && !isAdmin) return <span className="text-xs text-neutral-300">-</span>;
+          if (isAdmin) return <span className="text-xs font-bold text-blue-600">Yes</span>;
+          if (currentUserMbId === post.requester_mb_id) return <span className="text-xs font-bold text-blue-600">Yes</span>;
+          if (currentUserMbId === post.approver1_mb_id || currentUserMbId === post.approver2_mb_id) return <span className="text-xs font-bold text-blue-600">Yes</span>;
+          // 참조인원 확인
+          try {
+            const refMembers: string[] = post.ref_members ? JSON.parse(post.ref_members) : [];
+            if (refMembers.includes(currentUserMbId!)) return <span className="text-xs font-bold text-blue-600">Yes</span>;
+          } catch { /* */ }
+          // 참조부서 확인
+          if (currentUserDepts.length > 0) {
+            try {
+              const refDepts: string[] = post.ref_department ? JSON.parse(post.ref_department) : [];
+              if (refDepts.some((d) => currentUserDepts.includes(d))) return <span className="text-xs font-bold text-blue-600">Yes</span>;
+            } catch { /* */ }
+          }
+          return <span className="text-xs text-neutral-300">-</span>;
+        })()}
       </td>
     </tr>
   );
@@ -110,11 +159,17 @@ export default function ApprovalTable({
   nameMap: initialNameMap,
   totalCount,
   infiniteScroll,
+  currentUserMbId = null,
+  isAdmin = false,
+  currentUserDepts = [],
 }: {
   posts: Post[];
   nameMap: Record<string, string>;
   totalCount?: number;
   infiniteScroll?: boolean;
+  currentUserMbId?: string | null;
+  isAdmin?: boolean;
+  currentUserDepts?: string[];
 }) {
   const [posts, setPosts] = useState(initialPosts);
   const [nameMap, setNameMap] = useState(initialNameMap);
@@ -182,20 +237,8 @@ export default function ApprovalTable({
   return (
     <>
       <div className="mt-4 overflow-x-auto bg-white shadow-sm">
-        <table className="w-full min-w-[960px] table-fixed text-sm">
-          <colgroup>
-            <col className="w-16" />       {/* 번호 */}
-            <col className="w-28" />       {/* 문서분류 */}
-            <col className="w-24" />       {/* 계정이름 */}
-            <col />                         {/* 제목 (나머지) */}
-            <col className="w-22" />       {/* 등록일시 */}
-            <col className="w-24" />       {/* 금액 */}
-            <col className="w-16" />       {/* 품의 */}
-            <col className="w-16" />       {/* 결재1 */}
-            <col className="w-16" />       {/* 결재2 */}
-            <col className="w-14" />       {/* 재정 */}
-            <col className="w-14" />       {/* 지급 */}
-          </colgroup>
+        <table className="w-full min-w-[960px] text-sm">
+          <colgroup><col className="w-16" /><col className="w-28" /><col className="w-24" /><col /><col className="w-22" /><col className="w-24" /><col className="w-16" /><col className="w-16" /><col className="w-16" /><col className="w-14" /><col className="w-14" /><col className="w-14" /></colgroup>
           <thead>
             <tr className="border-b border-neutral-400 bg-neutral-200 text-neutral-600">
               <th className="px-2 py-2 text-center font-medium">번호</th>
@@ -209,11 +252,12 @@ export default function ApprovalTable({
               <th className="px-2 py-2 text-center font-medium">결재2</th>
               <th className="px-2 py-2 text-center font-medium">재정</th>
               <th className="px-2 py-2 text-center font-medium">지급</th>
+              <th className="px-2 py-2 text-center font-medium">권한</th>
             </tr>
           </thead>
           <tbody>
             {posts.map((post) => (
-              <PostRow key={post.id} post={post} getName={getName} />
+              <PostRow key={post.id} post={post} getName={getName} search={params.get("q") || ""} searchField={params.get("sf") || "title"} currentUserMbId={currentUserMbId} isAdmin={isAdmin} currentUserDepts={currentUserDepts} />
             ))}
           </tbody>
         </table>

@@ -17,16 +17,24 @@ export default async function NewApprovalPage() {
   // 결재자 목록
   const { data: members } = await supabase
     .from("approval_members")
-    .select("mb_id, name, position, status")
+    .select("mb_id, name, position, status, mb_section")
     .order("sort_order");
 
   // 예산 목록 (현재 연도)
   const year = new Date().getFullYear().toString();
-  const { data: budgets } = await supabase
-    .from("approval_budgets")
-    .select("id, year, committee, account, budget, spending, balance, purpose, chairman, manager")
-    .eq("year", year)
-    .order("account");
+  const [{ data: budgets }, { data: deptMembers }] = await Promise.all([
+    supabase
+      .from("approval_budgets")
+      .select("id, year, committee, account, budget, spending, balance, purpose, chairman, manager")
+      .eq("year", year)
+      .order("account"),
+    supabase
+      .from("approval_members")
+      .select("name")
+      .eq("status", "조직")
+      .order("sort_order"),
+  ]);
+  const refDeptList = (deptMembers || []).map((d) => d.name);
 
   return (
     <>
@@ -36,6 +44,7 @@ export default async function NewApprovalPage() {
         members={members || []}
         budgets={budgets || []}
         budgetYear={year}
+        refDeptList={refDeptList}
       />
     </>
   );

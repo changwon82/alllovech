@@ -10,6 +10,14 @@ const SECTION_LABELS: Record<number, string> = {
   1: "예배", 2: "목양", 3: "재정", 4: "총무", 5: "선교", 6: "교육", 7: "설비", 8: "기획", 0: "기타",
 };
 const STATUSES = ["재직", "조직", "전출", "부재"];
+const DEPT_LIST = [
+  "#건축재정", "#일반재정", "-권사회", "-당회", "-안수집사회",
+  "경조사", "교회IT운영", "기획위원회", "다코방", "독서사역",
+  "새가족부", "성경일독", "성지순례", "수랏간", "숨바선교",
+  "시설관리", "에즈마이야", "예배기획", "유초등부", "일대일사역",
+  "일반총무", "전도사역", "중보기도팀", "찬양대", "청년부",
+  "청소년부", "친교부",
+];
 
 type Props = {
   mode: "create" | "edit";
@@ -58,6 +66,32 @@ export default function MemberForm({ mode, member, onClose }: Props) {
     });
   }
 
+  function handleAddressSearch() {
+    function openPostcode() {
+      new (window as any).daum.Postcode({
+        oncomplete(data: any) {
+          const form = document.querySelector<HTMLFormElement>("#member-form");
+          if (!form) return;
+          const zip = form.querySelector<HTMLInputElement>("[name=mb_zip]");
+          const addr1 = form.querySelector<HTMLInputElement>("[name=mb_addr1]");
+          const addr3 = form.querySelector<HTMLInputElement>("[name=mb_addr3]");
+          if (zip) { zip.value = data.zonecode; zip.dispatchEvent(new Event("input", { bubbles: true })); }
+          if (addr1) { addr1.value = data.roadAddress || data.jibunAddress; addr1.dispatchEvent(new Event("input", { bubbles: true })); }
+          if (addr3) { addr3.value = data.buildingName || ""; addr3.dispatchEvent(new Event("input", { bubbles: true })); }
+        },
+      }).open();
+    }
+
+    if ((window as any).daum?.Postcode) {
+      openPostcode();
+    } else {
+      const script = document.createElement("script");
+      script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.onload = openPostcode;
+      document.head.appendChild(script);
+    }
+  }
+
   const inputClass = "w-full border border-neutral-200 px-3 py-2 text-sm outline-none transition focus:border-navy focus:ring-1 focus:ring-navy";
   const labelClass = "bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-700 whitespace-nowrap";
 
@@ -76,7 +110,7 @@ export default function MemberForm({ mode, member, onClose }: Props) {
           <div className="mx-6 mt-3 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form id="member-form" onSubmit={handleSubmit} className="p-6">
           {mode === "edit" && member && (
             <input type="hidden" name="id" value={member.id} />
           )}
@@ -124,7 +158,12 @@ export default function MemberForm({ mode, member, onClose }: Props) {
               <tr className="border-b border-neutral-200">
                 <td className={labelClass}>부서명</td>
                 <td className="px-2 py-1.5">
-                  <input type="text" name="mb_kind" defaultValue={member?.mb_kind || ""} className={inputClass} />
+                  <select name="mb_kind" defaultValue={member?.mb_kind || ""} className={inputClass}>
+                    <option value="">= 부서명 =</option>
+                    {DEPT_LIST.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </td>
                 <td className={labelClass}>직분</td>
                 <td className="px-2 py-1.5">
@@ -184,7 +223,16 @@ export default function MemberForm({ mode, member, onClose }: Props) {
               <tr className="border-b border-neutral-200">
                 <td className={labelClass} rowSpan={3}>주소</td>
                 <td className="px-2 py-1.5" colSpan={2}>
-                  <input type="text" name="mb_zip" defaultValue={member?.mb_zip || ""} placeholder="우편번호" className={inputClass} />
+                  <div className="flex items-center gap-2">
+                    <input type="text" name="mb_zip" defaultValue={member?.mb_zip || ""} placeholder="우편번호" className={inputClass} />
+                    <button
+                      type="button"
+                      onClick={handleAddressSearch}
+                      className="shrink-0 whitespace-nowrap rounded border border-neutral-300 bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-200"
+                    >
+                      주소 검색
+                    </button>
+                  </div>
                 </td>
                 <td className="px-2 py-1.5" colSpan={3}>
                   <input type="text" name="mb_addr1" defaultValue={member?.mb_addr1 || ""} placeholder="기본주소" className={inputClass} />

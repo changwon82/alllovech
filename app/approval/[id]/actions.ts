@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { deleteFromR2 } from "@/lib/r2";
+import { notifyApprovalAction } from "@/lib/approval-notify";
 
 type ApprovalAction = "approve" | "reject" | "execute";
 
@@ -12,6 +13,7 @@ export async function updateApprovalStatus(
   postId: number,
   field: "approver1_status" | "approver2_status" | "finance_status" | "payment_status",
   action: ApprovalAction,
+  comment?: string,
 ) {
   const { user } = await getSessionUser();
   if (!user) return { error: "로그인이 필요합니다." };
@@ -55,7 +57,7 @@ export async function updateApprovalStatus(
     }
   }
 
-  const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+  const now = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).substring(0, 19);
   let statusValue: string;
 
   switch (action) {
@@ -78,6 +80,39 @@ export async function updateApprovalStatus(
     .eq("id", postId);
 
   if (error) return { error: error.message };
+
+  // 결재의견 기록
+  const { data: myProfile } = await admin
+    .from("approval_members")
+    .select("name")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const stepMap: Record<string, string> = {
+    approver1_status: "approver1",
+    approver2_status: "approver2",
+    finance_status: "finance",
+    payment_status: "payment",
+  };
+  const statusLabel = action === "approve" ? "승인" : action === "execute" ? "집행" : "승인취소";
+
+  await admin.from("approval_comments").insert({
+    post_id: postId,
+    mb_id: myMbId || user.id,
+    name: myProfile?.name || "관리자",
+    step: stepMap[field],
+    status: statusLabel,
+    comment: comment || "",
+  });
+
+  // 알림 발송 (비동기, 실패해도 결재 처리에 영향 없음)
+  notifyApprovalAction({
+    postId,
+    field,
+    action,
+    actorMbId: myMbId || user.id,
+    comment: comment || undefined,
+  }).catch((e) => console.error("[알림 발송 실패]", e));
 
   revalidatePath(`/approval/${postId}`);
   revalidatePath("/approval");
@@ -106,9 +141,19 @@ export async function submitForApproval(postId: number) {
   }
   if (post.doc_status === "submitted") return { error: "이미 결재요청된 문서입니다." };
 
+  // 문서번호 채번: 현재 최대 doc_number + 1
+  const { data: maxRow } = await admin
+    .from("approval_posts")
+    .select("doc_number")
+    .not("doc_number", "is", null)
+    .order("doc_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextDocNumber = (maxRow?.doc_number || 0) + 1;
+
   const { error } = await admin
     .from("approval_posts")
-    .update({ doc_status: "submitted" })
+    .update({ doc_status: "submitted", doc_number: nextDocNumber })
     .eq("id", postId);
 
   if (error) return { error: error.message };

@@ -23,11 +23,19 @@ export default async function ApprovalListPage({
 
   const { supabase, user } = await getSessionUser();
 
-  // 관리자 확인
+  // 관리자 + 현재 사용자 mb_id 확인
   let isAdmin = false;
+  let currentUserMbId: string | null = null;
+  let currentUserDepts: string[] = [];
   if (user) {
-    const roles = await getUserRoles(supabase, user.id);
+    const [roles, { data: myMember }] = await Promise.all([
+      getUserRoles(supabase, user.id),
+      supabase.from("approval_members").select("mb_id, mb_kind, extra_dept").eq("user_id", user.id).maybeSingle(),
+    ]);
     isAdmin = isAdminRole(roles);
+    currentUserMbId = myMember?.mb_id || null;
+    if (myMember?.mb_kind) currentUserDepts.push(myMember.mb_kind);
+    if (myMember?.extra_dept) currentUserDepts.push(...myMember.extra_dept.split(",").map((d: string) => d.trim()).filter(Boolean));
   }
 
   // 카테고리별 건수 조회 (병렬 count 쿼리)
@@ -48,7 +56,7 @@ export default async function ApprovalListPage({
   let query = supabase
     .from("approval_posts")
     .select(
-      "id, title, author_name, requester_mb_id, amount, doc_category, doc_status, account_name, approver1_mb_id, approver1_status, approver2_mb_id, approver2_status, finance_status, payment_status, post_date, hit_count"
+      "id, doc_number, title, author_name, requester_mb_id, amount, doc_category, doc_status, account_name, approver1_mb_id, approver1_status, approver2_mb_id, approver2_status, finance_status, payment_status, ref_department, ref_members, post_date, hit_count"
     )
     .order("id", { ascending: false });
 
@@ -165,7 +173,7 @@ export default async function ApprovalListPage({
           {search ? `"${search}" 검색 결과가 없습니다.` : "등록된 결재 문서가 없습니다."}
         </p>
       ) : (
-        <ApprovalTable posts={posts} nameMap={nameMap} totalCount={displayCount} infiniteScroll={isInfinite} />
+        <ApprovalTable posts={posts} nameMap={nameMap} totalCount={displayCount} infiniteScroll={isInfinite} currentUserMbId={currentUserMbId} isAdmin={isAdmin} currentUserDepts={currentUserDepts} />
       )}
 
       {/* 페이지네이션 */}

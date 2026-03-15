@@ -24,10 +24,10 @@ export default async function EditApprovalPage({
   if (!isAdmin && post.requester_mb_id !== user.id) redirect(`/approval/${id}`);
 
   // 필요한 데이터 병렬 조회
-  const [{ data: profile }, { data: members }, { data: items }, { data: files }, budgetsResult] =
+  const [{ data: profile }, { data: members }, { data: items }, { data: files }, budgetsResult, { data: deptMembers }] =
     await Promise.all([
       supabase.from("profiles").select("name").eq("id", user.id).single(),
-      supabase.from("approval_members").select("mb_id, name, position, status").order("sort_order"),
+      supabase.from("approval_members").select("mb_id, name, position, status, mb_section").order("sort_order"),
       supabase
         .from("approval_items")
         .select("item_name, quantity, unit_price, note")
@@ -43,10 +43,16 @@ export default async function EditApprovalPage({
         .select("id, year, committee, account, budget, spending, balance, purpose, chairman, manager")
         .eq("year", new Date().getFullYear().toString())
         .order("account"),
+      supabase
+        .from("approval_members")
+        .select("name")
+        .eq("status", "조직")
+        .order("sort_order"),
     ]);
 
   const budgets = budgetsResult.data || [];
   const year = new Date().getFullYear().toString();
+  const refDeptList = (deptMembers || []).map((d) => d.name);
 
   // 예산에서 committee 역산
   const matchedBudget = post.account_name
@@ -61,6 +67,7 @@ export default async function EditApprovalPage({
           members={members || []}
           budgets={budgets}
           budgetYear={year}
+          refDeptList={refDeptList}
           initialData={{
             id: postId,
             approver1_mb_id: post.approver1_mb_id || "",

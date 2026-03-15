@@ -25,7 +25,7 @@ export default function SubmitButton({ postId }: { postId: number }) {
     <button
       onClick={handleSubmit}
       disabled={isPending}
-      className="rounded-xl bg-navy px-8 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+      className="rounded border border-navy bg-navy px-4 py-1.5 text-sm font-medium text-white transition hover:brightness-110 active:scale-95 disabled:opacity-50"
     >
       {isPending ? "요청 중..." : "결재요청"}
     </button>

@@ -8,20 +8,14 @@ import { validateFileSize, fileSizeWarning } from "@/lib/validate-files";
 const DOC_CATEGORIES = ["일반재정청구", "건축재정청구", "예산전용품의", "사전품의", "기타품의"];
 
 const DOC_TEMPLATES: Record<string, string> = {
-  "일반재정청구": `★ 결 재 선 : 1차결재-예산부서 조직장, 최종결재-재정관리실장
-★ 필수참조부서 : #일반재정 + 청구부서 + 결재부서
-★ 참조인원 : 결재자 또는 참조부서 소속 인원을 제외한 추가 열람 필요 인원
-
-다애교회 헌금을 늘 지혜롭게 관리하고 아껴서 사용하겠습니다!
+  "일반재정청구": `다애교회 헌금을 늘 지혜롭게 관리하고 아껴서 사용하겠습니다!
 
 *** 일반 재정 청구서 ***
 
 1. 청구 내용
-(1) 선택(*): 기획() 행정() 예배() 다음() 돌봄() 선교()
-(2) 행사(예정) 일자 :
-(3) 행사(사용) 목적 :
-(4) 계정이름(실제 예산 계정) :
-(5) 기타사항 :
+(1) (예정) 일자 :
+(2) 행사(사용) 목적 :
+(3) 기타사항 :
 
 2. 이체 정보
 (1) 이체금액 :
@@ -29,15 +23,11 @@ const DOC_TEMPLATES: Record<string, string> = {
 (3) 계좌번호 :
 (4) 예 금 주 :
 
-* 영수증은 1MB 이하의 jpg 또는 png 파일로 업로드 바랍니다.(최대 12장)
+* 영수증은 1MB 이하의 jpg 또는 png 파일로 업로드 바랍니다.
 * 양식은 복사 또는 수정하지 마시기 바랍니다.(단, 이체정보는 추가 가능)
 * 50만원 이상은 사용하기 전에 미리 사전품의 결재를 받으시기 바랍니다.`,
 
-  "건축재정청구": `★ 결 재 선 : 1차결재-재정관리실장 전결, 최종결재-없음
-★ 참조부서 : #건축재정 + 필요부서
-★ 참조인원 : 결재자 또는 참조부서 소속 인원을 제외한 추가 열람 필요 인원
-
-다애교회 헌금을 늘 지혜롭게 관리하고 아껴서 사용하겠습니다!
+  "건축재정청구": `다애교회 헌금을 늘 지혜롭게 관리하고 아껴서 사용하겠습니다!
 
 *** 건축 재정 청구서 ***
 
@@ -123,14 +113,8 @@ const DOC_TEMPLATES: Record<string, string> = {
 * 기타 품의서 양식은 필요에 따라 변경하여 사용 가능합니다.`,
 };
 
-const REF_DEPARTMENTS = [
-  "없음",
-  "다음세대사역부", "돌봄사역부", "예배사역부", "선교와나눔사역부", "사역기획실",
-  "행)관리비", "행)일반경비", "행)시설관리",
-  "건축재정", "당회", "기타",
-];
 
-type Member = { mb_id: string; name: string; position: string | null; status: string | null };
+type Member = { mb_id: string; name: string; position: string | null; status: string | null; mb_section?: number | null };
 type Budget = {
   id: number;
   year: string;
@@ -175,32 +159,22 @@ export default function ApprovalForm({
   members,
   budgets,
   budgetYear,
+  refDeptList = [],
   initialData,
 }: {
   authorName: string;
   members: Member[];
   budgets: Budget[];
   budgetYear: string;
+  refDeptList?: string[];
   initialData?: InitialData;
 }) {
   const isEdit = !!initialData;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // 결재선
-  const [approver1, setApprover1] = useState(initialData?.approver1_mb_id || "");
-  const [approver2, setApprover2] = useState(initialData?.approver2_mb_id || "");
-
   // 문서분류
   const [docCategory, setDocCategory] = useState(initialData?.doc_category || "");
-
-  // 참조부서 & 참조인원
-  const [refDepartments, setRefDepartments] = useState<string[]>(() => {
-    try { return initialData?.ref_department ? JSON.parse(initialData.ref_department) : []; } catch { return []; }
-  });
-  const [refMembers, setRefMembers] = useState<string[]>(() => {
-    try { return initialData?.ref_members ? JSON.parse(initialData.ref_members) : []; } catch { return []; }
-  });
 
   // 조직명 (예산 필터)
   const [selectedCommittee, setSelectedCommittee] = useState(initialData?.committee || "");
@@ -212,6 +186,18 @@ export default function ApprovalForm({
   // 예산 계정
   const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(initialData?.budget_id ?? null);
   const selectedBudget = budgets.find((b) => b.id === selectedBudgetId) || null;
+
+  // 결재선
+  const [approver1, setApprover1] = useState(initialData?.approver1_mb_id || "");
+  const [approver2, setApprover2] = useState(initialData?.approver2_mb_id || "");
+
+  // 참조부서 & 참조인원
+  const [refDepartments, setRefDepartments] = useState<string[]>(() => {
+    try { return initialData?.ref_department ? JSON.parse(initialData.ref_department) : []; } catch { return []; }
+  });
+  const [refMembers, setRefMembers] = useState<string[]>(() => {
+    try { return initialData?.ref_members ? JSON.parse(initialData.ref_members) : []; } catch { return []; }
+  });
 
   // 문서제목
   const [title, setTitle] = useState(initialData?.title || "");
@@ -226,28 +212,66 @@ export default function ApprovalForm({
       : [{ item_name: "", quantity: 1, unit_price: 0, note: "" }],
   );
 
-  // 첨부파일 (새로 추가할 파일)
+  // 첨부파일
   const [files, setFiles] = useState<File[]>([]);
-  // 기존 첨부파일 (수정 시)
   const [existingFiles, setExistingFiles] = useState<ExistingFile[]>(initialData?.files || []);
   const [removedFileNames, setRemovedFileNames] = useState<string[]>([]);
 
-  // 입력 순서 하이라이트 단계
-  const step = !approver1 ? 1
-    : !approver2 ? 2
-    : !docCategory ? 3
-    : !selectedCommittee ? 4
-    : !selectedBudgetId ? 5
-    : (refDepartments.length === 0 && refMembers.length === 0) ? 6
-    : !title.trim() ? 7
-    : (!content.trim() || (docCategory && content === DOC_TEMPLATES[docCategory])) ? 8
-    : items.every((r) => !r.item_name.trim()) ? 9
-    : (files.length === 0 && existingFiles.length === 0) ? 10
-    : 11;
+  const itemsTotal = items.reduce((s, r) => s + r.quantity * r.unit_price, 0);
+
+  // 이름으로 멤버 mb_id 찾기
+  function findMemberByName(name: string): Member | undefined {
+    if (!name) return undefined;
+    return members.find((m) => m.mb_id && m.name === name);
+  }
+
+  // 재정장로: mb_section=2(재정) + position에 '장로' 포함
+  const financeElder = members.find((m) => m.mb_id && m.mb_section === 2 && m.position?.includes("장로"));
+
+  // 예산 계정 선택 시 결재자 자동 설정 (문서분류에 따라 다름)
+  function applyAutoApprovers(category: string, budget: Budget | null) {
+    if (!budget) return;
+
+    const chairman = findMemberByName(budget.chairman);
+
+    if (category === "건축재정청구") {
+      // 1차결재: 재정장로 전결, 최종결재: 없음
+      if (financeElder) setApprover1(financeElder.mb_id);
+      setApprover2("");
+    } else if (category === "예산전용품의") {
+      // 1차결재: 조직장, 최종결재: 조직장(동일 시 재정장로)
+      if (chairman) setApprover1(chairman.mb_id);
+      if (financeElder) setApprover2(financeElder.mb_id);
+    } else if (category === "일반재정청구" || category === "사전품의") {
+      // 1차결재: 조직장, 최종결재: 재정장로
+      if (chairman) setApprover1(chairman.mb_id);
+      if (financeElder) setApprover2(financeElder.mb_id);
+    }
+    // 기타품의: 자동 설정 없음
+  }
+
+  function handleBudgetSelect(budgetId: number | null) {
+    setSelectedBudgetId(budgetId);
+    if (!budgetId) return;
+    const budget = budgets.find((b) => b.id === budgetId);
+    if (budget && docCategory) applyAutoApprovers(docCategory, budget);
+  }
+
+  // 입력 안내 단계
+  const step = !docCategory ? 1
+    : !selectedCommittee ? 2
+    : !selectedBudgetId ? 3
+    : !approver1 ? 4
+    : !title.trim() ? 5
+    : (!content.trim() || (docCategory && content === DOC_TEMPLATES[docCategory])) ? 6
+    : items.every((r) => !r.item_name.trim()) ? 7
+    : (files.length === 0 && existingFiles.length === 0) ? 8
+    : 9;
   const ring = "border-red-200 ring-4 ring-red-100";
   const noRing = "border-neutral-200";
-
-  const itemsTotal = items.reduce((s, r) => s + r.quantity * r.unit_price, 0);
+  // 값이 선택/입력되면 볼드+파란색
+  const filled = "font-bold text-blue-600";
+  const empty = "text-neutral-600";
 
   function addItem() {
     setItems([...items, { item_name: "", quantity: 1, unit_price: 0, note: "" }]);
@@ -315,100 +339,71 @@ export default function ApprovalForm({
     });
   }
 
+  // 멤버 옵션 렌더링 헬퍼
+  function renderMemberOptions() {
+    return (
+      <>
+        <option value="">== 선택 ==</option>
+        {members.filter((m) => m.mb_id && m.status === "재직").map((m) => (
+          <option key={m.mb_id} value={m.mb_id}>
+            {m.name} {m.position || ""}
+          </option>
+        ))}
+        {members.some((m) => m.mb_id && m.status !== "재직") && (
+          <optgroup label="── 전출/부재 ──">
+            {members.filter((m) => m.mb_id && m.status !== "재직").map((m) => (
+              <option key={m.mb_id} value={m.mb_id!}>
+                {m.name} {m.position || ""}
+              </option>
+            ))}
+          </optgroup>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="mt-4 space-y-5">
-      {/* 결재선 */}
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h3 className="mb-3 text-sm font-semibold text-neutral-700">결재선</h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-neutral-100 text-neutral-500">
-              <th className="px-3 py-2 text-center font-medium">구분</th>
-              <th className="px-3 py-2 text-center font-medium">작성자</th>
-              <th className="px-3 py-2 text-center font-medium">1차결재</th>
-              <th className="px-3 py-2 text-center font-medium">최종결재</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-neutral-50">
-              <td className="px-3 py-2 text-center text-neutral-500">결재선</td>
-              <td className="px-3 py-2 text-center font-medium text-neutral-700">{authorName}</td>
-              <td className="px-3 py-2 text-center">
-                <select
-                  value={approver1}
-                  onChange={(e) => setApprover1(e.target.value)}
-                  className={`w-full rounded-lg border px-2 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 1 ? ring : noRing}`}
-                >
-                  <option value="">== 선택 ==</option>
-                  {members.filter((m) => m.status === "재직").map((m) => (
-                    <option key={m.mb_id} value={m.mb_id}>
-                      {m.name} {m.position || ""}
-                    </option>
-                  ))}
-                  {members.some((m) => m.status !== "재직") && (
-                    <optgroup label="── 전출/부재 ──">
-                      {members.filter((m) => m.status !== "재직").map((m) => (
-                        <option key={m.mb_id} value={m.mb_id}>
-                          {m.name} {m.position || ""}
-                        </option>
-                      ))}
-                    </optgroup>
-                  )}
-                </select>
-              </td>
-              <td className="px-3 py-2 text-center">
-                <select
-                  value={approver2}
-                  onChange={(e) => setApprover2(e.target.value)}
-                  className={`w-full rounded-lg border px-2 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 2 ? ring : noRing}`}
-                >
-                  <option value="">== 선택 ==</option>
-                  {members.filter((m) => m.status === "재직").map((m) => (
-                    <option key={m.mb_id} value={m.mb_id}>
-                      {m.name} {m.position || ""}
-                    </option>
-                  ))}
-                  {members.some((m) => m.status !== "재직") && (
-                    <optgroup label="── 전출/부재 ──">
-                      {members.filter((m) => m.status !== "재직").map((m) => (
-                        <option key={m.mb_id} value={m.mb_id}>
-                          {m.name} {m.position || ""}
-                        </option>
-                      ))}
-                    </optgroup>
-                  )}
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* 문서분류 + 예산계정 */}
+      {/* 1. 문서분류 */}
       <div className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex items-center gap-4">
-            <label className="shrink-0 text-sm font-medium text-neutral-700">
-              문서분류 <span className="text-red-500">*</span>
-            </label>
-            <div className={`inline-flex gap-2 rounded-lg p-1 ${step === 3 ? "ring-4 ring-red-100" : ""}`}>
-              {DOC_CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => {
-                    setDocCategory(cat);
-                    setContent(DOC_TEMPLATES[cat] || "");
-                  }}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all active:scale-95 ${
-                    docCategory === cat
-                      ? "bg-navy text-white"
-                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+          <label className="shrink-0 text-sm font-semibold text-neutral-700">
+            문서분류 <span className="text-red-500">*</span>
+          </label>
+          <div className={`inline-flex gap-2 rounded-lg p-1 ${step === 1 ? "ring-4 ring-red-100" : ""}`}>
+            {DOC_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => {
+                  setDocCategory(cat);
+                  // 본문 템플릿 교체
+                  setContent(DOC_TEMPLATES[cat] || "");
+                  // 하위 상태 초기화
+                  setSelectedCommittee("");
+                  setSelectedBudgetId(null);
+                  setApprover1("");
+                  setApprover2("");
+                  setRefMembers([]);
+                  // 참조부서 자동 설정
+                  if (cat === "일반재정청구" || cat === "사전품의") {
+                    setRefDepartments(["#일반재정"]);
+                  } else if (cat === "건축재정청구") {
+                    setRefDepartments(["#건축재정"]);
+                  } else {
+                    setRefDepartments([]);
+                  }
+                }}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all active:scale-95 ${
+                  docCategory === cat
+                    ? "bg-blue-600 text-white"
+                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 조직명 / 계정이름 / 참조부서 / 참조인원 */}
@@ -423,7 +418,7 @@ export default function ApprovalForm({
                 setSelectedCommittee(e.target.value);
                 setSelectedBudgetId(null);
               }}
-              className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 4 ? ring : noRing}`}
+              className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 2 ? ring : noRing} ${selectedCommittee ? filled : empty}`}
             >
               <option value="">== 선택 ==</option>
               {committees.map((c) => (
@@ -435,8 +430,8 @@ export default function ApprovalForm({
             <label className="mb-1.5 block text-sm font-medium text-neutral-700">계정이름</label>
             <select
               value={selectedBudgetId ?? ""}
-              onChange={(e) => setSelectedBudgetId(e.target.value ? Number(e.target.value) : null)}
-              className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 5 ? ring : noRing}`}
+              onChange={(e) => handleBudgetSelect(e.target.value ? Number(e.target.value) : null)}
+              className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 3 ? ring : noRing} ${selectedBudgetId ? filled : empty}`}
             >
               <option value="">== 선택 ==</option>
               {filteredBudgets.map((b) => (
@@ -447,7 +442,12 @@ export default function ApprovalForm({
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700">참조부서</label>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              참조부서
+              {selectedBudgetId && refDepartments.length <= 1 && (
+                <span className="ml-1 text-xs font-medium text-red-500">추가 가능</span>
+              )}
+            </label>
             <select
               value=""
               onChange={(e) => {
@@ -459,23 +459,20 @@ export default function ApprovalForm({
                 }
                 e.target.value = "";
               }}
-              className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 6 ? ring : noRing}`}
+              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:border-navy focus:outline-none"
             >
               <option value="">== 추가 ==</option>
-              {REF_DEPARTMENTS.map((d) => (
+              <option value="없음">없음</option>
+              {refDeptList.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
             {refDepartments.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {refDepartments.map((d) => (
-                  <span key={d} className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-700">
+                  <span key={d} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-600">
                     {d}
-                    <button
-                      type="button"
-                      onClick={() => setRefDepartments(refDepartments.filter((r) => r !== d))}
-                      className="text-neutral-400 hover:text-red-500"
-                    >
+                    <button type="button" onClick={() => setRefDepartments(refDepartments.filter((r) => r !== d))} className="text-blue-400 hover:text-red-500">
                       ✕
                     </button>
                   </span>
@@ -484,7 +481,12 @@ export default function ApprovalForm({
             )}
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700">참조인원</label>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              참조인원
+              {selectedBudgetId && refMembers.length === 0 && (
+                <span className="ml-1 text-xs font-medium text-red-500">추가 가능</span>
+              )}
+            </label>
             <select
               value=""
               onChange={(e) => {
@@ -496,11 +498,11 @@ export default function ApprovalForm({
                 }
                 e.target.value = "";
               }}
-              className={`w-full rounded-lg border px-3 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 6 ? ring : noRing}`}
+              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:border-navy focus:outline-none"
             >
               <option value="">== 추가 ==</option>
               <option value="없음">없음</option>
-              {members.filter((m) => m.status === "재직").map((m) => (
+              {members.filter((m) => m.mb_id && m.status === "재직").map((m) => (
                 <option key={m.mb_id} value={m.mb_id}>
                   {m.name} {m.position || ""}
                 </option>
@@ -511,13 +513,9 @@ export default function ApprovalForm({
                 {refMembers.map((id) => {
                   const m = members.find((mm) => mm.mb_id === id);
                   return (
-                    <span key={id} className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-neutral-700">
+                    <span key={id} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-600">
                       {m ? `${m.name} ${m.position || ""}` : id}
-                      <button
-                        type="button"
-                        onClick={() => setRefMembers(refMembers.filter((r) => r !== id))}
-                        className="text-neutral-400 hover:text-red-500"
-                      >
+                      <button type="button" onClick={() => setRefMembers(refMembers.filter((r) => r !== id))} className="text-blue-400 hover:text-red-500">
                         ✕
                       </button>
                     </span>
@@ -557,7 +555,51 @@ export default function ApprovalForm({
         </div>
       </div>
 
-      {/* 문서제목 + 본문 */}
+      {/* 2. 결재선 */}
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h3 className="mb-3 text-sm font-semibold text-neutral-700">결재선</h3>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-neutral-100 text-neutral-500">
+              <th className="px-3 py-2 text-center font-medium">구분</th>
+              <th className="px-3 py-2 text-center font-medium">작성자</th>
+              <th className="px-3 py-2 text-center font-medium">1차결재</th>
+              <th className="px-3 py-2 text-center font-medium">최종결재</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-neutral-50">
+              <td className="px-3 py-2 text-center text-neutral-500">결재선</td>
+              <td className="px-3 py-2 text-center font-medium text-neutral-700">{authorName}</td>
+              <td className="px-3 py-2 text-center">
+                <select
+                  value={approver1}
+                  onChange={(e) => setApprover1(e.target.value)}
+                  className={`w-full rounded-lg border px-2 py-1.5 text-sm focus:border-navy focus:outline-none ${step === 4 ? ring : noRing} ${approver1 ? filled : empty}`}
+                >
+                  {renderMemberOptions()}
+                </select>
+              </td>
+              <td className="px-3 py-2 text-center">
+                <select
+                  value={approver2}
+                  onChange={(e) => setApprover2(e.target.value)}
+                  className={`w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm focus:border-navy focus:outline-none ${approver2 ? filled : empty}`}
+                >
+                  {renderMemberOptions()}
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        {selectedBudget && (approver1 || approver2) && (
+          <p className="mt-2 text-xs text-neutral-400">
+            문서분류와 예산 계정에 따라 자동 설정됩니다. 필요 시 변경할 수 있습니다.
+          </p>
+        )}
+      </div>
+
+      {/* 3. 문서제목 + 본문 */}
       <div className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex items-center gap-4">
           <label className="shrink-0 text-sm font-medium text-neutral-700">문서제목</label>
@@ -567,7 +609,7 @@ export default function ApprovalForm({
             onChange={(e) => setTitle(e.target.value)}
             maxLength={22}
             placeholder="문서 제목을 입력하세요 (최대 22자)"
-            className={`flex-1 rounded-lg border px-3 py-2 text-sm focus:border-navy focus:outline-none ${step === 7 ? ring : noRing}`}
+            className={`flex-1 rounded-lg border px-3 py-2 text-sm focus:border-navy focus:outline-none ${step === 5 ? ring : noRing} ${title.trim() ? filled : empty}`}
           />
         </div>
 
@@ -577,12 +619,12 @@ export default function ApprovalForm({
           onChange={(e) => setContent(e.target.value)}
           rows={28}
           placeholder="문서분류를 선택하시면 청구서 양식이 나옵니다."
-          className={`w-full resize-y rounded-lg border px-3 py-2 text-sm focus:border-navy focus:outline-none ${step === 8 ? ring : noRing}`}
+          className={`w-full resize-y rounded-lg border px-3 py-2 text-sm focus:border-navy focus:outline-none ${step === 6 ? ring : noRing}`}
         />
       </div>
 
-      {/* 세부항목 */}
-      <div className={`rounded-2xl bg-white p-5 shadow-sm ${step === 9 ? "ring-4 ring-red-100" : ""}`}>
+      {/* 4. 세부항목 */}
+      <div className={`rounded-2xl bg-white p-5 shadow-sm ${step === 7 ? "ring-4 ring-red-100" : ""}`}>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-neutral-700">세부항목</h3>
           <button
@@ -672,11 +714,10 @@ export default function ApprovalForm({
         </div>
       </div>
 
-      {/* 첨부파일 */}
-      <div className={`rounded-2xl bg-white p-5 shadow-sm ${step === 10 ? "ring-4 ring-red-100" : ""}`}>
+      {/* 5. 첨부파일 */}
+      <div className={`rounded-2xl bg-white p-5 shadow-sm ${step === 8 ? "ring-4 ring-red-100" : ""}`}>
         <h3 className="mb-3 text-sm font-semibold text-neutral-700">첨부파일</h3>
         <div className="space-y-2">
-          {/* 기존 파일 (수정 시) */}
           {existingFiles.map((file, i) => {
             const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(file.original_name);
             return (
@@ -706,7 +747,6 @@ export default function ApprovalForm({
               </div>
             );
           })}
-          {/* 새 파일 */}
           {files.map((file, i) => {
             const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name);
             return (
@@ -753,7 +793,7 @@ export default function ApprovalForm({
           type="button"
           onClick={handleSubmit}
           disabled={isPending}
-          className={`rounded-xl bg-navy px-8 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 ${step === 11 ? "ring-4 ring-red-100" : ""}`}
+          className={`rounded-xl bg-navy px-8 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 ${step === 9 ? "ring-4 ring-red-100" : ""}`}
         >
           {isPending ? "저장 중..." : isEdit ? "수정완료" : "임시저장"}
         </button>

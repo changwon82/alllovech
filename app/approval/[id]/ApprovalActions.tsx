@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { updateApprovalStatus } from "./actions";
 
@@ -31,14 +31,13 @@ export default function ApprovalActions({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const commentRef = useRef<HTMLTextAreaElement>(null);
 
-  // 현재 사용자가 각 단계의 결재자인지 확인
   const canApprove1 = isAdmin || currentUserMbId === approver1MbId;
   const canApprove2 = isAdmin || currentUserMbId === approver2MbId;
-  const canFinance = isAdmin; // 재정결재는 관리자만 (추후 별도 역할 추가 가능)
-  const canPayment = isAdmin; // 지급집행도 관리자만
+  const canFinance = isAdmin;
+  const canPayment = isAdmin;
 
-  // 표시할 항목이 하나도 없으면 렌더링 안 함
   if (!canApprove1 && !canApprove2 && !canFinance && !canPayment) return null;
 
   function handleAction(field: StatusField, action: "approve" | "reject" | "execute") {
@@ -49,11 +48,14 @@ export default function ApprovalActions({
     };
     if (!confirm(`${labels[action]} 처리하시겠습니까?`)) return;
 
+    const comment = commentRef.current?.value || "";
+
     startTransition(async () => {
-      const result = await updateApprovalStatus(postId, field, action);
+      const result = await updateApprovalStatus(postId, field, action, comment);
       if (result.error) {
         alert(result.error);
       } else {
+        if (commentRef.current) commentRef.current.value = "";
         router.refresh();
       }
     });
@@ -69,8 +71,16 @@ export default function ApprovalActions({
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm">
       <h3 className="mb-4 text-sm font-semibold text-neutral-700">결재 처리</h3>
+
+      {/* 결재의견 입력 */}
+      <textarea
+        ref={commentRef}
+        placeholder="결재의견을 입력하세요 (선택사항)"
+        rows={2}
+        className="mb-4 w-full resize-y rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-800 outline-none transition focus:border-navy focus:ring-1 focus:ring-navy"
+      />
+
       <div className="space-y-3">
-        {/* 1차 결재 */}
         {canApprove1 && (
           <div className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
             <span className="text-sm font-medium text-neutral-700">1차결재</span>
@@ -78,28 +88,15 @@ export default function ApprovalActions({
               {approver1Approved ? (
                 <>
                   <span className="text-xs text-green-600">승인완료</span>
-                  <button
-                    onClick={() => handleAction("approver1_status", "reject")}
-                    disabled={isPending}
-                    className={btnReject}
-                  >
-                    취소
-                  </button>
+                  <button onClick={() => handleAction("approver1_status", "reject")} disabled={isPending} className={btnReject}>취소</button>
                 </>
               ) : (
-                <button
-                  onClick={() => handleAction("approver1_status", "approve")}
-                  disabled={isPending}
-                  className={btnApprove}
-                >
-                  승인
-                </button>
+                <button onClick={() => handleAction("approver1_status", "approve")} disabled={isPending} className={btnApprove}>승인</button>
               )}
             </div>
           </div>
         )}
 
-        {/* 최종 결재 */}
         {hasApprover2 && canApprove2 && (
           <div className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
             <span className="text-sm font-medium text-neutral-700">최종결재</span>
@@ -107,28 +104,15 @@ export default function ApprovalActions({
               {approver2Approved ? (
                 <>
                   <span className="text-xs text-green-600">승인완료</span>
-                  <button
-                    onClick={() => handleAction("approver2_status", "reject")}
-                    disabled={isPending}
-                    className={btnReject}
-                  >
-                    취소
-                  </button>
+                  <button onClick={() => handleAction("approver2_status", "reject")} disabled={isPending} className={btnReject}>취소</button>
                 </>
               ) : (
-                <button
-                  onClick={() => handleAction("approver2_status", "approve")}
-                  disabled={isPending}
-                  className={btnApprove}
-                >
-                  승인
-                </button>
+                <button onClick={() => handleAction("approver2_status", "approve")} disabled={isPending} className={btnApprove}>승인</button>
               )}
             </div>
           </div>
         )}
 
-        {/* 재정결재 */}
         {canFinance && (
           <div className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
             <span className="text-sm font-medium text-neutral-700">재정결재</span>
@@ -136,28 +120,15 @@ export default function ApprovalActions({
               {financeApproved ? (
                 <>
                   <span className="text-xs text-green-600">승인완료</span>
-                  <button
-                    onClick={() => handleAction("finance_status", "reject")}
-                    disabled={isPending}
-                    className={btnReject}
-                  >
-                    취소
-                  </button>
+                  <button onClick={() => handleAction("finance_status", "reject")} disabled={isPending} className={btnReject}>취소</button>
                 </>
               ) : (
-                <button
-                  onClick={() => handleAction("finance_status", "approve")}
-                  disabled={isPending}
-                  className={btnApprove}
-                >
-                  승인
-                </button>
+                <button onClick={() => handleAction("finance_status", "approve")} disabled={isPending} className={btnApprove}>승인</button>
               )}
             </div>
           </div>
         )}
 
-        {/* 지급 집행 */}
         {canPayment && (
           <div className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
             <span className="text-sm font-medium text-neutral-700">지급집행</span>
@@ -165,22 +136,10 @@ export default function ApprovalActions({
               {paymentApproved ? (
                 <>
                   <span className="text-xs text-accent">집행완료</span>
-                  <button
-                    onClick={() => handleAction("payment_status", "reject")}
-                    disabled={isPending}
-                    className={btnReject}
-                  >
-                    취소
-                  </button>
+                  <button onClick={() => handleAction("payment_status", "reject")} disabled={isPending} className={btnReject}>취소</button>
                 </>
               ) : (
-                <button
-                  onClick={() => handleAction("payment_status", "execute")}
-                  disabled={isPending}
-                  className={btnExecute}
-                >
-                  집행
-                </button>
+                <button onClick={() => handleAction("payment_status", "execute")} disabled={isPending} className={btnExecute}>집행</button>
               )}
             </div>
           </div>

@@ -1,22 +1,23 @@
 import { getSessionUser } from "@/lib/supabase/server";
 import { getUserRoles, isAdminRole } from "@/lib/admin";
 import { redirect } from "next/navigation";
-import PageHeader from "@/app/components/ui/PageHeader";
-import MemberTable from "./MemberTable";
+import MemberClientWrapper from "./MemberClientWrapper";
 import Link from "next/link";
 
 const SECTION_MAP: Record<string, number> = {
-  예배: 1, 목양: 2, 재정: 3, 총무: 4, 선교: 5, 교육: 6, 설비: 7, 기획: 8, 기타: 0,
+  목양: 1, 재정: 2, 총무: 3, 선교: 4, 교육: 5, 설비: 6, 기획: 7, 기타: 0,
 };
 
 export default async function MembersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ section?: string; q?: string; status?: string }>;
+  searchParams: Promise<{ section?: string; dept?: string; q?: string; sf?: string; status?: string }>;
 }) {
   const params = await searchParams;
   const sectionFilter = params.section || "";
+  const deptFilter = params.dept || "";
   const search = params.q?.trim() || "";
+  const searchField = params.sf || "name";
   const statusFilter = params.status || "";
 
   const { supabase, user } = await getSessionUser();
@@ -25,112 +26,74 @@ export default async function MembersPage({
   const roles = await getUserRoles(supabase, user.id);
   if (!isAdminRole(roles)) redirect("/approval");
 
+  // 부서 목록 조회
+  const { data: allMembers } = await supabase
+    .from("approval_members")
+    .select("mb_kind");
+  const deptList = [...new Set((allMembers || []).map((r) => r.mb_kind).filter(Boolean))].sort() as string[];
+
   let query = supabase
     .from("approval_members")
     .select("*")
     .order("id", { ascending: false });
 
   if (sectionFilter && sectionFilter in SECTION_MAP) {
-    query = query.eq("mb_section", SECTION_MAP[sectionFilter]);
+    if (sectionFilter === "기타") {
+      query = query.or("mb_section.eq.0,mb_section.eq.99");
+    } else {
+      query = query.eq("mb_section", SECTION_MAP[sectionFilter]);
+    }
+  }
+  if (deptFilter) {
+    query = query.eq("mb_kind", deptFilter);
   }
   if (statusFilter) {
     query = query.eq("status", statusFilter);
   }
   if (search) {
-    query = query.or(`name.ilike.%${search}%,mb_id.ilike.%${search}%`);
+    const fieldMap: Record<string, string> = {
+      name: "name",
+      position: "position",
+      area: "mb_area",
+      mb_id: "mb_id",
+      status: "status",
+    };
+    const col = fieldMap[searchField] || "name";
+    query = query.ilike(col, `%${search}%`);
   }
 
   const { data: members } = await query;
 
-  // URL 빌더
-  function buildHref(section?: string, status?: string) {
-    const sp = new URLSearchParams();
-    if (section) sp.set("section", section);
-    if (status) sp.set("status", status);
-    if (search) sp.set("q", search);
-    const qs = sp.toString();
-    return `/approval/members${qs ? `?${qs}` : ""}`;
-  }
-
-  const sections = ["예배", "목양", "재정", "총무", "선교", "교육", "설비", "기획", "기타"];
-
   return (
     <>
-      <div className="flex items-center justify-between">
-        <PageHeader title="사용자 관리" />
+      {/* 타이틀 + 돌아가기 */}
+      <div className="mt-2 flex items-center justify-between">
+        <div>
+          <h2 className="flex items-center gap-2 text-xl font-bold text-navy">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6">
+              <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM2.046 15.253c-.058.468.172.92.57 1.175A9.953 9.953 0 0 0 8 18c1.982 0 3.83-.578 5.384-1.573.398-.254.628-.707.57-1.175a6.001 6.001 0 0 0-11.908 0ZM15.75 8.5a.75.75 0 0 1 .75.75v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5v1.5a.75.75 0 0 1-1.5 0v-1.5h-1.5a.75.75 0 0 1 0-1.5H15v-1.5a.75.75 0 0 1 .75-.75Z" />
+            </svg>
+            사용자 관리
+          </h2>
+          <div className="mt-1.5 h-1 w-12 rounded-full bg-accent" />
+        </div>
         <Link
           href="/approval"
-          className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+          className="rounded border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
         >
           목록으로 돌아가기
         </Link>
       </div>
 
-      {/* 구분 필터 */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-neutral-500">구분</span>
-        <a
-          href={buildHref("", statusFilter)}
-          className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-            !sectionFilter ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-          }`}
-        >
-          전체
-        </a>
-        {sections.map((s) => (
-          <a
-            key={s}
-            href={buildHref(s, statusFilter)}
-            className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-              sectionFilter === s ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-            }`}
-          >
-            {s}
-          </a>
-        ))}
-      </div>
-
-      {/* 상태 필터 + 검색 */}
-      <div className="mt-2 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-neutral-500">상태</span>
-          {["", "재직", "조직"].map((s) => (
-            <a
-              key={s}
-              href={buildHref(sectionFilter, s)}
-              className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
-                statusFilter === s ? "border-navy bg-navy text-white" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"
-              }`}
-            >
-              {s || "전체"}
-            </a>
-          ))}
-        </div>
-        <form action="/approval/members" method="get" className="flex items-center gap-2">
-          {sectionFilter && <input type="hidden" name="section" value={sectionFilter} />}
-          {statusFilter && <input type="hidden" name="status" value={statusFilter} />}
-          <input
-            type="text"
-            name="q"
-            defaultValue={search}
-            placeholder="이름/아이디 검색"
-            className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm focus:border-navy focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-navy px-4 py-1.5 text-sm font-medium text-white transition-all hover:brightness-110 active:scale-95"
-          >
-            검색
-          </button>
-          {(search || sectionFilter || statusFilter) && (
-            <a href="/approval/members" className="text-xs text-neutral-400 hover:text-neutral-600">
-              초기화
-            </a>
-          )}
-        </form>
-      </div>
-
-      <MemberTable members={members || []} />
+      <MemberClientWrapper
+        members={members || []}
+        sectionFilter={sectionFilter}
+        deptFilter={deptFilter}
+        statusFilter={statusFilter}
+        search={search}
+        searchFieldInit={searchField}
+        deptList={deptList}
+      />
     </>
   );
 }
